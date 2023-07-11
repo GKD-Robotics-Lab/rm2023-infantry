@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/components/algorithm/AHRS_middleware.h" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/components/algorithm/Include" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/components/algorithm/Source" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/components/algorithm/libahrs.a" charset="GBK" />
+  </component>
+</project>

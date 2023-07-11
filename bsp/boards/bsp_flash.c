@@ -8,11 +8,11 @@
   * @retval         sector number
   */
 /**
-  * @brief          »ñÈ¡flashµÄsectorºÅ
-  * @param[in]      address: flash µØÖ·
-  * @retval         sectorºÅ
+  * @brief          ï¿½ï¿½È¡flashï¿½ï¿½sectorï¿½ï¿½
+  * @param[in]      address: flash ï¿½ï¿½Ö·
+  * @retval         sectorï¿½ï¿½
   */
-static uint32_t ger_sector(uint32_t address);
+uint32_t ger_sector(uint32_t address);
 
 /**
   * @brief          erase flash
@@ -21,9 +21,9 @@ static uint32_t ger_sector(uint32_t address);
   * @retval         none
   */
 /**
-  * @brief          ²Á³ýflash
-  * @param[in]      address: flash µØÖ·
-  * @param[in]      len: Ò³ÊýÁ¿
+  * @brief          ï¿½ï¿½ï¿½ï¿½flash
+  * @param[in]      address: flash ï¿½ï¿½Ö·
+  * @param[in]      len: Ò³ï¿½ï¿½ï¿½ï¿½
   * @retval         none
   */
 void flash_erase_address(uint32_t address, uint16_t len)
@@ -49,10 +49,10 @@ void flash_erase_address(uint32_t address, uint16_t len)
   * @retval         success 0, fail -1
   */
 /**
-  * @brief          ÍùÒ»Ò³flashÐ´Êý¾Ý
-  * @param[in]      start_address: flash µØÖ·
-  * @param[in]      buf: Êý¾ÝÖ¸Õë
-  * @param[in]      len: Êý¾Ý³¤¶È
+  * @brief          ï¿½ï¿½Ò»Ò³flashÐ´ï¿½ï¿½ï¿½ï¿½
+  * @param[in]      start_address: flash ï¿½ï¿½Ö·
+  * @param[in]      buf: ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+  * @param[in]      len: ï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½
   * @retval         success 0, fail -1
   */
 int8_t flash_write_single_address(uint32_t start_address, uint32_t *buf, uint32_t len)
@@ -102,11 +102,11 @@ int8_t flash_write_single_address(uint32_t start_address, uint32_t *buf, uint32_
   * @retval         success 0, fail -1
   */
 /**
-  * @brief          Íù¼¸Ò³flashÐ´Êý¾Ý
-  * @param[in]      start_address: flash ¿ªÊ¼µØÖ·
-  * @param[in]      end_address: flash ½áÊøµØÖ·
-  * @param[in]      buf: Êý¾ÝÖ¸Õë
-  * @param[in]      len: Êý¾Ý³¤¶È
+  * @brief          ï¿½ï¿½ï¿½ï¿½Ò³flashÐ´ï¿½ï¿½ï¿½ï¿½
+  * @param[in]      start_address: flash ï¿½ï¿½Ê¼ï¿½ï¿½Ö·
+  * @param[in]      end_address: flash ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+  * @param[in]      buf: ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+  * @param[in]      len: ï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½
   * @retval         success 0, fail -1
   */
 int8_t flash_write_muli_address(uint32_t start_address, uint32_t end_address, uint32_t *buf, uint32_t len)
@@ -151,10 +151,10 @@ int8_t flash_write_muli_address(uint32_t start_address, uint32_t end_address, ui
   * @retval         none
   */
 /**
-  * @brief          ´Óflash¶ÁÊý¾Ý
-  * @param[in]      start_address: flash µØÖ·
-  * @param[out]     buf: Êý¾ÝÖ¸Õë
-  * @param[in]      len: Êý¾Ý³¤¶È
+  * @brief          ï¿½ï¿½flashï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+  * @param[in]      start_address: flash ï¿½ï¿½Ö·
+  * @param[out]     buf: ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+  * @param[in]      len: ï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½
   * @retval         none
   */
 void flash_read(uint32_t address, uint32_t *buf, uint32_t len)
@@ -169,9 +169,9 @@ void flash_read(uint32_t address, uint32_t *buf, uint32_t len)
   * @retval         sector number
   */
 /**
-  * @brief          »ñÈ¡flashµÄsectorºÅ
-  * @param[in]      address: flash µØÖ·
-  * @retval         sectorºÅ
+  * @brief          ï¿½ï¿½È¡flashï¿½ï¿½sectorï¿½ï¿½
+  * @param[in]      address: flash ï¿½ï¿½Ö·
+  * @retval         sectorï¿½ï¿½
   */
 uint32_t ger_sector(uint32_t address)
 {
@@ -238,9 +238,9 @@ uint32_t ger_sector(uint32_t address)
   * @retval         next page flash address
   */
 /**
-  * @brief          »ñÈ¡ÏÂÒ»Ò³flashµØÖ·
-  * @param[in]      address: flash µØÖ·
-  * @retval         ÏÂÒ»Ò³flashµØÖ·
+  * @brief          ï¿½ï¿½È¡ï¿½ï¿½Ò»Ò³flashï¿½ï¿½Ö·
+  * @param[in]      address: flash ï¿½ï¿½Ö·
+  * @retval         ï¿½ï¿½Ò»Ò³flashï¿½ï¿½Ö·
   */
 uint32_t get_next_flash_address(uint32_t address)
 {

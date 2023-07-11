@@ -1,28 +1,24 @@
 #ifndef STRUCT_TYPEDEF_H
 #define STRUCT_TYPEDEF_H
 
+#ifndef __packed
 
-typedef signed char int8_t;
-typedef signed short int int16_t;
-typedef signed int int32_t;
-typedef signed long long int64_t;
+#define __packed __attribute__(())
 
-/* exact-width unsigned integer types */
-typedef unsigned char uint8_t;
-typedef unsigned short int uint16_t;
-typedef unsigned int uint32_t;
-typedef unsigned long long uint64_t;
+#endif
+
+#include "stdint.h"
 typedef unsigned char bool_t;
 typedef float fp32;
 typedef double fp64;
 
 
-/* Ìõ¼þ±àÒë¿ª¹Ø£ºÇÐ»»»·²½ºÍÕÅ²½ */
+/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¿ªï¿½Ø£ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å²ï¿½ */
 //#define INFANTRY1_HUAN
 #define INFANTRY2_ZHANG
 
 /*
-ÓÃÀý£º
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 #ifdef INFANTRY1_HUAN
 #define YAW_OFFSET_ECD_FORWARD			00
