@@ -1,7 +1,7 @@
-# RM2022-Standard1
+# RM2023-infantry
 ## 使用struct_typedef.h中的宏定义切换环步或张步的条件编译
 ## 介绍
-GKD战队RoboMaster2022赛季，步兵机器人，C板（STM32F407IGHx），FreeRTOS，在官步基础上修改
+GKD战队RoboMaster2023赛季，步兵机器人，C板（STM32F407IGHx），FreeRTOS，在官步基础上修改
 
 ## 软件和固件库版本
 CubeMX 6.4.0  
@@ -16,63 +16,23 @@ STM32CubeF4 Firmware Package V1.26.0
 1. CAN1：chassis底盘(4个3508)
     - 将增加：超级电容
 2. CAN2：视觉，gimbal云台(2个6020), trigger拨弹电机(1个2006)，fric摩擦轮电机(2个3508)  
-(摩擦轮电机使用PWM控制的2个3508)  
+(摩擦轮电机使用PWM控制的2个3508)
+
+#### PWM
+1. PWM0用于控制弹舱盖开关
 
 ## 开发记录
-- 1.12 by 片哥
-  - 在bsp_buzzer.c中禁用了蜂鸣器
-  - 在INS_task.c中添加了变量Angle，用于保存以degree为单位的角度
-- 1.13 by 片哥
-  - 增加了结构体can_CV_t(最大64bytes)和gimbal_CV_t(大小不限)，并建立了数据流，将所有与CV相关的数据存在gimbal_task.c的结构体gimbal_control_t中的can_CV中 **Tips.CAN包最大64字节，现已用48字节**
-  - 确定了视觉控制的逻辑：操作手通过键盘/遥控器开启或关闭自瞄，自瞄开启后云台和射击的控制由视觉接管，通过视觉算法控制姿态和射击
-- 1.14 by 片哥
-  - 官步使用一个微动开关BUTTON_TRIG_Pin检测送弹完成，因无需送弹，所以已修改此功能
-    - 更改了shoot_bullet_control()中的SHOOT_DONE判断，原逻辑为微动开关松开即判断为完成一发子弹的射击，现逻辑为拨弹电机转动一定时间(TRIGGER_LONG_TIME)即判断为完成一次射击，不精确控制射出子弹量
-    - 修改shoot_feedback_update，使shoot_control.key的状态一直处于SWITCH_TRIGGER_ON，屏蔽送弹检测
-- 1.15 by 片哥
-  - **右switch置下开启CV模式，只有在摩擦轮开启时才可由CV触发射击**，进入CV状态的判断写在gimbal_behavour_set中
-  - 新增视觉控制射击的逻辑: 使用视觉回传的射击指令模拟switch down，从而触发射击
-  - 修改了CV结构体中cv_reco_status的逻辑，不再由CV设备提供此信息，改为根据switch的值修改cv_reco_status，判断是否开启CV模式
-  - 现有的CV模式只会控制云台，不会控制底盘运动，应在后续加入(已加入)，**思路是将CV模式视为直接控制遥控器左摇杆(即控制云台抬头低头、左转右转以及底盘跟随)，CV模式下操作手仅能控制右摇杆(与左摇杆互不冲突)**
-- 1.18 by 片哥
-  - 调试了视觉到电控的CAN通讯(开发板必须外接电池，暂不明确是否与CAN电阻有关)，在CAN回调中添加了接收的逻辑
-  - 在user_lib中添加了kalman滤波，用于对接收到的视觉坐标进行滤波，在视觉端滤波算法
-  - 调试了视觉的控制算法，尝试了原始值、位置式PID、增量式PID，最后选用了单环增量式PID，还需进一步优化，预计需要添加速度环
-- 1.19 by 片哥
-  - 修复了CV模式进入后无法退出的bug，并添加了CV数据接收超时判断
-  - 添加了借助USART1的虚拟示波器支持(详见bsp_usart.c)
-  - 调节了底盘的PID参数，云台和底盘现在使用CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW + GIMBAL_ABSOLUTE_ANGLE (switch置中)
-- 3.3 by 片哥
-  - 关闭了USB任务、OLED任务、电压检测任务
-  - 增加CHASSIS_SPIN模式
-  - **右switch上开启底盘小陀螺**
-  - 修改gimbal_absolute_angle_limit()以适配小陀螺模式
-  - 修改chassis_behaviour_mode_set()使小陀螺结束时只有完成一圈才会停止
-- 3.6 by 片哥
-  - 修改chassis_set_contorl()中CHASSIS_VECTOR_NO_FOLLOW_YAW的处理逻辑，使小陀螺的同时可以移动
-  - 增加CAN2，启用FIFO1
-- 3.7 by 片哥
-  - motor_chassis结构体中增加摩擦轮
-  - 增加CAN_cmd_fric()函数
-  - 在gimbal_control_t结构体中增加摩擦轮控制内容
-  - 部分沿用了原有摩擦轮控制逻辑，改写了shoot_control_loop()函数，用于速度控制的宏定义从bsp_fric.h移至shoot.h
-  - 加入USB虚拟示波器调试功能
-- 3.15 by 片哥
-  - 增加用于优化键盘控制的斜波函数，更改宏定义RAMP_KEY_ADD_VX和RAMP_KEY_ADD_VY可以调整加速度
-- 3.16 by 片哥
-  - 继续优化键盘操作逻辑，加入缓停止
-  - 将键盘控制设置为更高优先级
-- 3.20 by 片哥
-  - 云台CV模式改为使用absolute angle
-  - 重构CV控制逻辑，在gimbal_control_loop()中增加gimbal_motor_cv_control()，删除gimbal_set_control()中的两处CV控制函数，CV控制在gimbal_control_loop()中完成
-- 3.23 by 片哥
-  - 缓解了yaw云台运动时的回正现象：修改底盘默认模式为CHASSIS_NO_FOLLOW_YAW，并将set_cali_gimbal_hook()中yaw motor的relative angle的默认值修改为一个较小值 (**这一修改会导致CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW模式运动缓慢**)
-- 3.28 by 片哥
-  - 修改了云台和底盘的跟随逻辑，不再强制限制角度，底盘CHASSIS_VECTOR_NO_FOLLOW_YAW模式中的角度改为由遥控器和角度跟随PID联合控制，基本消除了yaw云台回正现象
-- 3.29 by 片哥
-  - 添加了gimbal_yaw_direction，用于记录yaw云台向前或向后
-  - 现在摇杆置中将会立即切换到CHASSIS_NO_FOLLOW_YAW模式
-  - 小陀螺加入缓启停
+- 旧库的开发记录请见原始分支，该开发记录从2023步兵对抗赛结束后开始维护
+- 7.11 by Rhine
+  - 代码内有冗余部分UI.c/.h和KF.c/.h，分别为UI代码和卡曼滤波代码，后续决定删除还是加入
+  - 该分支代码添加了Cmakelists，适配了Mac和Linux环境，修改了代码内部分不兼容错误
+    - ~~头文件未区分大小写~~，改为全部区分大小写
+    - ~~struct_typedef.h中的定义冲突~~，修改为#include "stdint.h"并define fp32, fp64和 bool_t
+    - ~~AHRS闭源库的不适配问题~~，添加了libahrs.a文件进行适配
+    - ~~存在一些static修饰的函数被extern到外部~~，删除static
+    - ~~dsp库的.lib不适配~~，移植了dsp库的源码，删除了.lib
+    - ~~__packed的宏未定义~~，在struct_typedef.h中重新定义
+  - 请注意重新生成的cmakelists中一定要开启硬浮点并添加库和源
 
 ## 笔记
 ### gimbal_task 云台控制任务
@@ -146,25 +106,24 @@ STM32CubeF4 Firmware Package V1.26.0
 
 ### 操作手
 #### 自定义按键
-- SHIFT: **预留**超级电容
-- CTRL: **预留**小陀螺
-- Q: 切换单发点射和连射模式(切换)
+- SHIFT:  按住开启小陀螺
+- CTRL
+- Q
 - E
-- R
-- F
-- G:
+- R: 开启/关闭小陀螺
+- F: 开启/关闭摩擦轮
+- G: 开启/关闭弹舱盖
 - Z
 - X
 - C
 - V
-- B
+- B: 切换点射/连射
 #### 学生端按键
 - I: 补充42mm弹丸
 - K: 使用血包
 - F12: 帮助界面
 
 #### 自定义UI
-- 摩擦轮实时转速(TODO)
 
 ## 参考资料
 1. 官方2019步兵开源学习: https://bbs.robomaster.com/forum.php?mod=viewthread&tid=8361

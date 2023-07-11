@@ -1,11 +1,11 @@
 /**
   ****************************(C) COPYRIGHT 2019 DJI****************************
   * @file       AHRS_MiddleWare.c/h
-  * @brief      ×ËÌ¬½âËãÖÐ¼ä²ã£¬Îª×ËÌ¬½âËãÌá¹©Ïà¹Øº¯Êý
+  * @brief      ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½Ð¼ï¿½ã£¬Îªï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½á¹©ï¿½ï¿½Øºï¿½ï¿½ï¿½
   * @note
   * @history
   *  Version    Date            Author          Modification
-  *  V1.0.0     Dec-26-2018     RM              1. Íê³É
+  *  V1.0.0     Dec-26-2018     RM              1. ï¿½ï¿½ï¿½
   *
   @verbatim
   ==============================================================================
@@ -15,15 +15,15 @@
   ****************************(C) COPYRIGHT 2019 DJI****************************
   */
 
-#include "AHRS_MiddleWare.h"
+#include "AHRS_middleware.h"
 #include "AHRS.h"
 #include "arm_math.h"
 #include "main.h"
 /**
- * @brief          ÓÃÓÚ»ñÈ¡µ±Ç°¸ß¶È
+ * @brief          ï¿½ï¿½ï¿½Ú»ï¿½È¡ï¿½ï¿½Ç°ï¿½ß¶ï¿½
  * @author         RM
- * @param[in]      ¸ß¶ÈµÄÖ¸Õë£¬fp32
- * @retval         ·µ»Ø¿Õ
+ * @param[in]      ï¿½ß¶Èµï¿½Ö¸ï¿½ë£¬fp32
+ * @retval         ï¿½ï¿½ï¿½Ø¿ï¿½
  */
 
 void AHRS_get_height(fp32* high)
@@ -35,10 +35,10 @@ void AHRS_get_height(fp32* high)
 }
 
 /**
- * @brief          ÓÃÓÚ»ñÈ¡µ±Ç°Î³¶È
+ * @brief          ï¿½ï¿½ï¿½Ú»ï¿½È¡ï¿½ï¿½Ç°Î³ï¿½ï¿½
  * @author         RM
- * @param[in]      Î³¶ÈµÄÖ¸Õë£¬fp32
- * @retval         ·µ»Ø¿Õ
+ * @param[in]      Î³ï¿½Èµï¿½Ö¸ï¿½ë£¬fp32
+ * @retval         ï¿½ï¿½ï¿½Ø¿ï¿½
  */
 
 void AHRS_get_latitude(fp32* latitude)
@@ -50,10 +50,10 @@ void AHRS_get_latitude(fp32* latitude)
 }
 
 /**
- * @brief          ¿ìËÙ¿ª·½º¯Êý£¬
+ * @brief          ï¿½ï¿½ï¿½Ù¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  * @author         RM
- * @param[in]      ÊäÈëÐèÒª¿ª·½µÄ¸¡µãÊý£¬fp32
- * @retval         ·µ»Ø1/sqrt ¿ª·½ºóµÄµ¹Êý
+ * @param[in]      ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½fp32
+ * @retval         ï¿½ï¿½ï¿½ï¿½1/sqrt ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½
  */
 
 fp32 AHRS_invSqrt(fp32 num)
@@ -71,10 +71,10 @@ fp32 AHRS_invSqrt(fp32 num)
 }
 
 /**
- * @brief          sinº¯Êý
+ * @brief          sinï¿½ï¿½ï¿½ï¿½
  * @author         RM
- * @param[in]      ½Ç¶È µ¥Î» rad
- * @retval         ·µ»Ø¶ÔÓ¦½Ç¶ÈµÄsinÖµ
+ * @param[in]      ï¿½Ç¶ï¿½ ï¿½ï¿½Î» rad
+ * @retval         ï¿½ï¿½ï¿½Ø¶ï¿½Ó¦ï¿½Ç¶Èµï¿½sinÖµ
  */
 
 fp32 AHRS_sinf(fp32 angle)
@@ -82,10 +82,10 @@ fp32 AHRS_sinf(fp32 angle)
     return arm_sin_f32(angle);
 }
 /**
- * @brief          cosº¯Êý
+ * @brief          cosï¿½ï¿½ï¿½ï¿½
  * @author         RM
- * @param[in]      ½Ç¶È µ¥Î» rad
- * @retval         ·µ»Ø¶ÔÓ¦½Ç¶ÈµÄcosÖµ
+ * @param[in]      ï¿½Ç¶ï¿½ ï¿½ï¿½Î» rad
+ * @retval         ï¿½ï¿½ï¿½Ø¶ï¿½Ó¦ï¿½Ç¶Èµï¿½cosÖµ
  */
 
 fp32 AHRS_cosf(fp32 angle)
@@ -94,10 +94,10 @@ fp32 AHRS_cosf(fp32 angle)
 }
 
 /**
- * @brief          tanº¯Êý
+ * @brief          tanï¿½ï¿½ï¿½ï¿½
  * @author         RM
- * @param[in]      ½Ç¶È µ¥Î» rad
- * @retval         ·µ»Ø¶ÔÓ¦½Ç¶ÈµÄtanÖµ
+ * @param[in]      ï¿½Ç¶ï¿½ ï¿½ï¿½Î» rad
+ * @retval         ï¿½ï¿½ï¿½Ø¶ï¿½Ó¦ï¿½Ç¶Èµï¿½tanÖµ
  */
 
 fp32 AHRS_tanf(fp32 angle)
@@ -105,10 +105,10 @@ fp32 AHRS_tanf(fp32 angle)
     return tanf(angle);
 }
 /**
- * @brief          ÓÃÓÚ32Î»¸¡µãÊýµÄ·´Èý½Çº¯Êý asinº¯Êý
+ * @brief          ï¿½ï¿½ï¿½ï¿½32Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½Çºï¿½ï¿½ï¿½ asinï¿½ï¿½ï¿½ï¿½
  * @author         RM
- * @param[in]      ÊäÈësinÖµ£¬×î´ó1.0f£¬×îÐ¡-1.0f
- * @retval         ·µ»Ø½Ç¶È µ¥Î»»¡¶È
+ * @param[in]      ï¿½ï¿½ï¿½ï¿½sinÖµï¿½ï¿½ï¿½ï¿½ï¿½1.0fï¿½ï¿½ï¿½ï¿½Ð¡-1.0f
+ * @retval         ï¿½ï¿½ï¿½Ø½Ç¶ï¿½ ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½
  */
 
 fp32 AHRS_asinf(fp32 sin)
@@ -118,10 +118,10 @@ fp32 AHRS_asinf(fp32 sin)
 }
 
 /**
- * @brief          ·´Èý½Çº¯Êýacosº¯Êý
+ * @brief          ï¿½ï¿½ï¿½ï¿½ï¿½Çºï¿½ï¿½ï¿½acosï¿½ï¿½ï¿½ï¿½
  * @author         RM
- * @param[in]      ÊäÈëcosÖµ£¬×î´ó1.0f£¬×îÐ¡-1.0f
- * @retval         ·µ»Ø¶ÔÓ¦µÄ½Ç¶È µ¥Î»»¡¶È
+ * @param[in]      ï¿½ï¿½ï¿½ï¿½cosÖµï¿½ï¿½ï¿½ï¿½ï¿½1.0fï¿½ï¿½ï¿½ï¿½Ð¡-1.0f
+ * @retval         ï¿½ï¿½ï¿½Ø¶ï¿½Ó¦ï¿½Ä½Ç¶ï¿½ ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½
  */
 
 fp32 AHRS_acosf(fp32 cos)
@@ -131,11 +131,11 @@ fp32 AHRS_acosf(fp32 cos)
 }
 
 /**
- * @brief          ·´Èý½Çº¯Êýatanº¯Êý
+ * @brief          ï¿½ï¿½ï¿½ï¿½ï¿½Çºï¿½ï¿½ï¿½atanï¿½ï¿½ï¿½ï¿½
  * @author         RM
- * @param[in]      ÊäÈëtanÖµÖÐµÄyÖµ ×î´óÕýÎÞÇî£¬×îÐ¡¸ºÎÞÇî
- * @param[in]      ÊäÈëtanÖµÖÐµÄxÖµ ×î´óÕýÎÞÇî£¬×îÐ¡¸ºÎÞÇî
- * @retval         ·µ»Ø¶ÔÓ¦µÄ½Ç¶È µ¥Î»»¡¶È
+ * @param[in]      ï¿½ï¿½ï¿½ï¿½tanÖµï¿½Ðµï¿½yÖµ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î£¬ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * @param[in]      ï¿½ï¿½ï¿½ï¿½tanÖµï¿½Ðµï¿½xÖµ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î£¬ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * @retval         ï¿½ï¿½ï¿½Ø¶ï¿½Ó¦ï¿½Ä½Ç¶ï¿½ ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½
  */
 
 fp32 AHRS_atan2f(fp32 y, fp32 x)
