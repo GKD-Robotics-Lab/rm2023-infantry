@@ -161,6 +161,8 @@
 
 
 #define GYRO_CALIBRATE_TIME         20000   //gyro calibrate time,陀螺仪校准时间
+#define __packed __attribute__((packed))
+#include "stdint.h"
 
 //cali device name
 typedef enum

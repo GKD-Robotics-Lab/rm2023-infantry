@@ -37,6 +37,9 @@
  extern "C" {
 #endif
 
+
+#define __FPU_PRESENT 1U
+
 /**
   \page CMSIS_MISRA_Exceptions  MISRA-C:2004 Compliance Exceptions
   CMSIS violates the following MISRA-C:2004 rules:

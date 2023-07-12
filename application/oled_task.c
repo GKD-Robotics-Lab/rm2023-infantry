@@ -16,7 +16,7 @@
   */
 #include "oled_task.h"
 #include "main.h"
-#include "oled.h"
+#include "OLED.h"
 
 #include "cmsis_os.h"
 #include "detect_task.h"

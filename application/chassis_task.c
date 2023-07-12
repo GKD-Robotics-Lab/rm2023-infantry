@@ -316,7 +316,7 @@ static void chassis_set_mode(chassis_move_t *chassis_move_mode)
   * @param[out]     chassis_move_transit:"chassis_move"±‰¡ø÷∏’Î.
   * @retval         none
   */
-static void chassis_mode_change_control_transit(chassis_move_t *chassis_move_transit)
+void chassis_mode_change_control_transit(chassis_move_t *chassis_move_transit)
 {
     if (chassis_move_transit == NULL)
     {

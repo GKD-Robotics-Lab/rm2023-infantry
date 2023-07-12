@@ -52,7 +52,7 @@
   
 #include "detect_task.h"
 #include "cmsis_os.h"
-
+#include "struct_typedef.h"
 
 /**
   * @brief          init error_list, assign  offline_time, online_time, priority.
