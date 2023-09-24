@@ -1,22 +1,22 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : usbd_conf.c
-  * @version        : v1.0_Cube
-  * @brief          : This file implements the board support package for the USB device library
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : usbd_conf.c
+ * @version        : v1.0_Cube
+ * @brief          : This file implements the board support package for the USB device library
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under Ultimate Liberty license
+ * SLA0044, the "License"; You may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at:
+ *                             www.st.com/SLA0044
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -232,11 +232,11 @@ void HAL_PCD_SuspendCallback(PCD_HandleTypeDef *hpcd)
   __HAL_PCD_GATE_PHYCLOCK(hpcd);
   /* Enter in STOP mode. */
   /* USER CODE BEGIN 2 */
-  if (hpcd->Init.low_power_enable)
-  {
-    /* Set SLEEPDEEP bit and SleepOnExit of Cortex System Control Register. */
-    SCB->SCR |= (uint32_t)((uint32_t)(SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk));
-  }
+    if (hpcd->Init.low_power_enable)
+    {
+        /* Set SLEEPDEEP bit and SleepOnExit of Cortex System Control Register. */
+        SCB->SCR |= (uint32_t)((uint32_t)(SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk));
+    }
   /* USER CODE END 2 */
 }
 

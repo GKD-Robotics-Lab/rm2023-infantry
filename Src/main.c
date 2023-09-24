@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under Ultimate Liberty license
+ * SLA0044, the "License"; You may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at:
+ *                             www.st.com/SLA0044
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -35,22 +35,22 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "INS_task.h"
+#include "UI.h"
 #include "bsp_can.h"
 #include "bsp_delay.h"
 #include "bsp_usart.h"
-#include "remote_control.h"
-
 #include "calibrate_task.h"
 #include "chassis_task.h"
 #include "detect_task.h"
 #include "gimbal_task.h"
-#include "INS_task.h"
 #include "led_flow_task.h"
 #include "oled_task.h"
 #include "referee_usart_task.h"
+#include "remote_control.h"
 #include "usb_task.h"
 #include "voltage_task.h"
-#include "UI.h"
+#include "BNO080.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,7 +71,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
 
 /* USER CODE END PV */
 
@@ -128,7 +127,6 @@ int main(void)
   MX_TIM8_Init();
   MX_CRC_Init();
   MX_RNG_Init();
-  MX_I2C2_Init();
   MX_I2C3_Init();
   MX_RTC_Init();
   MX_SPI2_Init();
@@ -146,19 +144,41 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
+  /**MX_FREERTOS_Init();*/
 
   /* Start scheduler */
-  osKernelStart();
+  /**osKernelStart();*/
+
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+
+	//Resets BNO080 to disable All output
+	BNO080_Initialization();
+
+	//BNO080/BNO085 Configuration
+	//Enable dynamic calibration for accelerometer, gyroscope, and magnetometer
+	//Enable Game Rotation Vector output
+	//Enable Magnetic Field output
+	BNO080_calibrateAll(); //Turn on cal for Accel, Gyro, and Mag
+	BNO080_enableGameRotationVector(20000); //Send data update every 20ms (50Hz)
+	BNO080_enableMagnetometer(20000); //Send data update every 20ms (50Hz)
+
+	//Once magnetic field is 2 or 3, run the Save DCD Now command
+  usart1_printf("Calibrating BNO080. Pull up FS-i6 SWC to end calibration and save to flash\n");
+	HAL_Delay(80);
+	usart1_printf("Output in form x, y, z, in uTesla\n\n");
+
+	//while loop for calibration procedure
+	//Iterates until iBus.SwC is mid point (1500)
+	//Calibration procedure should be done while this loop is in iteration.
+
+    while (1)
+    {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+    }
   /* USER CODE END 3 */
 }
 
@@ -218,7 +238,7 @@ void SystemClock_Config(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
+    /* User can add his own implementation to report the HAL error return state */
 
   /* USER CODE END Error_Handler_Debug */
 }
@@ -234,8 +254,8 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    /* User can add his own implementation to report the file name and line number,
+       tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

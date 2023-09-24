@@ -20,6 +20,7 @@
 #ifndef __STM32F4xx_LL_GPIO_H
 #define __STM32F4xx_LL_GPIO_H
 
+#define USE_FULL_LL_DRIVER
 #ifdef __cplusplus
 extern "C" {
 #endif

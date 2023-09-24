@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    tim.c
-  * @brief   This file provides code for the configuration
-  *          of the TIM instances.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    tim.c
+ * @brief   This file provides code for the configuration
+ *          of the TIM instances.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "tim.h"
@@ -411,7 +411,6 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
     __HAL_RCC_TIM1_CLK_ENABLE();
   /* USER CODE BEGIN TIM1_MspInit 1 */
 
-
   /* USER CODE END TIM1_MspInit 1 */
   }
   else if(tim_baseHandle->Instance==TIM3)
@@ -422,7 +421,6 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
     /* TIM3 clock enable */
     __HAL_RCC_TIM3_CLK_ENABLE();
   /* USER CODE BEGIN TIM3_MspInit 1 */
-
 
   /* USER CODE END TIM3_MspInit 1 */
   }
@@ -496,11 +494,11 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
 
   /* USER CODE BEGIN TIM1_MspPostInit 1 */
 
-    HAL_TIM_Base_Start(&htim1);
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+        HAL_TIM_Base_Start(&htim1);
+        HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+        HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+        HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+        HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
   /* USER CODE END TIM1_MspPostInit 1 */
   }
   else if(timHandle->Instance==TIM3)
@@ -521,8 +519,8 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /* USER CODE BEGIN TIM3_MspPostInit 1 */
-    HAL_TIM_Base_Start(&htim3);
-    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+        HAL_TIM_Base_Start(&htim3);
+        HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 
   /* USER CODE END TIM3_MspPostInit 1 */
   }
@@ -536,16 +534,16 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
     /**TIM4 GPIO Configuration
     PD14     ------> TIM4_CH3
     */
-    GPIO_InitStruct.Pin = BUZZER_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_14;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
-    HAL_GPIO_Init(BUZZER_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /* USER CODE BEGIN TIM4_MspPostInit 1 */
-    HAL_TIM_Base_Start(&htim4);
-    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
+        HAL_TIM_Base_Start(&htim4);
+        HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
 
   /* USER CODE END TIM4_MspPostInit 1 */
   }
@@ -561,7 +559,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
     PH11     ------> TIM5_CH2
     PH10     ------> TIM5_CH1
     */
-    GPIO_InitStruct.Pin = LED_R_Pin|LED_G_Pin|LED_B_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_11|GPIO_PIN_10;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -569,10 +567,10 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
     HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
 
   /* USER CODE BEGIN TIM5_MspPostInit 1 */
-    HAL_TIM_Base_Start(&htim5);
-    HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_3);
+        HAL_TIM_Base_Start(&htim5);
+        HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
+        HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
+        HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_3);
 
   /* USER CODE END TIM5_MspPostInit 1 */
   }
@@ -603,9 +601,9 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /* USER CODE BEGIN TIM8_MspPostInit 1 */
-    HAL_TIM_Base_Start(&htim8);
-    HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
+        HAL_TIM_Base_Start(&htim8);
+        HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
+        HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
 
   /* USER CODE END TIM8_MspPostInit 1 */
   }
@@ -627,8 +625,8 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
     HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   /* USER CODE BEGIN TIM10_MspPostInit 1 */
-    HAL_TIM_Base_Start(&htim10);
-    HAL_TIM_PWM_Start(&htim10, TIM_CHANNEL_1);
+        HAL_TIM_Base_Start(&htim10);
+        HAL_TIM_PWM_Start(&htim10, TIM_CHANNEL_1);
 
   /* USER CODE END TIM10_MspPostInit 1 */
   }

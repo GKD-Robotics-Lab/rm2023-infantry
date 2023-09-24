@@ -19,6 +19,7 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __STM32F4xx_LL_EXTI_H
 #define __STM32F4xx_LL_EXTI_H
+#define USE_FULL_LL_DRIVER
 
 #ifdef __cplusplus
 extern "C" {

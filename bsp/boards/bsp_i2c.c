@@ -3,7 +3,7 @@
 
 
 extern I2C_HandleTypeDef hi2c1;
-extern I2C_HandleTypeDef hi2c2;
+/**extern I2C_HandleTypeDef hi2c2;*/
 
 
 void bsp_I2C_master_transmit(I2C_TypeDef *I2C, uint16_t I2C_address, uint8_t *data, uint16_t len)
@@ -12,10 +12,10 @@ void bsp_I2C_master_transmit(I2C_TypeDef *I2C, uint16_t I2C_address, uint8_t *da
     {
         HAL_I2C_Master_Transmit(&hi2c1, I2C_address, data, len, 100);
     }
-    else if(I2C == I2C2)
-    {
-        HAL_I2C_Master_Transmit(&hi2c2, I2C_address, data, len, 100);
-    }
+    /**else if(I2C == I2C2)*/
+    /**{*/
+    /**    HAL_I2C_Master_Transmit(&hi2c2, I2C_address, data, len, 100);*/
+    /**}*/
 }
 
 
@@ -26,10 +26,10 @@ void bsp_I2C_reset(I2C_TypeDef *I2C)
     {
         hi2c = &hi2c1;
     }
-    else if(I2C == I2C2)
-    {
-        hi2c = &hi2c2;
-    }
+    /**else if(I2C == I2C2)*/
+    /**{*/
+    /**    hi2c = &hi2c2;*/
+    /**}*/
 
     SET_BIT(hi2c->Instance->CR1, I2C_CR1_SWRST);
     CLEAR_BIT(hi2c->Instance->CR1, I2C_CR1_SWRST);
@@ -48,10 +48,10 @@ bool_t bsp_I2C_check_ack(I2C_TypeDef *I2C, uint16_t I2C_address)
     {
         hi2c = &hi2c1;
     }
-    else if(I2C == I2C2)
-    {
-        hi2c = &hi2c2;
-    }
+    /**else if(I2C == I2C2)*/
+    /**{*/
+    /**    hi2c = &hi2c2;*/
+    /**}*/
 
     if((hi2c->Instance->CR2 & I2C_CR2_DMAEN) && ((hi2c->hdmatx != NULL && hi2c->hdmatx->Instance->NDTR != 0) || (hi2c->hdmarx != NULL && hi2c->hdmarx->Instance->NDTR != 0)))
     {
@@ -130,11 +130,11 @@ bool_t bsp_I2C_check_ack(I2C_TypeDef *I2C, uint16_t I2C_address)
 
 void DMA1_Stream7_IRQHandler(void)
 {
-    if(DMA1->HISR & (1<<27))
-    {
-        __HAL_DMA_CLEAR_FLAG(hi2c2.hdmatx, DMA_HISR_TCIF7);
-        SET_BIT(hi2c2.Instance->CR1, I2C_CR1_STOP);
-    }
+    /**if(DMA1->HISR & (1<<27))*/
+    /**{*/
+    /**    __HAL_DMA_CLEAR_FLAG(hi2c2.hdmatx, DMA_HISR_TCIF7);*/
+    /**    SET_BIT(hi2c2.Instance->CR1, I2C_CR1_STOP);*/
+    /**}*/
 }
 
 
@@ -144,15 +144,15 @@ void I2C2_tx_DMA_init(void)
 
     //disable DMA
     //ʧЧDMA
-    __HAL_DMA_DISABLE(hi2c2.hdmatx);
-    
-    while(hi2c2.hdmatx->Instance->CR & DMA_SxCR_EN)
-    {
-        __HAL_DMA_DISABLE(hi2c2.hdmatx);
-    }
-    hi2c2.hdmatx->Instance->PAR = (uint32_t)(&I2C2->DR);
-    __HAL_DMA_CLEAR_FLAG(hi2c2.hdmatx, DMA_HISR_TCIF7);
-    __HAL_DMA_ENABLE_IT(hi2c2.hdmatx, DMA_IT_TC);
+    /**__HAL_DMA_DISABLE(hi2c2.hdmatx);*/
+
+    /**while(hi2c2.hdmatx->Instance->CR & DMA_SxCR_EN)*/
+    /**{*/
+    /**    __HAL_DMA_DISABLE(hi2c2.hdmatx);*/
+    /**}*/
+    /**hi2c2.hdmatx->Instance->PAR = (uint32_t)(&I2C2->DR);*/
+    /**__HAL_DMA_CLEAR_FLAG(hi2c2.hdmatx, DMA_HISR_TCIF7);*/
+    /**__HAL_DMA_ENABLE_IT(hi2c2.hdmatx, DMA_IT_TC);*/
 
 
 
@@ -162,20 +162,20 @@ void I2C2_tx_DMA_enable(uint32_t tx_buf, uint16_t ndtr)
 {
     //disable DMA
     //ʧЧDMA
-    __HAL_DMA_DISABLE(hi2c2.hdmatx);
+    /**__HAL_DMA_DISABLE(hi2c2.hdmatx);*/
 
-    while(hi2c2.hdmatx->Instance->CR & DMA_SxCR_EN)
-    {
-        __HAL_DMA_DISABLE(hi2c2.hdmatx);
-    }
+    /**while(hi2c2.hdmatx->Instance->CR & DMA_SxCR_EN)*/
+    /**{*/
+    /**    __HAL_DMA_DISABLE(hi2c2.hdmatx);*/
+    /**}*/
 
-    __HAL_DMA_CLEAR_FLAG(hi2c2.hdmatx, DMA_HISR_TCIF7);
+    /**__HAL_DMA_CLEAR_FLAG(hi2c2.hdmatx, DMA_HISR_TCIF7);*/
 
 
-    hi2c2.hdmatx->Instance->M0AR = tx_buf;
-    __HAL_DMA_SET_COUNTER(hi2c2.hdmatx, ndtr);
+    /**hi2c2.hdmatx->Instance->M0AR = tx_buf;*/
+    /**__HAL_DMA_SET_COUNTER(hi2c2.hdmatx, ndtr);*/
 
-    __HAL_DMA_ENABLE(hi2c2.hdmatx);
+    /**__HAL_DMA_ENABLE(hi2c2.hdmatx);*/
 
 }
 
@@ -255,10 +255,10 @@ HAL_StatusTypeDef I2C_TX_DMA_START(I2C_HandleTypeDef *hi2c, uint16_t DevAddress)
 }
 void I2C2_DMA_transmit(uint16_t DevAddress, uint8_t *pData, uint16_t Size)
 {
-    if( I2C_TX_DMA_START(&hi2c2, DevAddress) == HAL_OK)
-    {
-        I2C2_tx_DMA_enable((uint32_t)pData, Size);
-    }
+    /**if( I2C_TX_DMA_START(&hi2c2, DevAddress) == HAL_OK)*/
+    /**{*/
+    /**    I2C2_tx_DMA_enable((uint32_t)pData, Size);*/
+    /**}*/
 }
 
 

@@ -15,36 +15,35 @@
   ****************************(C) COPYRIGHT 2019 DJI****************************
   */
 #include "oled_task.h"
-#include "main.h"
-#include "OLED.h"
 
+#include "OLED.h"
 #include "cmsis_os.h"
 #include "detect_task.h"
+#include "main.h"
 #include "voltage_task.h"
 
 #define OLED_CONTROL_TIME 10
-#define REFRESH_RATE    10
+#define REFRESH_RATE      10
 
 const error_t *error_list_local;
 
-uint8_t other_toe_name[4][4] = {"GYR\0","ACC\0","MAG\0","REF\0"};
+uint8_t other_toe_name[4][4] = { "GYR\0", "ACC\0", "MAG\0", "REF\0" };
 
 uint8_t last_oled_error = 0;
 uint8_t now_oled_errror = 0;
 static uint8_t refresh_tick = 0;
 
-
 /**
-  * @brief          oled task
-  * @param[in]      pvParameters: NULL
-  * @retval         none
-  */
+ * @brief          oled task
+ * @param[in]      pvParameters: NULL
+ * @retval         none
+ */
 /**
-  * @brief          oled任务
-  * @param[in]      pvParameters: NULL
-  * @retval         none
-  */
-void oled_task(void const * argument)  // !!!!!该任务已关闭!!!!!
+ * @brief          oled任务
+ * @param[in]      pvParameters: NULL
+ * @retval         none
+ */
+void oled_task(void const *argument)  // !!!!!该任务已关闭!!!!!
 {
     uint8_t i;
     uint8_t show_col, show_row;
@@ -53,9 +52,9 @@ void oled_task(void const * argument)  // !!!!!该任务已关闭!!!!!
     OLED_init();
     OLED_LOGO();
     i = 100;
-    while(i--)
+    while (i--)
     {
-        if(OLED_check_ack())
+        if (OLED_check_ack())
         {
             detect_hook(OLED_TOE);
         }
@@ -64,36 +63,36 @@ void oled_task(void const * argument)  // !!!!!该任务已关闭!!!!!
 
     vTaskDelete(NULL);  // 删除任务
 
-    while(1)
+    while (1)
     {
-        //use i2c ack to check the oled
-        if(OLED_check_ack())
+        // use i2c ack to check the oled
+        if (OLED_check_ack())
         {
             detect_hook(OLED_TOE);
         }
 
         now_oled_errror = toe_is_error(OLED_TOE);
-        //oled init
-        if(last_oled_error == 1 && now_oled_errror == 0)
+        // oled init
+        if (last_oled_error == 1 && now_oled_errror == 0)
         {
             OLED_init();
         }
 
-        if(now_oled_errror == 0)
+        if (now_oled_errror == 0)
         {
             refresh_tick++;
-            //10Hz refresh
-            if(refresh_tick > configTICK_RATE_HZ / (OLED_CONTROL_TIME * REFRESH_RATE))
+            // 10Hz refresh
+            if (refresh_tick > configTICK_RATE_HZ / (OLED_CONTROL_TIME * REFRESH_RATE))
             {
                 refresh_tick = 0;
                 OLED_operate_gram(PEN_CLEAR);
                 OLED_show_graphic(0, 1, &battery_box);
 
-                if(get_battery_percentage() < 10)
+                if (get_battery_percentage() < 10)
                 {
                     OLED_printf(9, 2, "%d", get_battery_percentage());
                 }
-                else if(get_battery_percentage() < 100)
+                else if (get_battery_percentage() < 100)
                 {
                     OLED_printf(6, 2, "%d", get_battery_percentage());
                 }
@@ -104,32 +103,28 @@ void oled_task(void const * argument)  // !!!!!该任务已关闭!!!!!
 
                 OLED_show_string(90, 27, "DBUS");
                 OLED_show_graphic(115, 27, &check_box[error_list_local[DBUS_TOE].error_exist]);
-                for(i = CHASSIS_MOTOR1_TOE; i < TRIGGER_MOTOR_TOE + 1; i++)
+                for (i = CHASSIS_MOTOR1_TOE; i < TRIGGER_MOTOR_TOE + 1; i++)
                 {
-                    show_col = ((i-1) * 32) % 128;
-                    show_row = 15 + (i-1) / 4 * 12;
+                    show_col = ((i - 1) * 32) % 128;
+                    show_row = 15 + (i - 1) / 4 * 12;
                     OLED_show_char(show_col, show_row, 'M');
-                    OLED_show_char(show_col + 6, show_row, '0'+i);
+                    OLED_show_char(show_col + 6, show_row, '0' + i);
                     OLED_show_graphic(show_col + 12, show_row, &check_box[error_list_local[i].error_exist]);
                 }
 
-                for(i = BOARD_GYRO_TOE; i < REFEREE_TOE + 1; i++)
+                for (i = BOARD_GYRO_TOE; i < REFEREE_TOE + 1; i++)
                 {
                     show_col = (i * 32) % 128;
                     show_row = 15 + i / 4 * 12;
                     OLED_show_string(show_col, show_row, other_toe_name[i - BOARD_GYRO_TOE]);
                     OLED_show_graphic(show_col + 18, show_row, &check_box[error_list_local[i].error_exist]);
-
                 }
 
                 OLED_refresh_gram();
             }
         }
 
-
-
         last_oled_error = now_oled_errror;
         osDelay(OLED_CONTROL_TIME);
     }
 }
-
