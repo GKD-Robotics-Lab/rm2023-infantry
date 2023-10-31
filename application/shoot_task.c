@@ -23,9 +23,10 @@
 #include "detect_task.h"
 #include "pid.h"
 
-#define RC_shoot_switch (shoot_control.shoot_rc->rc.s[SHOOT_RC_MODE_CHANNEL])
-#define RC_mouse_l      (shoot_control.shoot_rc->mouse.press_l)
-#define RC_mouse_r      (shoot_control.shoot_rc->mouse.press_r)
+// 为精简代码将遥控器相关按键使用宏替代
+#define RC_shoot_switch (shoot_control.shoot_rc->rc.s[SHOOT_RC_MODE_CHANNEL]) // 遥控器射击控制拨杆
+#define RC_mouse_l      (shoot_control.shoot_rc->mouse.press_l) // 鼠标左键
+#define RC_mouse_r      (shoot_control.shoot_rc->mouse.press_r) // 鼠标右键
 
 static void shoot_init(void);
 static void shoot_set_mode(void);
