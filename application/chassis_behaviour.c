@@ -25,9 +25,9 @@
  * >               第二个参数: 'vy' 通常控制横向移动,正值 左移, 负值 右移
  * >               第三个参数: 'wz' 可能是角度控制或者旋转速度控制
  * >               在这个新的函数, 你能给 "vx","vy",and "wz" 赋值想要的速度参数
- * >           3.  在"chassis_behaviour_mode_get"这个函数中，添加新的逻辑判断，给chassis_behaviour_mode赋值成CHASSIS_XXX_XXX
+ * >           3.  在"chassis_behaviour_mode_set"这个函数中，添加新的逻辑判断，给chassis_behaviour_mode赋值成CHASSIS_XXX_XXX
  * >               在函数最后，添加"else if(chassis_behaviour_mode == CHASSIS_XXX_XXX)" ,然后选择底盘控制策略
- * >           4.  在"chassis_behaviour_control_get" 函数的最后，添加
+ * >           4.  在"chassis_behaviour_control_set" 函数的最后，添加
  * >               else if(chassis_behaviour_mode == CHASSIS_XXX_XXX)
  * >               {
  * >                   chassis_xxx_xxx_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
@@ -44,6 +44,9 @@
 
 #include "gimbal_behaviour.h"
 
+#define RC_chassis_switch (behaviour_set->chassis_RC->rc.s[CHASSIS_MODE_CHANNEL]) // 遥控器底盘控制拨杆
+
+static void chassis_behaviour_set(chassis_move_t *behaviour_set);
 static void chassis_zero_force_control(fp32 *vx_can_set, fp32 *vy_can_set, fp32 *wz_can_set, chassis_move_t *chassis_move_rc_to_vector);
 static void chassis_no_move_control(fp32 *vx_set, fp32 *vy_set, fp32 *wz_set, chassis_move_t *chassis_move_rc_to_vector);
 static void chassis_infantry_follow_gimbal_yaw_control(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, chassis_move_t *chassis_move_rc_to_vector);
@@ -56,70 +59,20 @@ static void chassis_spin_control(fp32 *vx_set, fp32 *vy_set, fp32 *wz_set, chass
 // highlight, the variable chassis behaviour mode
 // 底盘行为模式
 chassis_behaviour_e chassis_behaviour_mode = CHASSIS_ZERO_FORCE;
+static chassis_behaviour_e chassis_behaviour_mode_last = CHASSIS_ZERO_FORCE;
 
 /**
  * @brief          通过遥控器获取底盘行为模式，通过逻辑判断选择底盘控制模式 chassis_behaviour_mode
  * @param[in]      chassis_move_mode: 底盘数据
  * @retval         none
  */
-void chassis_behaviour_mode_get(chassis_move_t *chassis_move_mode)
+void chassis_behaviour_mode_set(chassis_move_t *chassis_move_mode)
 {
-    static chassis_behaviour_e chassis_behaviour_mode_last = CHASSIS_NO_MOVE;
-
     if (chassis_move_mode == NULL) {
         return;
     }
 
-    //* 遥控器设置底盘行为模式
-    if (switch_is_down(chassis_move_mode->chassis_RC->rc.s[CHASSIS_MODE_CHANNEL])) {
-        chassis_behaviour_mode = CHASSIS_NO_FOLLOW_YAW;
-    } else if (switch_is_mid(chassis_move_mode->chassis_RC->rc.s[CHASSIS_MODE_CHANNEL]) || (chassis_move_mode->chassis_RC->key.v & CHASSIS_SPIN_TEMP_STOP_KEYBOARD)) {
-        chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;
-    } else if (switch_is_up(chassis_move_mode->chassis_RC->rc.s[CHASSIS_MODE_CHANNEL]) || (chassis_move_mode->chassis_RC->key.v & CHASSIS_SPIN_KEYBOARD)) {
-        chassis_behaviour_mode = CHASSIS_SPIN;
-    }
-
-    //* 进出小陀螺模式的过渡
-    if (chassis_behaviour_mode_last != CHASSIS_SPIN && chassis_behaviour_mode == CHASSIS_SPIN) {
-        chassis_move_mode->chassis_spin_ramp.out = chassis_move_mode->wz;
-        // 设置小陀螺启动增速
-        if (chassis_move_mode->wz >= 0)
-            chassis_move_mode->chassis_spin_ramp.input = CHASSIS_SPIN_RAMP_ADD;
-        else
-            chassis_move_mode->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_ADD;
-    } else if (chassis_behaviour_mode_last == CHASSIS_SPIN && chassis_behaviour_mode != CHASSIS_SPIN) {
-        // 设置小陀螺退出减速
-        if (chassis_move_mode->wz >= 0)
-            chassis_move_mode->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_SUB;
-        else
-            chassis_move_mode->chassis_spin_ramp.input = CHASSIS_SPIN_RAMP_SUB;
-        // 若小陀螺速度已减至足够小，则退出小陀螺模式
-        if (ABS(chassis_move_mode->chassis_spin_ramp.out) <= CHASSIS_WZ_SPIN_OUT)
-            chassis_move_mode->chassis_spin_ramp.out = 0; // 清空输出
-        else                                              // 否则继续在小陀螺模式中减速
-            chassis_behaviour_mode = CHASSIS_SPIN;
-    }
-
-#ifndef CHASSIS_DEBUG
-    //* 检查是否需要强制底盘不动
-    // when gimbal in some mode, such as init mode, chassis must's move
-    // 当云台在某些模式下，像初始化， 底盘不动
-    if (gimbal_cmd_to_chassis_stop()) {
-        chassis_behaviour_mode = CHASSIS_NO_MOVE;
-    }
-#endif
-
-    //* 记录底盘行为模式
-    chassis_behaviour_mode_last = chassis_behaviour_mode;
-
-    //* 调试时强制设置行为模式
-#if defined CHASSIS_DEBUG_OPEN
-    chassis_behaviour_mode = CHASSIS_OPEN;
-#elif defined CHASSIS_DEBUG_MOTOR_SPEED
-    chassis_behaviour_mode = CHASSIS_NO_FOLLOW_YAW;
-#elif defined CHASSIS_DEBUG_ANGEL
-    chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;
-#endif
+    chassis_behaviour_set(chassis_move_mode);
 
     //* 根据行为模式选择底盘移动策略
     if (chassis_behaviour_mode == CHASSIS_ZERO_FORCE) {
@@ -150,6 +103,60 @@ void chassis_behaviour_mode_get(chassis_move_t *chassis_move_mode)
     //! STEP 3 添加新的行为模式对应的控制模式 END
 }
 
+static void chassis_behaviour_set(chassis_move_t *behaviour_set)
+{
+    //* 遥控器设置底盘行为模式
+    if (switch_is_down(RC_chassis_switch)) {
+        chassis_behaviour_mode = CHASSIS_NO_FOLLOW_YAW;
+    } else if (switch_is_mid(RC_chassis_switch) || (behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_TEMP_STOP_KEYBOARD)) {
+        chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;
+    } else if (switch_is_up(RC_chassis_switch) || (behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_KEYBOARD)) {
+        chassis_behaviour_mode = CHASSIS_SPIN;
+    }
+
+    //* 进出小陀螺模式的过渡
+    if (chassis_behaviour_mode_last != CHASSIS_SPIN && chassis_behaviour_mode == CHASSIS_SPIN) {
+        behaviour_set->chassis_spin_ramp.out = behaviour_set->wz;
+        // 设置小陀螺启动增速
+        if (behaviour_set->wz >= 0)
+            behaviour_set->chassis_spin_ramp.input = CHASSIS_SPIN_RAMP_ADD;
+        else
+            behaviour_set->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_ADD;
+    } else if (chassis_behaviour_mode_last == CHASSIS_SPIN && chassis_behaviour_mode != CHASSIS_SPIN) {
+        // 设置小陀螺退出减速
+        if (behaviour_set->wz >= 0)
+            behaviour_set->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_SUB;
+        else
+            behaviour_set->chassis_spin_ramp.input = CHASSIS_SPIN_RAMP_SUB;
+        // 若小陀螺速度已减至足够小，则退出小陀螺模式
+        if (ABS(behaviour_set->chassis_spin_ramp.out) <= CHASSIS_WZ_SPIN_OUT)
+            behaviour_set->chassis_spin_ramp.out = 0; // 清空输出
+        else                                              // 否则继续在小陀螺模式中减速
+            chassis_behaviour_mode = CHASSIS_SPIN;
+    }
+
+#ifndef CHASSIS_DEBUG
+    //* 检查是否需要强制底盘不动
+    // when gimbal in some mode, such as init mode, chassis must's move
+    // 当云台在某些模式下，像初始化， 底盘不动
+    if (gimbal_cmd_to_chassis_stop()) {
+        chassis_behaviour_mode = CHASSIS_NO_MOVE;
+    }
+#endif
+
+    //* 记录底盘行为模式
+    chassis_behaviour_mode_last = chassis_behaviour_mode;
+
+#if defined CHASSIS_DEBUG_OPEN
+    //* 调试时强制设置行为模式
+    chassis_behaviour_mode = CHASSIS_OPEN;
+#elif defined CHASSIS_DEBUG_MOTOR_SPEED
+    chassis_behaviour_mode = CHASSIS_NO_FOLLOW_YAW;
+#elif defined CHASSIS_DEBUG_ANGEL
+    chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;
+#endif
+}
+
 /**
  * @brief          控制值获取：对于不同的底盘行为模式，根据遥控器的选择获取三个运动控制值. 在这个函数里面，会调用不同的控制函数.
  * @param[out]     vx_set 通常控制纵向移动.
@@ -158,7 +165,7 @@ void chassis_behaviour_mode_get(chassis_move_t *chassis_move_mode)
  * @param[in]      chassis_move_rc_to_vector 包括底盘所有信息.
  * @retval         none
  */
-void chassis_behaviour_control_get(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, chassis_move_t *chassis_move_rc_to_vector)
+void chassis_behaviour_control_set(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, chassis_move_t *chassis_move_rc_to_vector)
 {
 
     if (vx_set == NULL || vy_set == NULL || angle_set == NULL || chassis_move_rc_to_vector == NULL) {
@@ -180,7 +187,7 @@ void chassis_behaviour_control_get(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, 
     }
     //! STEP 4 添加新的行为模式遥控器控制值获取 BEGIN
     /*
-    >   在"chassis_behaviour_control_get" 函数的最后，添加
+    >   在"chassis_behaviour_control_set" 函数的最后，添加
     >     else if(chassis_behaviour_mode == CHASSIS_XXX_XXX)
     >     {
     >         chassis_xxx_xxx_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);

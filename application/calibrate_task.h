@@ -19,12 +19,12 @@
   *
   @verbatim
   ==============================================================================
-  * >           使用遥控器进行开始校准
-  * >               第一步:遥控器的两个开关都打到下
-  * >               第二步:两个摇杆打成\../,保存两秒.\.代表左摇杆向右下打.
-  * >               第三步:摇杆打成./\. 开始陀螺仪校准
-  * >                      或者摇杆打成'\/' 开始云台校准
-  * >                      或者摇杆打成/''\ 开始底盘校准
+  * >           校准: 
+  * >               方法一: 上电后检测到遥控器拨杆与摇杆均在下校准全部设备
+  * >               方法二: 按下按键 1s 校准全部设备
+  * >               方法三: 保持拨杆都在下，将摇杆内拨，听到提示音后即开始选择校准设备
+  * >                       选择设备几就外拨几次，选择过程中与完成后均有提示音
+  * >                       现有可选校准设备: 1->陀螺仪
   *
   * >           数据在flash中，包括校准数据和名字 name[3] 和 校准标志位 cali_flag
   * >               例如head_cali有8个字节(不__packed的话应该是16字节)，但它需要12字节在flash，如果它从0x080A0000开始
@@ -62,6 +62,9 @@
   * >                   cmd 参数有两个：
   * >                       CALI_FUNC_CMD_INIT，已经校准过，直接使用校准值
   * >                       CALI_FUNC_CMD_ON，开始校准
+  * >                   该函数在参数为 CALI_FUNC_CMD_INIT 的情况下返回 1 表示每次上电都需要校准，否则为不需要
+  * >                   该函数在参数为 CALI_FUNC_CMD_ON 的情况下返回 1 表示校准完成，否则为未完成
+  * >                   这些函数对应设置的校准值必须是在任务启动前就已经存在的静态变量
   *
   ==============================================================================
   @endverbatim
@@ -72,8 +75,10 @@
 #define CALIBRATE_TASK_H
 
 #include "struct_typedef.h"
+#include "bsp_buzzer.h"
 
-#define CALIBRATE_CONTROL_TIME 1 // osDelay time,  means 1ms.1ms 系统延时
+#define CALIBRATE_CONTROL_TIME      1 // osDelay time,  means 1ms.1ms 系统延时
+#define CALIBRATE_CONTROL_INIT_TIME 57
 
 //* calibrate
 // cali_done
@@ -83,25 +88,24 @@
 #define CALI_FUNC_CMD_INIT 0 // has been calibrated, set value to init.已经校准过，设置校准值
 // cali param
 #define CALI_EX_DATA_LEN_WORD 1 // 额外数据 name[3] 和 cali_done 的长度 (word)
-// gryo : cali time
-#define GYRO_CALIBRATE_TIME 20000 // gyro calibrate time,陀螺仪校准时间
-// head
-#define SELF_ID          0     // ID
-#define FIRMWARE_VERSION 12345 // handware version.
 
 //* buzzer
+#define cali_all_start_buzzer()                buzzer_on(0, 30000)
+#define cali_RC_choose_begin_start_buzzer()    buzzer_on(1, 25000)
+#define cali_RC_choose_verified_start_buzzer() buzzer_on(2, 20000)
+#define cali_RC_choose_OK_start_buzzer()       buzzer_on(0, 30000)
+#define cali_imu_start_buzzer()                buzzer_on(95, 10000)
+#define cali_buzzer_off()                      buzzer_off() // buzzer off，关闭蜂鸣器
 // when imu is calibrating ,buzzer set frequency and strength. 当imu在校准,蜂鸣器的设置频率和强度
-#define imu_start_buzzer() buzzer_on(95, 10000)
-// when gimbal is calibrating ,buzzer set frequency and strength.当云台在校准,蜂鸣器的设置频率和强度
-#define gimbal_start_buzzer()      buzzer_on(31, 19999)
-#define cali_buzzer_off()          buzzer_off() // buzzer off，关闭蜂鸣器
-#define rc_cali_buzzer_middle_on() gimbal_start_buzzer()
-#define rc_cali_buzzer_start_on()  imu_start_buzzer()
+// #define imu_start_buzzer() buzzer_on(95, 10000)
+
+// #define rc_cali_buzzer_start_on()  imu_start_buzzer()
+
+//* gyro
+#define GYRO_CALIBRATE_TIME 20000 // gyro calibrate time,陀螺仪校准时间
 
 //* temperature
-// get stm32 chip temperature, to calc imu control temperature.获取stm32片内温度，计算imu的控制温度
-#define cali_get_mcu_temperature() get_temprate()
-#define GYRO_CONST_MAX_TEMP        45.0f // max control temperature of gyro,最大陀螺仪控制温度
+#define GYRO_CONST_MAX_TEMP 45.0f // max control temperature of gyro,最大陀螺仪控制温度
 
 //* flash
 #define FLASH_USER_ADDR                     ADDR_FLASH_SECTOR_9                                 // write flash page 9,保存的flash页地址
@@ -110,41 +114,43 @@
 #define cali_flash_erase(address, page_num) flash_erase_address((address), (page_num))          // flash erase function,flash擦除函数
 
 //* RC
-// RC point
-#define get_remote_ctrl_point_cali() get_remote_control_point() // get the remote control point，获取遥控器指针
 // RC control
-#define gyro_cali_disable_control() RC_unable() // when imu is calibrating, disable the remote control.当imu在校准时候,失能遥控器
-#define gyro_cali_enable_control()  RC_restart(SBUS_RX_BUF_NUM)
+#define cali_disable_RC_control() RC_unable() // when imu is calibrating, disable the remote control.当imu在校准时候,失能遥控器
+#define cali_enable_RC_control()  RC_restart(SBUS_RX_BUF_NUM)
 // RC value limit
 #define RC_CALI_VALUE_HOLE 600 // remote control threshold, the max value of remote control channel is 660.
 // RC time set
-#define CALIBRATE_END_TIME         20000 // you have 20 seconds to calibrate by remote control. 有20s可以用遥控器进行校准
-#define RC_CMD_DURATION            2000  // 遥控器控制持续时间
-#define RC_CALI_BUZZER_CYCLE_TIME  400
-#define RC_CALI_BUZZER_PAUSE_TIME  200
-#define RC_CALI_BUZZER_START_TIME  0     // in the beginning, buzzer frequency change to low frequency of imu calibration.当开始校准的时候,蜂鸣器切成低频声音
-#define RC_CALI_BUZZER_MIDDLE_TIME 10000 // when 10 second, buzzer frequency change to high frequency of gimbal calibration.当10s的时候,蜂鸣器切成高频声音
+#define RC_CMD_START_TIME  1500
+#define RC_CMD_VERIFY_TIME 150
+#define RC_CMD_STOP_TIME   1500
+
+#define RC_FLAG_NO_CMD -1 // 遥控器没有接收到命令状态
+#define RC_FLAG_BEGIN  0  // 进入遥控器选择状态
+#define RC_FLAG_GYRO   1
+
+//* key
+#define KEY_LONG_TIME 1000 // 按键持续按下控制校准的时间
+#define KEY_SET_CALI_DONT_CHECK 0 // 不检查是否已经有校准，适用于遥控器连接前等待
+#define KEY_SET_CALI_CHECK 1 // 检查是否有在校准的
 
 //* cali device structure
 typedef struct
 {
-    uint8_t name[3];                                  // device name
-    uint8_t cali_done;                                // 0x55 means has been calibrated
-    uint8_t data_len_word : 7;                        // buf lenght
-    uint8_t cali_cmd : 1;                             // 1 means to run cali hook function,
-    uint32_t *data;                                   // link to device calibration data
-    bool_t (*cali_hook)(uint32_t *point, bool_t cmd); // cali function
-} __packed cali_sensor_t;
+    uint8_t name[3];                         // device name
+    uint8_t cali_done;                       // 0x55 means has been calibrated
+    uint8_t data_len_word : 7;               // buf lenght
+    uint8_t cali_cmd : 1;                    // 1 means to run cali hook function,
+    uint32_t *data;                          // link to device calibration data
+    bool_t (*cali_hook)(uint32_t *, bool_t); // cali function
+} __packed cali_device_t;
 
 //* cali device id
 //// 其实这个 id 只是用来计算设备列表长度
 typedef enum {
-    // TODO 写一下校准的目标/目的
-    CALI_HEAD   = 0, // 包括 id，陀螺仪的设定温度 temperature，纬度 latitude
-    CALI_GIMBAL = 1, // 云台中值校准
-    CALI_GYRO   = 2, // 陀螺仪零漂校准
-    CALI_ACC    = 3,
-    CALI_MAG    = 4,
+    CALI_TEMP = 0, // 设置陀螺仪的设定温度 temperature
+    CALI_GYRO = 1, // 陀螺仪零漂校准
+    CALI_ACC  = 2,
+    CALI_MAG  = 3,
     //! STEP 1 添加设备名 BEGIN
 
     //! STEP 1 添加设备名 END
@@ -152,26 +158,11 @@ typedef enum {
 } cali_id_e;
 
 //* cali data structure
-// header device
+// temperature
 typedef struct
 {
-    uint8_t self_id;           // the "SELF_ID"
-    uint16_t firmware_version; // set to the "FIRMWARE_VERSION"
-    //'temperature' and 'latitude' should not be in the head_cali, because don't want to create a new sensor
-    //'temperature' and 'latitude'不应该在head_cali,因为不想创建一个新的设备就放这了
-    int8_t temperature; // imu control temperature
-    fp32 latitude;      // latitude
-} head_cali_t;
-// gimbal device
-typedef struct
-{
-    uint16_t yaw_offset;
-    uint16_t pitch_offset;
-    fp32 yaw_max_angle;
-    fp32 yaw_min_angle;
-    fp32 pitch_max_angle;
-    fp32 pitch_min_angle;
-} gimbal_cali_t;
+    int32_t temperature; // imu control temperature
+} temp_cali_t;
 // gyro, accel, mag device
 typedef struct
 {
@@ -187,7 +178,6 @@ typedef struct
 
 extern void cali_param_init(void);
 extern int8_t get_control_temperature(void);
-extern void get_flash_latitude(float *latitude);
 extern void calibrate_task(void const *pvParameters);
 
 #endif

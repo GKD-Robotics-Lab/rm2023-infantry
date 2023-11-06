@@ -12,6 +12,15 @@
 #define rpm_to_radps(x) (2.0f * PI * x / 60.0f)
 // 求绝对值
 #define ABS(x) ((x > 0) ? x : -x)
+// 限幅
+#define ABS_LIMIT(input, max)      \
+    {                              \
+        if (input > (max)) {         \
+            input = (max);           \
+        } else if (input < -(max)) { \
+            input = -(max);          \
+        }                          \
+    }
 
 typedef struct
 {

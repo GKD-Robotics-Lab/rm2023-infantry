@@ -49,10 +49,10 @@ void battery_voltage_task(void const * argument)
 {
     osDelay(1000);
     //use inner 1.2v to calbrate
-    init_vrefint_reciprocal();
+    bsp_adc_init_vrefint_reciprocal();
     while(1)
     {
-        battery_voltage = get_battery_voltage() + VOLTAGE_DROP;
+        battery_voltage = bsp_adc_get_battery_voltage() + VOLTAGE_DROP;
         electricity_percentage = calc_battery_percentage(battery_voltage);
         osDelay(100);
     }

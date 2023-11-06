@@ -180,7 +180,6 @@ typedef enum {
 typedef struct
 {
     const motor_measure_t *chassis_motor_measure; // 底盘电机数据指针
-    fp32 accel;
     fp32 speed;
     fp32 speed_set;
     int16_t give_current;

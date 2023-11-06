@@ -24,7 +24,7 @@ static uint16_t adcx_get_chx_value(ADC_HandleTypeDef *ADCx, uint32_t ch)
     return (uint16_t)HAL_ADC_GetValue(ADCx);
 
 }
-void init_vrefint_reciprocal(void)
+void bsp_adc_init_vrefint_reciprocal(void)
 {
     uint8_t i = 0;
     uint32_t total_adc = 0;
@@ -36,7 +36,7 @@ void init_vrefint_reciprocal(void)
     voltage_vrefint_proportion = 200 * 1.2f / total_adc;
 
 }
-fp32 get_temprate(void)
+fp32 bsp_adc_get_temperature(void)
 {
     uint16_t adcx = 0;
     fp32 temperate;
@@ -49,7 +49,7 @@ fp32 get_temprate(void)
 }
 
 
-fp32 get_battery_voltage(void)
+fp32 bsp_adc_get_battery_voltage(void)
 {
     fp32 voltage;
     uint16_t adcx = 0;
@@ -60,7 +60,7 @@ fp32 get_battery_voltage(void)
     return voltage;
 }
 
-uint8_t get_hardware_version(void)
+uint8_t bsp_adc_get_hardware_version(void)
 {
     uint8_t hardware_version;
     hardware_version = HAL_GPIO_ReadPin(HW0_GPIO_Port, HW0_Pin)

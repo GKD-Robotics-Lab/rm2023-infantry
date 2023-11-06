@@ -161,8 +161,11 @@ static void chassis_init(chassis_move_t *chassis_move_init)
     // get chassis motor data point,  initialize motor speed PID
     // 获取底盘电机数据指针，初始化电机速度环 PID
     const static fp32 motor_speed_pid[3] = {M3505_MOTOR_SPEED_PID_KP, M3505_MOTOR_SPEED_PID_KI, M3505_MOTOR_SPEED_PID_KD};
+    chassis_move_init->motor_chassis[0].chassis_motor_measure = get_motor_measure_point(MOTOR_CHASSIS_1_ID);
+    chassis_move_init->motor_chassis[1].chassis_motor_measure = get_motor_measure_point(MOTOR_CHASSIS_2_ID);
+    chassis_move_init->motor_chassis[2].chassis_motor_measure = get_motor_measure_point(MOTOR_CHASSIS_3_ID);
+    chassis_move_init->motor_chassis[3].chassis_motor_measure = get_motor_measure_point(MOTOR_CHASSIS_4_ID);
     for (uint8_t i = 0; i < 4; i++) {
-        chassis_move_init->motor_chassis[i].chassis_motor_measure = get_chassis_motor_measure_point(i);
         PID_init(&chassis_move_init->motor_speed_pid[i], PID_POSITION, motor_speed_pid, M3505_MOTOR_SPEED_PID_MAX_OUT, M3505_MOTOR_SPEED_PID_MAX_IOUT, M3505_MOTOR_SPEED_PID_DEAD_BAND);
     }
     // initialize angle PID
@@ -199,7 +202,7 @@ static void chassis_init(chassis_move_t *chassis_move_init)
 }
 
 /**
- * @brief          设置底盘移动策略，主要在 'chassis_behaviour_mode_get' 函数中改变
+ * @brief          设置底盘移动策略，主要在 'chassis_behaviour_mode_set' 函数中改变
  * @param[out]     chassis_move_mode: "chassis_move" 变量指针.
  * @retval         none
  */
@@ -209,7 +212,7 @@ static void chassis_set_strategy(chassis_move_t *chassis_move_strategy)
         return;
     }
     // in file "chassis_behaviour.c"
-    chassis_behaviour_mode_get(chassis_move_strategy);
+    chassis_behaviour_mode_set(chassis_move_strategy);
 }
 
 /**
@@ -267,7 +270,6 @@ static void chassis_feedback_update(chassis_move_t *chassis_move_update)
         // update motor speed, accel is differential of speed PID
         // 更新电机速度，加速度是速度的PID微分
         chassis_move_update->motor_chassis[i].speed = CHASSIS_MOTOR_RPM_TO_VECTOR_SEN * chassis_move_update->motor_chassis[i].chassis_motor_measure->speed_rpm;
-        chassis_move_update->motor_chassis[i].accel = chassis_move_update->motor_speed_pid[i].Dbuf[0] * CHASSIS_CONTROL_FREQUENCE;
     }
 
     //* 底盘整体运动参数更新，数据根据电机速度计算
@@ -280,13 +282,13 @@ static void chassis_feedback_update(chassis_move_t *chassis_move_update)
     //* 底盘姿态角度更新，数据来自陀螺仪和云台
     // calculate chassis euler angle, if chassis add a new gyro sensor,please change this code
     // 计算底盘姿态角度, 如果底盘上有陀螺仪请更改这部分代码
-    chassis_move_update->chassis_yaw   = rad_format(*(chassis_move_update->chassis_INS_angle + INS_YAW_ADDRESS_OFFSET) - chassis_move_update->chassis_yaw_motor->relative_angle);
-    chassis_move_update->chassis_pitch = rad_format(*(chassis_move_update->chassis_INS_angle + INS_PITCH_ADDRESS_OFFSET) - chassis_move_update->chassis_pitch_motor->relative_angle);
-    chassis_move_update->chassis_roll  = *(chassis_move_update->chassis_INS_angle + INS_ROLL_ADDRESS_OFFSET);
+    chassis_move_update->chassis_yaw   = rad_format(*(chassis_move_update->chassis_INS_angle + INS_ANGLE_YAW_ADDRESS_OFFSET) - chassis_move_update->chassis_yaw_motor->relative_angle);
+    chassis_move_update->chassis_pitch = rad_format(*(chassis_move_update->chassis_INS_angle + INS_ANGLE_PITCH_ADDRESS_OFFSET) - chassis_move_update->chassis_pitch_motor->relative_angle);
+    chassis_move_update->chassis_roll  = *(chassis_move_update->chassis_INS_angle + INS_ANGLE_ROLL_ADDRESS_OFFSET);
 }
 
 /**
- * @brief          设置底盘控制设置值, 三个运动控制值是通过 chassis_behaviour_control_get 函数设置的
+ * @brief          设置底盘控制设置值, 三个运动控制值是通过 chassis_behaviour_control_set 函数设置的
  * @param[out]     chassis_move_update: "chassis_move"变量指针.
  * @retval         none
  *
@@ -302,7 +304,7 @@ static void chassis_set_contorl(chassis_move_t *chassis_move_control)
     //* 根据不同的底盘行为模式，从遥控器获取三个运动控制值
     fp32 vx_set = 0.0f, vy_set = 0.0f, angle_set = 0.0f;
     // get three control set-point, 获取三个控制设置值
-    chassis_behaviour_control_get(&vx_set, &vy_set, &angle_set, chassis_move_control);
+    chassis_behaviour_control_set(&vx_set, &vy_set, &angle_set, chassis_move_control);
 
     //* 根据不同的底盘平动策略，更新 vx_set 和 vy_set
     if (chassis_move_control->chassis_translation_strategy == TRANSLATION_RAW) {
@@ -341,10 +343,10 @@ static void chassis_set_contorl(chassis_move_t *chassis_move_control)
         // calculate ratation speed
         // 计算旋转PID角速度
         chassis_move_control->wz_set = -PID_calc(&chassis_move_control->chassis_angle_pid, chassis_move_control->chassis_yaw_motor->relative_angle, chassis_move_control->chassis_relative_angle_set);
-#if defined CHASSIS_DEBUG_ANGEL
-        usart1_printf("%.2f,%.2f,%.2f\r\n", 
-                      chassis_move_control->chassis_relative_angle_set, 
-                      chassis_move_control->wz_set, 
+#if defined CHASSIS_DEBUG_ANGEL && defined PRINT_ON
+        usart1_printf("%.2f,%.2f,%.2f\r\n",
+                      chassis_move_control->chassis_relative_angle_set,
+                      chassis_move_control->wz_set,
                       chassis_move_control->chassis_yaw_motor->relative_angle);
 #endif
     } else if (chassis_move_control->chassis_rotation_strategy == ROTATION_ABSOLUTE) {
@@ -425,7 +427,7 @@ static void chassis_control_loop(chassis_move_t *chassis_move_control_loop)
             chassis_move_control_loop->motor_chassis[i].give_current = (int16_t)(wheel_speed[i]);
         }
 
-#ifdef CHASSIS_DEBUG_OPEN
+#if defined CHASSIS_DEBUG_OPEN && defined PRINT_ON
         // 这里只输出了电机 1 的参数
         usart1_printf("%d,%.5f\r\n",
                       chassis_move_control_loop->motor_chassis[0].give_current,
@@ -465,7 +467,7 @@ static void chassis_control_loop(chassis_move_t *chassis_move_control_loop)
         chassis_move_control_loop->motor_chassis[i].give_current = (int16_t)(chassis_move_control_loop->motor_speed_pid[i].out);
     }
 
-#ifdef CHASSIS_DEBUG_MOTOR_SPEED
+#if defined CHASSIS_DEBUG_MOTOR_SPEED && defined PRINT_ON
     // 这里只输出了电机 1 的参数
     usart1_printf("%.2f,%d,%.2f\r\n",
                   chassis_move_control_loop->motor_chassis[0].speed_set,
@@ -578,11 +580,9 @@ static fp32 chassis_debug_input(void)
     uint32_t t      = (uint32_t)xTaskGetTickCount() % period; // 时间 | 单位 ms | 范围 0~period | tick 约 50 天才会溢出一次，不用担心
 
     //* 示例 产生方波输入 BEGIN
-    if (t < (period / 2))
-    {
+    if (t < (period / 2)) {
         input = 0;
-    } 
-    else {
+    } else {
         // input = (fp32)MAX_MOTOR_CAN_CURRENT;
         // input = MAX_WHEEL_SPEED;
         input = PI / 3.0f;

@@ -25,9 +25,9 @@
  * >               第二个参数: 'vy' 通常控制横向移动,正值 左移, 负值 右移
  * >               第三个参数: 'wz' 可能是角度控制或者旋转速度控制
  * >               在这个新的函数, 你能给 "vx","vy",and "wz" 赋值想要的速度参数
- * >           3.  在"chassis_behaviour_mode_get"这个函数中，添加新的逻辑判断，给chassis_behaviour_mode赋值成CHASSIS_XXX_XXX
+ * >           3.  在"chassis_behaviour_mode_set"这个函数中，添加新的逻辑判断，给chassis_behaviour_mode赋值成CHASSIS_XXX_XXX
  * >               在函数最后，添加"else if(chassis_behaviour_mode == CHASSIS_XXX_XXX)" ,然后选择底盘控制策略
- * >           4.  在"chassis_behaviour_control_get" 函数的最后，添加
+ * >           4.  在"chassis_behaviour_control_set" 函数的最后，添加
  * >               else if(chassis_behaviour_mode == CHASSIS_XXX_XXX)
  * >               {
  * >                   chassis_xxx_xxx_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
@@ -65,7 +65,7 @@ typedef enum {
 
 #define CHASSIS_OPEN_RC_SCALE 10 // in CHASSIS_OPEN mode, multiply the value. 在chassis_open 模型下，遥控器乘以该比例发送到can上
 
-extern void chassis_behaviour_mode_get(chassis_move_t *chassis_move_mode);
-extern void chassis_behaviour_control_get(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, chassis_move_t *chassis_move_rc_to_vector);
+extern void chassis_behaviour_mode_set(chassis_move_t *chassis_move_mode);
+extern void chassis_behaviour_control_set(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, chassis_move_t *chassis_move_rc_to_vector);
 
 #endif

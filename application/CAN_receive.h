@@ -78,9 +78,6 @@ extern void CAN_cmd_gimbal(int16_t yaw, int16_t pitch, int16_t rev1, int16_t rev
 extern void CAN_cmd_shoot(int16_t trigger, int16_t fric1, int16_t fric2, int16_t rev);
 extern void CAN_cmd_chassis_reset_ID(void);
 extern void CAN_cmd_chassis(int16_t motor1, int16_t motor2, int16_t motor3, int16_t motor4);
-extern const motor_measure_t *get_yaw_gimbal_motor_measure_point(void);
-extern const motor_measure_t *get_pitch_gimbal_motor_measure_point(void);
-extern const motor_measure_t *get_chassis_motor_measure_point(uint8_t i);
-extern const motor_measure_t *get_motor_measure_point(uint8_t i);
+extern const motor_measure_t *get_motor_measure_point(motor_id_e i);
 
 #endif

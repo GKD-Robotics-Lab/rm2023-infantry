@@ -254,56 +254,11 @@ void CAN_cmd_chassis(int16_t motor1, int16_t motor2, int16_t motor3, int16_t mot
 }
 
 /**
- * @brief          return the yaw 6020 motor data point
- * @param[in]      none
- * @retval         motor data point
- */
-/**
- * @brief          返回yaw 6020电机数据指针
- * @param[in]      none
- * @retval         电机数据指针
- */
-const motor_measure_t *get_yaw_gimbal_motor_measure_point(void)
-{
-    return &motor_chassis[MOTOR_GIMBAL_YAW_ID];
-}
-
-/**
- * @brief          return the pitch 6020 motor data point
- * @param[in]      none
- * @retval         motor data point
- */
-/**
- * @brief          返回pitch 6020电机数据指针
- * @param[in]      none
- * @retval         电机数据指针
- */
-const motor_measure_t *get_pitch_gimbal_motor_measure_point(void)
-{
-    return &motor_chassis[MOTOR_GIMBAL_PITCH_ID];
-}
-
-/**
- * @brief          return the chassis 3508 motor data point
- * @param[in]      i: motor number,range [0,3]
- * @retval         motor data point
- */
-/**
- * @brief          返回底盘电机 3508电机数据指针
- * @param[in]      i: 电机编号,范围[0,3]
- * @retval         电机数据指针
- */
-const motor_measure_t *get_chassis_motor_measure_point(uint8_t i)
-{
-    return &motor_chassis[(i & 0x03)];
-}
-
-/**
-  * @brief         返回任意一个数据指针  added by 片哥
-  * @param[in]      i: 电机编号,范围[0,8]
+  * @brief          返回指定的电机报文数据指针
+  * @param[in]      id
   * @retval         电机数据指针
   */
-const motor_measure_t *get_motor_measure_point(uint8_t i)
+const motor_measure_t *get_motor_measure_point(motor_id_e id)
 {
-    return &motor_chassis[i];
+    return &motor_chassis[id];
 }

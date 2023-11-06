@@ -15,33 +15,9 @@
   ****************************(C) COPYRIGHT 2019 DJI****************************
   */
 
-/**
- * @file pid.c
- * @author dokee (dokee.39@gmail.com)
- * @brief
- * @version 0.1
- * @date 2023-10-02
- *
- * @note PID 计算添加了死区
- * @note 添加了对微分进行滤波的 PID 以抑制高频噪声
- * @note 添加了前馈 feedforward
- *
- * @copyright Copyright (c) 2023
- *
- */
-
 #include "pid.h"
 #include "main.h"
-
-#define ABS(x) ((x > 0) ? x : -x)
-#define ABS_LIMIT(input, max)      \
-    {                              \
-        if (input > max) {         \
-            input = max;           \
-        } else if (input < -max) { \
-            input = -max;          \
-        }                          \
-    }
+#include "user_lib.h"
 
 /**
  * @brief          pid struct data init
@@ -54,7 +30,7 @@
  * @param[in]      dead_band: pid 误差死区
  * @retval         none
  */
-void PID_init(pid_typedef *pid, PID_MODE_t mode, const fp32 PID[3], fp32 max_out, fp32 max_iout, fp32 dead_band)
+void PID_init(pid_typedef *pid, pid_mode_e mode, const fp32 PID[3], fp32 max_out, fp32 max_iout, fp32 dead_band)
 {
     if (pid == NULL || PID == NULL) {
         return;
@@ -69,13 +45,19 @@ void PID_init(pid_typedef *pid, PID_MODE_t mode, const fp32 PID[3], fp32 max_out
     pid->max_iout  = max_iout;
     pid->dead_band = dead_band;
 
-    pid->Dbuf[0] = pid->Dbuf[1] = pid->Dbuf[2] = 0.0f;
     pid->error[0] = pid->error[1] = pid->error[2] = pid->Pout = pid->Iout = pid->Dout = pid->out = 0.0f;
+    pid->last_diff = 0.0f;
 
     pid->feedforward = NULL;
     pid->Fout        = 0.0f;
 }
 
+/**
+ * @brief 为 pid 添加前馈处理
+ * 
+ * @param pid 
+ * @param feedforward 前馈处理函数的函数指针
+ */
 void PID_add_feedforward(pid_typedef *pid, fp32 (*feedforward)(fp32))
 {
     pid->feedforward = feedforward;
@@ -103,13 +85,10 @@ fp32 PID_calc(pid_typedef *pid, fp32 ref, fp32 set)
     pid->error[0] = set - ref;
 
     if (pid->mode == PID_POSITION) {
-        pid->Dbuf[2] = pid->Dbuf[1];
-        pid->Dbuf[1] = pid->Dbuf[0];
-        pid->Dbuf[0] = (pid->error[0] - pid->error[1]);
         if (ABS(pid->error[0]) > pid->dead_band) {
             pid->Pout = pid->Kp * pid->error[0];
             pid->Iout += pid->Ki * pid->error[0];
-            pid->Dout = pid->Kd * pid->Dbuf[0];
+            pid->Dout = pid->Kd * (pid->error[0] - pid->error[1]);
             ABS_LIMIT(pid->Iout, pid->max_iout);
             if (pid->feedforward != NULL) pid->Fout = pid->feedforward(pid->set);
             pid->out = pid->Pout + pid->Iout + pid->Dout + pid->Fout;
@@ -117,13 +96,10 @@ fp32 PID_calc(pid_typedef *pid, fp32 ref, fp32 set)
         } // 如果在误差死区范围内，沿用上次的输出
     } else if (pid->mode == PID_DELTA) {
         pid->out -= pid->Fout;
-        pid->Dbuf[2] = pid->Dbuf[1];
-        pid->Dbuf[1] = pid->Dbuf[0];
-        pid->Dbuf[0] = (pid->error[0] - 2.0f * pid->error[1] + pid->error[2]);
         if (ABS(pid->error[0]) > pid->dead_band) {
             pid->Pout = pid->Kp * (pid->error[0] - pid->error[1]);
             pid->Iout = pid->Ki * pid->error[0];
-            pid->Dout = pid->Kd * pid->Dbuf[0];
+            pid->Dout = pid->Kd * (pid->error[0] - 2.0f * pid->error[1] + pid->error[2]);
             if (pid->feedforward != NULL) pid->Fout = pid->feedforward(pid->set);
             pid->out += pid->Pout + pid->Iout + pid->Dout + pid->Fout;
             ABS_LIMIT(pid->out, pid->max_out);
@@ -134,13 +110,15 @@ fp32 PID_calc(pid_typedef *pid, fp32 ref, fp32 set)
 }
 
 /**
- * @brief          pid 计算 (微分滤波)
+ * @brief          pid 计算 (指定微分)
+ * @note           适用于例如云台角度环将陀螺仪输出指定为微分项 D，也可以用于自己对微分项 D 进行滤波
  * @param[out]     pid: PID 结构数据指针
  * @param[in]      ref: 反馈数据
  * @param[in]      set: 设定值
+ * @param[in]      diff: 指定的微分值
  * @retval         pid 输出
  */
-fp32 PID_calc_filterD(pid_typedef *pid, fp32 ref, fp32 set)
+fp32 PID_calc_specifyD(pid_typedef *pid, fp32 ref, fp32 set, fp32 diff)
 {
     if (pid == NULL) {
         return 0.0f;
@@ -155,30 +133,25 @@ fp32 PID_calc_filterD(pid_typedef *pid, fp32 ref, fp32 set)
     pid->error[0] = set - ref;
 
     if (pid->mode == PID_POSITION) {
-        pid->Dbuf[2] = pid->Dbuf[1];
-        pid->Dbuf[1] = pid->Dbuf[0];
-        pid->Dbuf[0] = (pid->error[0] - pid->error[1]);
         if (ABS(pid->error[0]) > pid->dead_band) {
             pid->Pout = pid->Kp * pid->error[0];
             pid->Iout += pid->Ki * pid->error[0];
-            // 微分滤波
-            pid->Dout = pid->Kd * (pid->Dbuf[0] + pid->Dbuf[1] + pid->Dbuf[2]) / 3;
+            pid->Dout = pid->Kd * diff;
             ABS_LIMIT(pid->Iout, pid->max_iout);
-            pid->out = pid->Pout + pid->Iout + pid->Dout;
-            if (pid->feedforward != NULL) pid->out += pid->feedforward(pid->set);
+            if (pid->feedforward != NULL) pid->Fout = pid->feedforward(pid->set);
+            pid->out = pid->Pout + pid->Iout + pid->Dout + pid->Fout;
             ABS_LIMIT(pid->out, pid->max_out);
         } // 如果在误差死区范围内，沿用上次的输出
     } else if (pid->mode == PID_DELTA) {
-        pid->Dbuf[2] = pid->Dbuf[1];
-        pid->Dbuf[1] = pid->Dbuf[0];
-        pid->Dbuf[0] = (pid->error[0] - 2.0f * pid->error[1] + pid->error[2]);
+        pid->out -= pid->Fout;
         if (ABS(pid->error[0]) > pid->dead_band) {
             pid->Pout = pid->Kp * (pid->error[0] - pid->error[1]);
             pid->Iout = pid->Ki * pid->error[0];
-            // 微分滤波
-            pid->Dout = pid->Kd * pid->Kd * (pid->Dbuf[0] + pid->Dbuf[1] + pid->Dbuf[2]) / 3;
-            pid->out += pid->Pout + pid->Iout + pid->Dout;
+            pid->Dout = pid->Kd * (diff - pid->last_diff);
+            if (pid->feedforward != NULL) pid->Fout = pid->feedforward(pid->set);
+            pid->out += pid->Pout + pid->Iout + pid->Dout + pid->Fout;
             ABS_LIMIT(pid->out, pid->max_out);
+            pid->last_diff = diff;
         } // 如果在误差死区范围内，沿用上次的输出
     }
 
@@ -187,11 +160,6 @@ fp32 PID_calc_filterD(pid_typedef *pid, fp32 ref, fp32 set)
 
 // TODO 微分先行
 
-/**
- * @brief          pid out clear
- * @param[out]     pid: PID struct data point
- * @retval         none
- */
 /**
  * @brief          pid 输出清除
  * @param[out]     pid: PID 结构数据指针
@@ -204,7 +172,7 @@ void PID_clear(pid_typedef *pid)
     }
 
     pid->error[0] = pid->error[1] = pid->error[2] = 0.0f;
-    pid->Dbuf[0] = pid->Dbuf[1] = pid->Dbuf[2] = 0.0f;
+    pid->last_diff = 0.0f;
     pid->out = pid->Pout = pid->Iout = pid->Dout = 0.0f;
     pid->fdb = pid->set = 0.0f;
 }

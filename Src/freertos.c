@@ -140,40 +140,40 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of test */
-  osThreadDef(test, test_task, osPriorityNormal, 0, 128);
-  testHandle = osThreadCreate(osThread(test), NULL);
+//   osThreadDef(test, test_task, osPriorityNormal, 0, 128);
+//   testHandle = osThreadCreate(osThread(test), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
-    // osThreadDef(cali, calibrate_task, osPriorityNormal, 0, 512);
-    // calibrate_tast_handle = osThreadCreate(osThread(cali), NULL);
-    // if (calibrate_tast_handle == NULL)
-    //     Error_Handler();
+    osThreadDef(cali, calibrate_task, osPriorityNormal, 0, 512);
+    calibrate_tast_handle = osThreadCreate(osThread(cali), NULL);
+    if (calibrate_tast_handle == NULL)
+        Error_Handler();
 
-    // osThreadDef(ChassisTask, chassis_task, osPriorityAboveNormal, 0, 512);
-    // chassisTaskHandle = osThreadCreate(osThread(ChassisTask), NULL);
-    // if (chassisTaskHandle == NULL)
-    //     Error_Handler();
+    osThreadDef(ChassisTask, chassis_task, osPriorityAboveNormal, 0, 512);
+    chassisTaskHandle = osThreadCreate(osThread(ChassisTask), NULL);
+    if (chassisTaskHandle == NULL)
+        Error_Handler();
 
     osThreadDef(DETECT, detect_task, osPriorityNormal, 0, 256);
     detect_handle = osThreadCreate(osThread(DETECT), NULL);
     if (detect_handle == NULL)
         Error_Handler();
 
-    // osThreadDef(gimbalTask, gimbal_task, osPriorityHigh, 0, 512);
-    // gimbalTaskHandle = osThreadCreate(osThread(gimbalTask), NULL);
-    // if (gimbalTaskHandle == NULL)
-    //     Error_Handler();
+    osThreadDef(gimbalTask, gimbal_task, osPriorityHigh, 0, 512);
+    gimbalTaskHandle = osThreadCreate(osThread(gimbalTask), NULL);
+    if (gimbalTaskHandle == NULL)
+        Error_Handler();
 
-    osThreadDef(shootTask, shoot_task, osPriorityHigh, 0, 512);
+    osThreadDef(shootTask, shoot_task, osPriorityNormal, 0, 512);
     shootTaskHandle = osThreadCreate(osThread(shootTask), NULL);
     if (shootTaskHandle == NULL)
         Error_Handler();
 
-    // osThreadDef(imuTask, INS_task, osPriorityRealtime, 0, 1024);
-    // imuTaskHandle = osThreadCreate(osThread(imuTask), NULL);
-    // if (imuTaskHandle == NULL)
-    //     Error_Handler();
+    osThreadDef(imuTask, INS_task, osPriorityRealtime, 0, 1024);
+    imuTaskHandle = osThreadCreate(osThread(imuTask), NULL);
+    if (imuTaskHandle == NULL)
+        Error_Handler();
 
     osThreadDef(led, led_RGB_flow_task, osPriorityNormal, 0, 256);
     led_RGB_flow_handle = osThreadCreate(osThread(led), NULL);

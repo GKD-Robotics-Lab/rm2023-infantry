@@ -26,8 +26,9 @@
 #include "INS_task.h"
 
 #include "main.h"
-
 #include "cmsis_os.h"
+#include "user_lib.h"
+#include "config.h"
 
 #include "bsp_imu_pwm.h"
 #include "bsp_spi.h"
@@ -36,27 +37,17 @@
 #include "pid.h"
 #include "ahrs.h"
 
+#ifdef IMU_DATA_PRINT
+#include "bsp_usart.h"
+#endif
+
 #include "calibrate_task.h"
 #include "detect_task.h"
 
-// TODO
-#include "bsp_usart.h"
-
 #define IMU_temp_PWM(pwm) imu_pwm_set(pwm) // pwm给定
 
-#define BMI088_BOARD_INSTALL_SPIN_MATRIX \
-    {0.0f, 1.0f, 0.0f},                  \
-        {-1.0f, 0.0f, 0.0f},             \
-    {                                    \
-        0.0f, 0.0f, 1.0f                 \
-    }
-
-#define IST8310_BOARD_INSTALL_SPIN_MATRIX \
-    {1.0f, 0.0f, 0.0f},                   \
-        {0.0f, 1.0f, 0.0f},               \
-    {                                     \
-        0.0f, 0.0f, 1.0f                  \
-    }
+#define BMI088_BOARD_INSTALL_SPIN_MATRIX {0.0f, 1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}
+#define IST8310_BOARD_INSTALL_SPIN_MATRIX {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}
 
 static void imu_cali_slove(fp32 gyro[3], fp32 accel[3], fp32 mag[3], bmi088_real_data_t *bmi088, ist8310_real_data_t *ist8310);
 static void imu_temp_control(fp32 temp);
@@ -87,10 +78,8 @@ volatile uint8_t imu_start_dma_flag     = 0;
 bmi088_real_data_t bmi088_real_data;
 fp32 gyro_scale_factor[3][3] = {BMI088_BOARD_INSTALL_SPIN_MATRIX};
 fp32 gyro_offset[3];
-fp32 gyro_cali_offset[3];
 fp32 accel_scale_factor[3][3] = {BMI088_BOARD_INSTALL_SPIN_MATRIX};
 fp32 accel_offset[3];
-fp32 accel_cali_offset[3];
 
 //* 磁力计数据
 ist8310_real_data_t ist8310_real_data;
@@ -117,7 +106,7 @@ static fp32 INS_gyro[3]  = {0.0f, 0.0f, 0.0f};
 static fp32 INS_accel[3] = {0.0f, 0.0f, 0.0f};
 static fp32 INS_mag[3]   = {0.0f, 0.0f, 0.0f};
 static fp32 INS_quat[4]  = {0.0f, 0.0f, 0.0f, 0.0f};
-fp32 INS_angle[3]        = {0.0f, 0.0f, 0.0f}; // euler angle, unit rad.欧拉角 单位 rad
+fp32 INS_angle[3]        = {0.0f, 0.0f, 0.0f};
 
 /**
  * @brief          imu任务, 初始化 bmi088, ist8310, 计算欧拉角
@@ -209,7 +198,11 @@ void INS_task(void const *pvParameters)
 
         //* 姿态解算
         AHRS_update(INS_quat, timing_time, INS_gyro, accel_fliter_3, INS_mag);
-        get_angle(INS_quat, INS_angle + INS_YAW_ADDRESS_OFFSET, INS_angle + INS_PITCH_ADDRESS_OFFSET, INS_angle + INS_ROLL_ADDRESS_OFFSET);
+        get_angle(INS_quat, INS_angle + INS_ANGLE_YAW_ADDRESS_OFFSET, INS_angle + INS_ANGLE_PITCH_ADDRESS_OFFSET, INS_angle + INS_ANGLE_ROLL_ADDRESS_OFFSET);
+
+#ifdef IMU_DATA_PRINT
+        usart1_printf("%f, %f, %f, %f, %f, %f\r\n", *(INS_angle + INS_ANGLE_ROLL_ADDRESS_OFFSET), *(INS_angle + INS_ANGLE_PITCH_ADDRESS_OFFSET), *(INS_angle + INS_ANGLE_YAW_ADDRESS_OFFSET), INS_gyro[0], INS_gyro[1], INS_gyro[2]);
+#endif
 
         // because no use ist8310 and save time, no use
         if (mag_update_flag &= 1 << IMU_DR_SHFITS) {
@@ -217,9 +210,6 @@ void INS_task(void const *pvParameters)
             mag_update_flag |= (1 << IMU_SPI_SHFITS);
             // ist8310_read_mag(ist8310_real_data.mag);
         }
-
-        // TODO
-        usart1_printf("%.6f,%.6f,%.6f,%.6f,%d\r\n", INS_angle[0], INS_angle[1], INS_angle[2], bmi088_real_data.temp, get_control_temperature());
     }
 }
 
@@ -275,40 +265,33 @@ static void imu_temp_control(fp32 temp)
 }
 
 /**
- * @brief          计算陀螺仪零漂
- * @param[out]     gyro_offset:计算零漂
- * @param[in]      gyro:角速度数据
- * @param[out]     offset_time_count: 自动加1
- * @retval         none
- */
-void gyro_offset_calc(fp32 gyro_offset[3], fp32 gyro[3], uint16_t *offset_time_count)
-{
-    if (gyro_offset == NULL || gyro == NULL || offset_time_count == NULL) {
-        return;
-    }
-
-    gyro_offset[0] = gyro_offset[0] - 0.0003f * gyro[0];
-    gyro_offset[1] = gyro_offset[1] - 0.0003f * gyro[1];
-    gyro_offset[2] = gyro_offset[2] - 0.0003f * gyro[2];
-    (*offset_time_count)++;
-}
-
-/**
  * @brief          校准陀螺仪
  * @param[out]     陀螺仪的比例因子，1.0f为默认值，不修改
  * @param[out]     陀螺仪的零漂，采集陀螺仪的静止的输出作为offset
  * @param[out]     陀螺仪的时刻，每次在gyro_offset调用会加1,
  * @retval         none
  */
-void INS_cali_gyro(fp32 cali_scale[3], fp32 cali_offset[3], uint16_t *time_count)
+void INS_cali_gyro_hook(fp32 cali_scale[3], fp32 cali_offset[3], uint16_t *time_count)
 {
+    //* 开始校准时将原数据归零
     if (*time_count == 0) {
-        gyro_offset[0] = gyro_cali_offset[0];
-        gyro_offset[1] = gyro_cali_offset[1];
-        gyro_offset[2] = gyro_cali_offset[2];
+        gyro_offset[0] = 0;
+        gyro_offset[1] = 0;
+        gyro_offset[2] = 0;
     }
-    gyro_offset_calc(gyro_offset, INS_gyro, time_count);
 
+    //* 迭代校准值
+    gyro_offset[0] = gyro_offset[0] - 0.0003f * INS_gyro[0];
+    gyro_offset[1] = gyro_offset[1] - 0.0003f * INS_gyro[1];
+    gyro_offset[2] = gyro_offset[2] - 0.0003f * INS_gyro[2];
+    (*time_count)++;
+
+    //* 校准值错误判断
+    if (ABS(gyro_offset[0]) > GYRO_OFFSET_MAX) gyro_offset[0] = 0;
+    if (ABS(gyro_offset[1]) > GYRO_OFFSET_MAX) gyro_offset[1] = 0;
+    if (ABS(gyro_offset[2]) > GYRO_OFFSET_MAX) gyro_offset[2] = 0;
+
+    //* 保存校准值
     cali_offset[0] = gyro_offset[0];
     cali_offset[1] = gyro_offset[1];
     cali_offset[2] = gyro_offset[2];
@@ -323,14 +306,16 @@ void INS_cali_gyro(fp32 cali_scale[3], fp32 cali_offset[3], uint16_t *time_count
  * @param[in]      陀螺仪的零漂
  * @retval         none
  */
-void INS_set_cali_gyro(fp32 cali_scale[3], fp32 cali_offset[3])
+void INS_set_cali_gyro_hook(fp32 cali_scale[3], fp32 cali_offset[3])
 {
-    gyro_cali_offset[0] = cali_offset[0];
-    gyro_cali_offset[1] = cali_offset[1];
-    gyro_cali_offset[2] = cali_offset[2];
-    gyro_offset[0]      = gyro_cali_offset[0];
-    gyro_offset[1]      = gyro_cali_offset[1];
-    gyro_offset[2]      = gyro_cali_offset[2];
+    //* 校准值错误判断
+    if (ABS(cali_offset[0]) > GYRO_OFFSET_MAX) cali_offset[0] = 0;
+    if (ABS(cali_offset[1]) > GYRO_OFFSET_MAX) cali_offset[1] = 0;
+    if (ABS(cali_offset[2]) > GYRO_OFFSET_MAX) cali_offset[2] = 0;
+
+    gyro_offset[0] = cali_offset[0];
+    gyro_offset[1] = cali_offset[1];
+    gyro_offset[2] = cali_offset[2];
 }
 
 /**

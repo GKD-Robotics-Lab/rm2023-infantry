@@ -37,7 +37,7 @@
 #define DETECT_TASK_H
 #include "struct_typedef.h"
 
-#define DETECT_TASK_INIT_TIME 57
+#define DETECT_TASK_INIT_TIME 17
 #define DETECT_CONTROL_TIME   10
 
 // 错误码以及对应设备顺序

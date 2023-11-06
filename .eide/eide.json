@@ -79,7 +79,8 @@
           "components/algorithm/Include",
           "components/controller",
           "components/devices",
-          "components/support"
+          "components/support",
+          "components/printf"
         ],
         "libList": [
           "components/algorithm"

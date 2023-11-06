@@ -19,12 +19,12 @@
   *
   @verbatim
   ==============================================================================
-  * >           使用遥控器进行开始校准
-  * >               第一步:遥控器的两个开关都打到下
-  * >               第二步:两个摇杆打成\../,保存两秒.\.代表左摇杆向右下打.
-  * >               第三步:摇杆打成./\. 开始陀螺仪校准
-  * >                      或者摇杆打成'\/' 开始云台校准
-  * >                      或者摇杆打成/''\ 开始底盘校准
+  * >           校准:
+  * >               方法一: 上电后检测到遥控器拨杆与摇杆均在下校准全部设备
+  * >               方法二: 按下按键 1s 校准全部设备
+  * >               方法三: 保持拨杆都在下，将摇杆内拨，听到提示音后即开始选择校准设备
+  * >                       选择设备几就外拨几次，选择过程中与完成后均有提示音
+  * >                       现有可选校准设备: 1->陀螺仪
   *
   * >           数据在flash中，包括校准数据和名字 name[3] 和 校准标志位 cali_flag
   * >               例如head_cali有8个字节(不__packed的话应该是16字节)，但它需要12字节在flash，如果它从0x080A0000开始
@@ -62,7 +62,9 @@
   * >                   cmd 参数有两个：
   * >                       CALI_FUNC_CMD_INIT，已经校准过，直接使用校准值
   * >                       CALI_FUNC_CMD_ON，开始校准
+  * >                   该函数在参数为 CALI_FUNC_CMD_INIT 的情况下返回 1 表示每次上电都需要校准，否则为不需要
   * >                   该函数在参数为 CALI_FUNC_CMD_ON 的情况下返回 1 表示校准完成，否则为未完成
+  * >                   这些函数对应设置的校准值必须是在任务启动前就已经存在的静态变量
   *
   ==============================================================================
   @endverbatim
@@ -70,27 +72,88 @@
   */
 
 #include "calibrate_task.h"
-#include "string.h"
+
+#include <string.h>
 #include "cmsis_os.h"
+#include "main.h"
+#include "config.h"
+#include "user_lib.h"
 
 #include "bsp_adc.h"
-#include "bsp_buzzer.h"
 #include "bsp_flash.h"
+#ifdef CALI_BUZZER_ON
+#include "bsp_buzzer.h"
+#endif
+#ifdef CALI_USART_PRINT
+#include "bsp_usart.h"
+#endif
 
-#include "can_receive.h"
 #include "remote_control.h"
 #include "INS_task.h"
-#include "gimbal_task.h"
+#include "detect_task.h"
+
+//* 为精简代码将遥控器相关按键使用宏替代
+// 遥控器两个拨杆均打到下
+#define is_all_switch_down (switch_is_down(cali_RC->rc.s[0]) && switch_is_down(cali_RC->rc.s[1]))
+// 遥控器的摇杆内拨
+#define is_rocker_dialed_inward (cali_RC->rc.ch[0] < -RC_CALI_VALUE_HOLE && cali_RC->rc.ch[2] > RC_CALI_VALUE_HOLE)
+// 遥控器的摇杆外拨
+#define is_rocker_dialed_outward (cali_RC->rc.ch[0] > RC_CALI_VALUE_HOLE && cali_RC->rc.ch[2] < -RC_CALI_VALUE_HOLE)
+// 遥控器的摇杆都打到下
+#define is_all_rocker_down (cali_RC->rc.ch[1] < -RC_CALI_VALUE_HOLE && cali_RC->rc.ch[3] < -RC_CALI_VALUE_HOLE)
+
+//* 为精简代码将蜂鸣器行为使用宏替代
+// 校准所有设备时蜂鸣器响 3 声
+#define cali_all_buzzer          \
+    {                            \
+        cali_all_start_buzzer(); \
+        vTaskDelay(100);         \
+        cali_buzzer_off();       \
+        vTaskDelay(50);          \
+        cali_all_start_buzzer(); \
+        vTaskDelay(100);         \
+        cali_buzzer_off();       \
+        vTaskDelay(50);          \
+        cali_all_start_buzzer(); \
+        vTaskDelay(300);         \
+        cali_buzzer_off();       \
+        vTaskDelay(50);          \
+    }
+// 开始校准设备选择时蜂鸣器响 3 声
+#define cali_RC_choose_begin_buzzer          \
+    {                                        \
+        cali_RC_choose_begin_start_buzzer(); \
+        vTaskDelay(150);                     \
+        cali_buzzer_off();                   \
+        vTaskDelay(75);                      \
+        cali_RC_choose_begin_start_buzzer(); \
+        vTaskDelay(150);                     \
+        cali_buzzer_off();                   \
+        vTaskDelay(75);                      \
+        cali_RC_choose_begin_start_buzzer(); \
+        vTaskDelay(300);                     \
+        cali_buzzer_off();                   \
+        vTaskDelay(50);                      \
+    }
+// 校准选择完成时蜂鸣器响声
+#define cali_RC_choose_OK_buzzer_loop     \
+    {                                     \
+        cali_RC_choose_OK_start_buzzer(); \
+        vTaskDelay(200);                  \
+        cali_buzzer_off();                \
+        vTaskDelay(75);                   \
+    }
 
 static void RC_cmd_to_calibrate(void);
+static uint8_t key_cmd_to_calibrate(uint8_t cmd);
+static void calibrate_all(void);
 static void cali_data_read(void);
 static void cali_data_write(void);
-static bool_t cali_head_hook(uint32_t *cali, bool_t cmd);   // header device cali function
-static bool_t cali_gyro_hook(uint32_t *cali, bool_t cmd);   // gyro device cali function
-static bool_t cali_gimbal_hook(uint32_t *cali, bool_t cmd); // gimbal device cali function
+static bool_t cali_temp_hook(uint32_t *cali, bool_t cmd); // temperature cali function
+static bool_t cali_gyro_hook(uint32_t *cali, bool_t cmd); // gyro device cali function
 
 //* 校准设备结构体 -> 该结构体的初始化 cali_param_init() 放在 main.c 中
-cali_sensor_t cali_sensor[CALI_LIST_LENGHT];
+cali_device_t cali_device[CALI_LIST_LENGHT];
 
 //! STEP 3 添加新校准设备所用的一系列变量 BEGIN
 /*
@@ -100,55 +163,51 @@ cali_sensor_t cali_sensor[CALI_LIST_LENGHT];
     >  在 cali_data_len_word[CALI_LIST_LENGHT] 添加数据长度 (word)
     >  在 cali_hook_fun[CALI_LIST_LENGHT]添加函数
     >  在 "FLASH_WRITE_BUF_LENGHT" 中添加校准数据长度 "sizeof(xxx_cali_t)"
+    >  注意顺序要一一对应，这里的顺序也是校准的优先级
 */
 
 //* 校准设备名称 | name[3]
-static const uint8_t cali_name[CALI_LIST_LENGHT][3] = {"HD", "GM", "GYR", "ACC", "MAG"};
+static const uint8_t cali_name[CALI_LIST_LENGHT][3] = {"TMP", "GYR", "ACC", "MAG"};
 
 //* 校准数据及其地址 | data
 // 设备的校准数据
-static head_cali_t head_cali;     // head cali data
-static gimbal_cali_t gimbal_cali; // gimbal cali data
-static imu_cali_t accel_cali;     // accel cali data
-static imu_cali_t gyro_cali;      // gyro cali data
-static imu_cali_t mag_cali;       // mag cali data
+static temp_cali_t temp_cali; // head cali data
+static imu_cali_t gyro_cali;  // gyro cali data
+static imu_cali_t accel_cali; // accel cali data
+static imu_cali_t mag_cali;   // mag cali data
 // cali data address
-static uint32_t *cali_data_address[CALI_LIST_LENGHT] = {
-    (uint32_t *)&head_cali, (uint32_t *)&gimbal_cali,
-    (uint32_t *)&gyro_cali, (uint32_t *)&accel_cali,
-    (uint32_t *)&mag_cali};
+static uint32_t *cali_data_address[CALI_LIST_LENGHT] = {(uint32_t *)&temp_cali,
+                                                        (uint32_t *)&gyro_cali,
+                                                        (uint32_t *)&accel_cali,
+                                                        (uint32_t *)&mag_cali};
 
 //* 校准数据长度 | data_len_word -> 单位：字
-static uint8_t cali_data_len_word[CALI_LIST_LENGHT] =
-    {
-        sizeof(head_cali_t) / 4, sizeof(gimbal_cali_t) / 4,
-        sizeof(imu_cali_t) / 4, sizeof(imu_cali_t) / 4, sizeof(imu_cali_t) / 4};
+static uint8_t cali_data_len_word[CALI_LIST_LENGHT] = {sizeof(temp_cali_t) / 4,
+                                                       sizeof(imu_cali_t) / 4,
+                                                       sizeof(imu_cali_t) / 4,
+                                                       sizeof(imu_cali_t) / 4};
 
 //* 校准钩子函数 | cali_hook
-void *cali_hook_fun[CALI_LIST_LENGHT] = {cali_head_hook, cali_gimbal_hook, cali_gyro_hook, NULL, NULL};
+void *cali_hook_fun[CALI_LIST_LENGHT] = {cali_temp_hook, cali_gyro_hook, NULL, NULL};
 
 //* 校准数据 flash 设置
 // 设备校准数据的总大小
-// include head,gimbal,gyro,accel,mag. gyro,accel and mag have the same data struct. total 5(CALI_LIST_LENGHT) devices, need data lenght + 5 * 4 bytes(name[3]+cali)
-#define FLASH_WRITE_BUF_LENGHT (sizeof(head_cali_t) + sizeof(gimbal_cali_t) + sizeof(imu_cali_t) * 3 + CALI_LIST_LENGHT * 4)
+// include temp,gyro,accel,mag. gyro,accel and mag have the same data struct. total 4(CALI_LIST_LENGHT) devices, need data lenght + 4 * 4 bytes(name[3]+cali)
+#define FLASH_WRITE_BUF_LENGHT (sizeof(temp_cali_t) + sizeof(imu_cali_t) * 3 + CALI_LIST_LENGHT * 4)
 // 设备校准数据 flash 写入缓存区
 static uint8_t flash_write_buf[FLASH_WRITE_BUF_LENGHT];
 //! STEP 3 添加新校准设备所用的一系列变量 END
 
-//* other
+//* RC
 // remote control point
-static const RC_ctrl_t *calibrate_RC;
-// 校准计时用 tick
-static uint32_t calibrate_systemTick;
+static const RC_ctrl_t *cali_RC;
 
 #if INCLUDE_uxTaskGetStackHighWaterMark
 uint32_t calibrate_task_stack;
 #endif
 
 /**
- * @brief          使用遥控器开始校准，例如陀螺仪，云台，底盘
- * @param[in]      none
- * @retval         none
+ * @brief          校准初始化函数
  *
  * @note           该函数应放在 main.c 中
  */
@@ -158,9 +217,9 @@ void cali_param_init(void)
 
     //* 初始化相关数据
     for (i = 0; i < CALI_LIST_LENGHT; i++) {
-        cali_sensor[i].data_len_word = cali_data_len_word[i];
-        cali_sensor[i].data          = cali_data_address[i];
-        cali_sensor[i].cali_hook     = (bool_t(*)(uint32_t *, bool_t))cali_hook_fun[i];
+        cali_device[i].data_len_word = cali_data_len_word[i];
+        cali_device[i].data          = cali_data_address[i];
+        cali_device[i].cali_hook     = (bool_t(*)(uint32_t *, bool_t))cali_hook_fun[i];
     }
 
     //* 从 flash 中读取以前的校准值
@@ -168,11 +227,12 @@ void cali_param_init(void)
 
     //* 如果已经被校准过，执行 init 钩子函数，以使用以前的校准值
     for (i = 0; i < CALI_LIST_LENGHT; i++) {
-        if (cali_sensor[i].cali_done == CALIED_FLAG) {
-            if (cali_sensor[i].cali_hook != NULL) {
+        if (cali_device[i].cali_done == CALIED_FLAG) {
+            if (cali_device[i].cali_hook != NULL) {
                 // if has been calibrated, set to init
-                // 如果已经被校准过，设置为 init
-                cali_sensor[i].cali_hook(cali_data_address[i], CALI_FUNC_CMD_INIT);
+                // 如果已经被校准过，设置通过 init 模式下的钩子函数设置校准值
+                // hook 函数返回 1 表示每次上电都需要校准
+                cali_device[i].cali_cmd = cali_device[i].cali_hook(cali_data_address[i], CALI_FUNC_CMD_INIT);
             }
         }
     }
@@ -187,32 +247,53 @@ void calibrate_task(void const *pvParameters)
 {
     static uint8_t i = 0;
 
-    calibrate_RC = get_remote_ctrl_point_cali();
+    cali_RC = get_remote_control_point();
+
+    // 要在 detect 任务初始化完成后再检测遥控器
+    vTaskDelay(CALIBRATE_CONTROL_INIT_TIME);
+
+    //* 遥控器刚连接时如果拨杆全部打到下且摇杆都打到下，则对所有设备进行校准
+    while (toe_is_error(DBUS_TOE)) {
+        // 遥控器未连接时也可以使用按键
+        if (key_cmd_to_calibrate(KEY_SET_CALI_DONT_CHECK) == 1)
+            break;
+        vTaskDelay(CALIBRATE_CONTROL_TIME);
+    }
+    if (is_all_switch_down && is_all_rocker_down)
+        calibrate_all();
 
     while (1) {
-
         //* 从遥控器获取 (并执行) 校准指令
-        //  对于云台和陀螺仪，需要校准时该函数将置位 cali_cmd，其他校准在该函数内部进行
         RC_cmd_to_calibrate();
+        //* 从按键获取校准指令
+        key_cmd_to_calibrate(KEY_SET_CALI_CHECK);
 
         //* 检查 cali_cmd，若为 1 则需要执行校准
         for (i = 0; i < CALI_LIST_LENGHT; i++) {
-            if (cali_sensor[i].cali_cmd) {
-                if (cali_sensor[i].cali_hook != NULL) {
-
-                    if (cali_sensor[i].cali_hook(cali_data_address[i], CALI_FUNC_CMD_ON)) {
+            if (cali_device[i].cali_cmd) {
+                if (cali_device[i].cali_hook != NULL) {
+                    if (cali_device[i].cali_hook(cali_data_address[i], CALI_FUNC_CMD_ON)) {
                         // done
-                        cali_sensor[i].name[0] = cali_name[i][0];
-                        cali_sensor[i].name[1] = cali_name[i][1];
-                        cali_sensor[i].name[2] = cali_name[i][2];
+                        cali_device[i].name[0] = cali_name[i][0];
+                        cali_device[i].name[1] = cali_name[i][1];
+                        cali_device[i].name[2] = cali_name[i][2];
                         // set 0x55
-                        cali_sensor[i].cali_done = CALIED_FLAG;
+                        cali_device[i].cali_done = CALIED_FLAG;
 
-                        cali_sensor[i].cali_cmd = 0;
+                        cali_device[i].cali_cmd = 0;
                         // write
                         cali_data_write();
                     }
+                } else {
+                    // cali_hook 为 NULL 说明校准还没有实现，直接校准完成
+                    cali_device[i].name[0]   = cali_name[i][0];
+                    cali_device[i].name[1]   = cali_name[i][1];
+                    cali_device[i].name[2]   = cali_name[i][2];
+                    cali_device[i].cali_done = CALIED_FLAG;
+                    cali_device[i].cali_cmd  = 0;
+                    cali_data_write();
                 }
+                break; // 同一时刻只能进行一个设备的校准
             }
         }
         osDelay(CALIBRATE_CONTROL_TIME);
@@ -230,120 +311,148 @@ void calibrate_task(void const *pvParameters)
  */
 static void RC_cmd_to_calibrate(void)
 {
-    static uint8_t rc_action_flag     = 0; // 摇杆行为标志位
-    static const uint8_t BEGIN_FLAG   = 1;
-    static const uint8_t GIMBAL_FLAG  = 2;
-    static const uint8_t GYRO_FLAG    = 3;
-    static const uint8_t CHASSIS_FLAG = 4;
 
-    static uint8_t i;
-    static uint32_t rc_cmd_systemTick = 0;
-    static uint16_t buzzer_time       = 0;
-    static uint16_t rc_cmd_time       = 0;
+    static int8_t rc_flag = RC_FLAG_NO_CMD; // 摇杆行为标志位
+
+    static int32_t rc_cmd_time = 0;
 
     //* 如果已经在校准，就返回
-    for (i = 0; i < CALI_LIST_LENGHT; i++) {
-        if (cali_sensor[i].cali_cmd) {
-            buzzer_time    = 0;
-            rc_cmd_time    = 0;
-            rc_action_flag = 0;
+    for (uint8_t i = 0; i < CALI_LIST_LENGHT; i++) {
+        if (cali_device[i].cali_cmd) {
+            rc_flag = RC_FLAG_NO_CMD;
 
             return;
         }
     }
 
-    //* 检查遥控器行为的标志位，判断应该进行什么校准
-    if (rc_action_flag == 0 && rc_cmd_time > RC_CMD_DURATION) {
-        rc_cmd_systemTick = xTaskGetTickCount();
-        rc_action_flag    = BEGIN_FLAG;
-        rc_cmd_time       = 0;
-    } else if (rc_action_flag == GIMBAL_FLAG && rc_cmd_time > RC_CMD_DURATION) {
-        // gimbal cali
-        rc_action_flag                    = 0;
-        rc_cmd_time                       = 0;
-        cali_sensor[CALI_GIMBAL].cali_cmd = 1;
-        cali_buzzer_off();
-    } else if (rc_action_flag == GYRO_FLAG && rc_cmd_time > RC_CMD_DURATION) {
-        // gyro cali
-        rc_action_flag                  = 0;
-        rc_cmd_time                     = 0;
-        cali_sensor[CALI_GYRO].cali_cmd = 1;
-        // ? 校准陀螺仪时顺便校准温度？
-        // update control temperature
-        head_cali.temperature = (int8_t)(cali_get_mcu_temperature()) + 10;
-        if (head_cali.temperature > (int8_t)(GYRO_CONST_MAX_TEMP)) {
-            head_cali.temperature = (int8_t)(GYRO_CONST_MAX_TEMP);
-        }
-        cali_buzzer_off();
-    } else if (rc_action_flag == CHASSIS_FLAG && rc_cmd_time > RC_CMD_DURATION) {
-        // TODO 底盘重设 ID 也一块放在这了
-        rc_action_flag = 0;
-        rc_cmd_time    = 0;
-        // send CAN reset ID cmd to M3508
-        // 发送CAN重设ID命令到3508
-        CAN_cmd_chassis_reset_ID();
-        CAN_cmd_chassis_reset_ID();
-        CAN_cmd_chassis_reset_ID();
-        cali_buzzer_off();
-    }
-
-    //* 判断摇杆的行为，设置摇杆行为标志位 rc_action_flag
-    if (calibrate_RC->rc.ch[0] < -RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[1] < -RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[2] > RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[3] < -RC_CALI_VALUE_HOLE && switch_is_down(calibrate_RC->rc.s[0]) && switch_is_down(calibrate_RC->rc.s[1]) && rc_action_flag == 0) {
-        // two rockers set to  \../, hold for 2 seconds,
-        // 两个摇杆打成 \../,保持2s
-        rc_cmd_time++;
-    } else if (calibrate_RC->rc.ch[0] > RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[1] > RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[2] < -RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[3] > RC_CALI_VALUE_HOLE && switch_is_down(calibrate_RC->rc.s[0]) && switch_is_down(calibrate_RC->rc.s[1]) && rc_action_flag != 0) {
-        // two rockers set '\/', hold for 2 seconds
-        // 两个摇杆打成'\/',保持2s
-        rc_cmd_time++;
-        rc_action_flag = GIMBAL_FLAG;
-    } else if (calibrate_RC->rc.ch[0] > RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[1] < -RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[2] < -RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[3] < -RC_CALI_VALUE_HOLE && switch_is_down(calibrate_RC->rc.s[0]) && switch_is_down(calibrate_RC->rc.s[1]) && rc_action_flag != 0) {
-        // two rocker set to ./\., hold for 2 seconds
-        // 两个摇杆打成./\.,保持2s
-        rc_cmd_time++;
-        rc_action_flag = GYRO_FLAG;
-    } else if (calibrate_RC->rc.ch[0] < -RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[1] > RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[2] > RC_CALI_VALUE_HOLE && calibrate_RC->rc.ch[3] > RC_CALI_VALUE_HOLE && switch_is_down(calibrate_RC->rc.s[0]) && switch_is_down(calibrate_RC->rc.s[1]) && rc_action_flag != 0) {
-        // two rocker set to /''\, hold for 2 seconds
-        // 两个摇杆打成/''\,保持2s
-        rc_cmd_time++;
-        rc_action_flag = CHASSIS_FLAG;
-    } else {
+    //* 判断摇杆的行为进行计时自增
+    if (!is_all_switch_down) {
+        // 拨杆没有都拨到下，直接重置标志位并返回
         rc_cmd_time = 0;
-    }
+        rc_flag     = RC_FLAG_NO_CMD;
 
-    calibrate_systemTick = xTaskGetTickCount();
-
-    //*
-    if (calibrate_systemTick - rc_cmd_systemTick > CALIBRATE_END_TIME) {
-        // over 20 seconds, end
-        // 超过20s,停止
-        //? 蜂鸣器呢？
-        rc_action_flag = 0;
         return;
-    } else if (calibrate_systemTick - rc_cmd_systemTick > RC_CALI_BUZZER_MIDDLE_TIME && rc_action_flag != 0) {
-        //? rc_action_flag != 0 必然有 rc_cmd_systemTick != 0 吧
-        rc_cali_buzzer_middle_on();
-    } else if (calibrate_systemTick - rc_cmd_systemTick > 0 && rc_action_flag != 0) {
-        rc_cali_buzzer_start_on();
+    } else {
+        if (rc_flag == RC_FLAG_NO_CMD && is_rocker_dialed_inward) {
+            if (rc_cmd_time < 0)
+                rc_cmd_time = 0;
+            else
+                rc_cmd_time++;
+        } else if (rc_flag > RC_FLAG_NO_CMD && is_rocker_dialed_outward) {
+            if (rc_cmd_time < 0)
+                rc_cmd_time = 0;
+            else
+                rc_cmd_time++;
+        } else if (rc_flag > RC_FLAG_NO_CMD && rc_cmd_time >= RC_CMD_VERIFY_TIME && !is_rocker_dialed_inward) {
+            rc_cmd_time = 0;
+            rc_flag++;
+        } else {
+            rc_cmd_time--;
+        }
     }
 
-    if (rc_action_flag != 0) {
-        buzzer_time++;
+#ifdef BUZZER_ON
+    // 一次选择达到时长后，打开蜂鸣器
+    if (rc_flag > RC_FLAG_NO_CMD) {
+        if (rc_cmd_time >= RC_CMD_VERIFY_TIME)
+            cali_RC_choose_verified_start_buzzer();
+        else
+            cali_buzzer_off();
     }
+#endif
 
-    if (buzzer_time > RC_CALI_BUZZER_CYCLE_TIME && rc_action_flag != 0) {
-        buzzer_time = 0;
-    }
-    if (buzzer_time > RC_CALI_BUZZER_PAUSE_TIME && rc_action_flag != 0) {
-        cali_buzzer_off();
+    if (rc_flag == RC_FLAG_NO_CMD && rc_cmd_time >= RC_CMD_START_TIME) {
+        rc_flag     = RC_FLAG_BEGIN;
+        rc_cmd_time = 0;
+#ifdef BUZZER_ON
+        // 进入校准项目选择，响三下蜂鸣器
+        cali_RC_choose_begin_buzzer;
+#endif
+    } else if (rc_flag > RC_FLAG_NO_CMD && rc_cmd_time <= -RC_CMD_STOP_TIME) {
+        //* 检查遥控器行为的标志位，判断应该进行什么校准
+        switch (rc_flag) {
+            case RC_FLAG_GYRO:
+                cali_device[CALI_GYRO].cali_cmd = 1;
+                break;
+            default:
+                break;
+        }
+#ifdef CALI_USART_PRINT
+        switch (rc_flag) {
+            case RC_FLAG_GYRO:
+                usart1_printf("=============!!! RC -> gyro calibrate !!!==============\r\n\r\n");
+                break;
+            default:
+                break;
+        }
+#endif
+
+#ifdef BUZZER_ON
+        // 选到了第几个项目，就对应响几次
+        for (uint8_t i = 0; i < rc_flag; i++) {
+            cali_RC_choose_OK_buzzer_loop;
+        }
+#endif
+
+        rc_flag     = RC_FLAG_NO_CMD;
+        rc_cmd_time = 0;
     }
 }
 
 /**
- * @brief          get imu control temperature, unit ℃
- * @param[in]      none
- * @retval         imu control temperature
+ * @brief 按键持续按下一秒则全部校准
+ *
+ * @param cmd KEY_SET_CALI_CHECK 检查是否有在校准的；KEY_SET_CALI_DONT_CHECK 不检查
+ * @return uint8_t
  */
+static uint8_t key_cmd_to_calibrate(uint8_t cmd)
+{
+    static uint32_t key_press_time = 0;
+
+    if (cmd == KEY_SET_CALI_CHECK) {
+        //* 如果已经在校准，就返回 (但如果在等待遥控器连接时，不进行检查)
+        for (uint8_t i = 0; i < CALI_LIST_LENGHT; i++) {
+            if (cali_device[i].cali_cmd) {
+                key_press_time = 0;
+                return 0;
+            }
+        }
+    }
+
+    if (HAL_GPIO_ReadPin(KEY_GPIO_Port, KEY_Pin) == GPIO_PIN_RESET)
+        key_press_time++;
+    else
+        key_press_time = 0;
+
+    if (key_press_time >= KEY_LONG_TIME) {
+        calibrate_all();
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * @brief 将所有校准设备的 cmd 设为 1
+ *
+ */
+static void calibrate_all(void)
+{
+    //* 使能所有的校准任务
+    for (uint8_t i = 0; i < CALI_LIST_LENGHT; i++)
+        cali_device[i].cali_cmd = 1;
+
+#ifdef CALI_USART_PRINT
+    //* 串口打印校准所有的信息
+    usart1_printf("=================!!! calibrate all !!!=================\r\n\r\n");
+#endif
+
+#ifdef CALI_BUZZER_ON
+    //* 蜂鸣器响 3 声
+    cali_all_buzzer;
+#endif
+}
+
 /**
  * @brief          获取imu控制温度, 单位℃
  * @param[in]      none
@@ -351,39 +460,9 @@ static void RC_cmd_to_calibrate(void)
  */
 int8_t get_control_temperature(void)
 {
-
-    return head_cali.temperature;
+    return temp_cali.temperature;
 }
 
-/**
- * @brief          get latitude, default 22.0f
- * @param[out]     latitude: the point to fp32
- * @retval         none
- */
-/**
- * @brief          获取纬度,默认22.0f
- * @param[out]     latitude:fp32指针
- * @retval         none
- */
-void get_flash_latitude(float *latitude)
-{
-
-    if (latitude == NULL) {
-
-        return;
-    }
-    if (cali_sensor[CALI_HEAD].cali_done == CALIED_FLAG) {
-        *latitude = head_cali.latitude;
-    } else {
-        *latitude = 22.0f;
-    }
-}
-
-/**
- * @brief          read cali data from flash
- * @param[in]      none
- * @retval         none
- */
 /**
  * @brief          从flash读取校准数据
  * @param[in]      none
@@ -397,31 +476,26 @@ static void cali_data_read(void)
     for (i = 0; i < CALI_LIST_LENGHT; i++) {
 
         // read the data in flash,
-        cali_flash_read(FLASH_USER_ADDR + offset, cali_sensor[i].data, cali_sensor[i].data_len_word);
+        cali_flash_read(FLASH_USER_ADDR + offset, cali_device[i].data, cali_device[i].data_len_word);
 
-        offset += cali_sensor[i].data_len_word * 4;
+        offset += cali_device[i].data_len_word * 4;
 
         // read the name and cali flag,
         cali_flash_read(FLASH_USER_ADDR + offset, (uint32_t *)flash_read_buf, CALI_EX_DATA_LEN_WORD);
 
-        cali_sensor[i].name[0]   = flash_read_buf[0];
-        cali_sensor[i].name[1]   = flash_read_buf[1];
-        cali_sensor[i].name[2]   = flash_read_buf[2];
-        cali_sensor[i].cali_done = flash_read_buf[3];
+        cali_device[i].name[0]   = flash_read_buf[0];
+        cali_device[i].name[1]   = flash_read_buf[1];
+        cali_device[i].name[2]   = flash_read_buf[2];
+        cali_device[i].cali_done = flash_read_buf[3];
 
         offset += CALI_EX_DATA_LEN_WORD * 4;
 
-        if (cali_sensor[i].cali_done != CALIED_FLAG && cali_sensor[i].cali_hook != NULL) {
-            cali_sensor[i].cali_cmd = 1;
+        if (cali_device[i].cali_done != CALIED_FLAG && cali_device[i].cali_hook != NULL) {
+            cali_device[i].cali_cmd = 1; // 没有读到数据要在任务中进行校准
         }
     }
 }
 
-/**
- * @brief          write the data to flash
- * @param[in]      none
- * @retval         none
- */
 /**
  * @brief          往flash写入校准数据
  * @param[in]      none
@@ -434,11 +508,11 @@ static void cali_data_write(void)
 
     for (i = 0; i < CALI_LIST_LENGHT; i++) {
         // copy the data of device calibration data
-        memcpy((void *)(flash_write_buf + offset), (void *)cali_sensor[i].data, cali_sensor[i].data_len_word * 4);
-        offset += cali_sensor[i].data_len_word * 4;
+        memcpy((void *)(flash_write_buf + offset), (void *)cali_device[i].data, cali_device[i].data_len_word * 4);
+        offset += cali_device[i].data_len_word * 4;
 
         // copy the name and "CALI_FLAG" of device
-        memcpy((void *)(flash_write_buf + offset), (void *)cali_sensor[i].name, CALI_EX_DATA_LEN_WORD * 4);
+        memcpy((void *)(flash_write_buf + offset), (void *)cali_device[i].name, CALI_EX_DATA_LEN_WORD * 4);
         offset += CALI_EX_DATA_LEN_WORD * 4;
     }
 
@@ -457,68 +531,34 @@ static void cali_data_write(void)
   * @retval         0:校准任务还没有完
                     1:校准任务已经完成
   * @note           id -> 直接设定；
-  * @note           陀螺仪的设定温度 temperature -> ADC 温度传感器温度加 6℃；
+  * @note           陀螺仪的设定温度 temperature -> ADC 温度传感器温度加 10℃；
   * @note           纬度 latitude -> 直接设定
   */
-static bool_t cali_head_hook(uint32_t *cali, bool_t cmd)
+static bool_t cali_temp_hook(uint32_t *cali, bool_t cmd)
 {
-    head_cali_t *local_cali_t = (head_cali_t *)cali;
+    temp_cali_t *local_cali = (temp_cali_t *)cali;
     if (cmd == CALI_FUNC_CMD_INIT) {
-        //        memcpy(&head_cali, local_cali_t, sizeof(head_cali_t));
-
-        return 1;
+        return 1; // 每次上电都要重新校准
     }
-    // self id
-    local_cali_t->self_id = SELF_ID;
+
+#ifdef CALI_USART_PRINT
+    //* 串口打印校准所有的信息
+    usart1_printf("-----------!! temperature calibrate start !!-----------\r\n");
+#endif
+
     // imu control temperature
-    local_cali_t->temperature = (int8_t)(cali_get_mcu_temperature()) + 8;
-    // head_cali.temperature = (int8_t)(cali_get_mcu_temperature()) + 10;
-    if (local_cali_t->temperature > (int8_t)(GYRO_CONST_MAX_TEMP)) {
-        local_cali_t->temperature = (int8_t)(GYRO_CONST_MAX_TEMP);
+    local_cali->temperature = (int8_t)(bsp_adc_get_temperature()) + 10;
+    if (local_cali->temperature > (int8_t)(GYRO_CONST_MAX_TEMP)) {
+        local_cali->temperature = (int8_t)(GYRO_CONST_MAX_TEMP);
     }
 
-    local_cali_t->firmware_version = FIRMWARE_VERSION;
-    // shenzhen latitude
-    local_cali_t->latitude = 22.0f;
+#ifdef CALI_USART_PRINT
+    //* 串口打印校准所有的信息
+    usart1_printf("imu temperature control value set : %d\r\n", get_control_temperature());
+    usart1_printf("---------!! temperature calibrate complete !!----------\r\n\r\n");
+#endif
 
     return 1;
-}
-
-/**
-  * @brief          云台设备校准
-  * @param[in][out] cali:指针指向云台数据,当cmd为CALI_FUNC_CMD_INIT, 参数是输入,CALI_FUNC_CMD_ON,参数是输出
-  * @param[in]      cmd:
-                    CALI_FUNC_CMD_INIT: 代表用校准数据初始化原始数据
-                    CALI_FUNC_CMD_ON: 代表需要校准
-  * @retval         0:校准任务还没有完
-                    1:校准任务已经完成
-  * @note           调用云台校准的钩子函数，未完成将开启蜂鸣器，完成将关闭蜂鸣器
-  */
-static bool_t cali_gimbal_hook(uint32_t *cali, bool_t cmd)
-{
-
-    gimbal_cali_t *local_cali_t = (gimbal_cali_t *)cali;
-    if (cmd == CALI_FUNC_CMD_INIT) {
-        set_cali_gimbal_hook(local_cali_t->yaw_offset, local_cali_t->pitch_offset,
-                             local_cali_t->yaw_max_angle, local_cali_t->yaw_min_angle,
-                             local_cali_t->pitch_max_angle, local_cali_t->pitch_min_angle);
-
-        return 0;
-    } else if (cmd == CALI_FUNC_CMD_ON) {
-        if (cmd_cali_gimbal_hook(&local_cali_t->yaw_offset, &local_cali_t->pitch_offset,
-                                 &local_cali_t->yaw_max_angle, &local_cali_t->yaw_min_angle,
-                                 &local_cali_t->pitch_max_angle, &local_cali_t->pitch_min_angle)) {
-            cali_buzzer_off();
-
-            return 1;
-        } else {
-            gimbal_start_buzzer();
-
-            return 0;
-        }
-    }
-
-    return 0;
 }
 
 /**
@@ -529,34 +569,62 @@ static bool_t cali_gimbal_hook(uint32_t *cali, bool_t cmd)
                     CALI_FUNC_CMD_ON: 代表需要校准
   * @retval         0:校准任务还没有完
                     1:校准任务已经完成
-  * @note           调用 INS_cali_gyro 计算陀螺仪零漂
+  * @note           调用 INS_cali_gyro_hook 计算陀螺仪零漂
   */
 static bool_t cali_gyro_hook(uint32_t *cali, bool_t cmd)
 {
-    imu_cali_t *local_cali_t = (imu_cali_t *)cali;
+    imu_cali_t *local_cali     = (imu_cali_t *)cali;
+    static uint16_t count_time = 0;
+
+    //* 写入 flash 中的数据
     if (cmd == CALI_FUNC_CMD_INIT) {
-        INS_set_cali_gyro(local_cali_t->scale, local_cali_t->offset);
-
+        INS_set_cali_gyro_hook(local_cali->scale, local_cali->offset);
         return 0;
-    } else if (cmd == CALI_FUNC_CMD_ON) {
-        static uint16_t count_time = 0;
-        INS_cali_gyro(local_cali_t->scale, local_cali_t->offset, &count_time);
-        if (count_time > GYRO_CALIBRATE_TIME) {
-            count_time = 0;
-            cali_buzzer_off();
-            gyro_cali_enable_control();
-            return 1;
-        } else {
-            gyro_cali_disable_control(); // disable the remote control to make robot no move
-            imu_start_buzzer();
+    }
 
-            return 0;
-        }
+    //* 陀螺仪零漂迭代计算钩子函数
+    INS_cali_gyro_hook(local_cali->scale, local_cali->offset, &count_time);
+
+#ifdef CALI_USART_PRINT
+    if (count_time == 0)
+        usart1_printf("--------------!! gyro calibrate start !!---------------\r\n");
+#endif
+
+#ifdef CALI_USART_GYRO_DATA_PRINT
+    usart1_printf("%f, %f, %f\r\n", local_cali->offset[0], local_cali->offset[1], local_cali->offset[2]);
+#endif
+
+    //* 20s 后结束校准
+    if (count_time > GYRO_CALIBRATE_TIME) {
+        count_time = 0;
+        cali_enable_RC_control();
+#ifdef CALI_GYRO_BUZZER_ON
+        cali_buzzer_off();
+#endif
+#ifdef CALI_USART_PRINT
+        usart1_printf("------------!! gyro calibrate compelete !!-------------\r\n\r\n");
+#endif
+        return 1;
+    } else {
+        cali_disable_RC_control(); // disable the remote control to make robot no move
+#ifdef CALI_GYRO_BUZZER_ON
+        cali_imu_start_buzzer();
+#endif
+        return 0;
     }
 
     return 0;
 }
 
 //! STEP 4 实现新的校准钩子函数 bool_t cali_xxx_hook(uint32_t *cali, bool_t cmd) BEGIN
+/*
+    >这里 hook 函数的作用是 1.启动校准 2.将得到的校准值拿到设备那边用
+    >                   cmd 参数有两个：
+    >                       CALI_FUNC_CMD_INIT，已经校准过，直接使用校准值
+    >                       CALI_FUNC_CMD_ON，开始校准
+    >                   该函数在参数为 CALI_FUNC_CMD_INIT 的情况下返回 1 表示每次上电都需要校准，否则为不需要
+    >                   该函数在参数为 CALI_FUNC_CMD_ON 的情况下返回 1 表示校准完成，否则为未完成
+    >                   这些函数对应设置的校准值必须是在任务启动前就已经存在的静态变量
+*/
 
 //! STEP 4 实现新的校准钩子函数 bool_t cali_xxx_hook(uint32_t *cali, bool_t cmd) END
