@@ -34,6 +34,7 @@
 
 //! time
 #define GIMBAL_TASK_INIT_TIME 201
+#define GIMBAL_TASK_WAIT_IMU_TIME 501
 #define GIMBAL_CONTROL_TIME 1
 
 //! PID
@@ -148,7 +149,8 @@
 typedef enum {
     GIMBAL_MOTOR_RAW = 0, // 电机原始值控制
     GIMBAL_MOTOR_GYRO,    // 电机陀螺仪角度控制
-    GIMBAL_MOTOR_ENCONDE, // 电机编码值角度控制
+    GIMBAL_MOTOR_GYRO_LIMIT, // 带限位的电机陀螺仪角度控制
+    GIMBAL_MOTOR_ENCONDE_LIMIT, // 带限位的电机编码值角度控制
 
     GIMBAL_MOTOR_MODE_LEN,
 } gimbal_motor_mode_e;

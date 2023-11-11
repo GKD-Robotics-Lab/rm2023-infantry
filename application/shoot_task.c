@@ -155,6 +155,12 @@ static void shoot_set_mode(void)
         shoot_control.fric_ramp.input = FRIC_RAMP_SUB;
     }
 
+    //* 如果云台状态是 无力状态，就关闭射击
+    if(gimbal_cmd_to_shoot_stop()) {
+        shoot_control.shoot_mode = SHOOT_STOP;
+        shoot_control.fric_ramp.input = FRIC_RAMP_SUB;
+    }
+
     //* 处于中档，可以使用键盘开启和关闭摩擦轮
     if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_ON_KEYBOARD) && shoot_control.shoot_mode == SHOOT_STOP) {
         shoot_control.shoot_mode = SHOOT_START;
@@ -196,12 +202,6 @@ static void shoot_set_mode(void)
         }
     }
 
-    //* 如果云台状态是 无力状态，就关闭射击
-    // TODO
-    // if (gimbal_cmd_to_shoot_stop()) {
-    //     shoot_control.shoot_mode = SHOOT_STOP;
-    // }
-
     //! 控制计时
     //* 左键长按计时
     if (RC_mouse_l) {
@@ -232,7 +232,7 @@ static void shoot_set_mode(void)
 static void shoot_feedback_update(void)
 {
     // 拨弹轮电机速度滤波一下 // 二阶低通滤波
-    // TODO 看一下这个滤波，感觉没必要
+    // TODO 看一下这个滤波
     static fp32 trigger_speed[3]                  = {0.0f};
     static const fp32 trigger_speed_fliter_num[3] = {1.725709860247969f, -0.75594777109163436f, 0.030237910843665373f};
 

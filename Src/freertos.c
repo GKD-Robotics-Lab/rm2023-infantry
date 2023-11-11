@@ -150,10 +150,10 @@ void MX_FREERTOS_Init(void) {
     if (calibrate_tast_handle == NULL)
         Error_Handler();
 
-    osThreadDef(ChassisTask, chassis_task, osPriorityAboveNormal, 0, 512);
-    chassisTaskHandle = osThreadCreate(osThread(ChassisTask), NULL);
-    if (chassisTaskHandle == NULL)
-        Error_Handler();
+    // osThreadDef(ChassisTask, chassis_task, osPriorityAboveNormal, 0, 512);
+    // chassisTaskHandle = osThreadCreate(osThread(ChassisTask), NULL);
+    // if (chassisTaskHandle == NULL)
+    //     Error_Handler();
 
     osThreadDef(DETECT, detect_task, osPriorityNormal, 0, 256);
     detect_handle = osThreadCreate(osThread(DETECT), NULL);
@@ -165,10 +165,10 @@ void MX_FREERTOS_Init(void) {
     if (gimbalTaskHandle == NULL)
         Error_Handler();
 
-    osThreadDef(shootTask, shoot_task, osPriorityNormal, 0, 512);
-    shootTaskHandle = osThreadCreate(osThread(shootTask), NULL);
-    if (shootTaskHandle == NULL)
-        Error_Handler();
+    // osThreadDef(shootTask, shoot_task, osPriorityNormal, 0, 512);
+    // shootTaskHandle = osThreadCreate(osThread(shootTask), NULL);
+    // if (shootTaskHandle == NULL)
+    //     Error_Handler();
 
     osThreadDef(imuTask, INS_task, osPriorityRealtime, 0, 1024);
     imuTaskHandle = osThreadCreate(osThread(imuTask), NULL);

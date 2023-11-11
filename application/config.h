@@ -51,7 +51,7 @@ todo test
 // #define GIMBAL_DEBUG_OPEN // 电机开环测试
 // #define GIMBAL_DEBUG_SPEED // 电机速度环调试
 // #define GIMBAL_DEBUG_ABSOLUTE_ANGEL // 电机角度环调试 (使用陀螺仪)
-// #define GIMBAL_DEBUG_RELATIVE_ANGEL // 电机角度环调试 (使用编码器)
+// #define GIMBAL_DEBUG_RELATIVE_ANGEL // 电机角度环调试 (使用编码器) (未实现)
 #if defined GIMBAL_DEBUG_OPEN || defined GIMBAL_DEBUG_SPEED || defined GIMBAL_DEBUG_ABSOLUTE_ANGEL || defined GIMBAL_DEBUG_RELATIVE_ANGEL
     #define GIMBAL_DEBUG
 #endif
@@ -59,11 +59,11 @@ todo test
 #ifdef GIMBAL_DEBUG
     //* STEP 2 选择要调试的电机 *//
     // #define GIMBAL_DEBUG_NO_FORCE
-    // #define GIMBAL_DEBUG_ONLY_PITCH
-    #define GIMBAL_DEBUG_ONLY_YAW
+    #define GIMBAL_DEBUG_ONLY_PITCH
+    // #define GIMBAL_DEBUG_ONLY_YAW
     //* STEP 3 选择调试的输入来源 *//
-    // #define GIMBAL_DEBUG_INPUT_RC // 控制值来源于遥控器
-    #define GIMBAL_DEBUG_INPUT_CODE // 控制值在代码中设置
+    #define GIMBAL_DEBUG_INPUT_RC // 控制值来源于遥控器
+    // #define GIMBAL_DEBUG_INPUT_CODE // 控制值在代码中设置
 #endif
 //! 云台调试宏 END !//
 

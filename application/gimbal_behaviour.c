@@ -63,8 +63,6 @@
         }                                                  \
     }
 
-// TODO 所有 pitch 轴给了负值
-
 static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set);
 
 static void gimbal_zero_force_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gimbal_control_set);
@@ -105,20 +103,20 @@ void gimbal_behaviour_mode_set(gimbal_control_t *gimbal_mode_set)
             gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_RAW;
             break;
         case GIMBAL_INIT:
-            gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_ENCONDE;
-            gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_ENCONDE;
+            gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_ENCONDE_LIMIT;
+            gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_ENCONDE_LIMIT;
             break;
         case GIMBAL_ABSOLUTE_ANGLE:
             gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_GYRO;
-            gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_GYRO;
+            gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_GYRO_LIMIT;
             break;
         case GIMBAL_RELATIVE_ANGLE:
-            gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_ENCONDE;
-            gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_ENCONDE;
+            gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_ENCONDE_LIMIT;
+            gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_ENCONDE_LIMIT;
             break;
         case GIMBAL_MOTIONLESS:
-            gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_ENCONDE;
-            gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_ENCONDE;
+            gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_ENCONDE_LIMIT;
+            gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_ENCONDE_LIMIT;
             break;
         //! STEP 3 为云台行为模式选择对应的电机控制模式 BEGIN !//
         /*
@@ -146,29 +144,21 @@ void gimbal_behaviour_mode_set(gimbal_control_t *gimbal_mode_set)
  */
 static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
 {
+
+    static gimbal_behaviour_e last_gimbal_behaviour = GIMBAL_ZERO_FORCE;
+
     if (gimbal_mode_set == NULL) {
         return;
     }
 
+#ifndef GIMBAL_DEBUG_INPUT_CODE
     //* 遥控器未连接时为无力模式
     // 陀螺仪校准时会关闭遥控器接收，这将导致进入 GIMBAL_ZERO_FORCE，所以不需要判断陀螺仪是否在校准
     if (toe_is_error(DBUS_TOE)) {
-        gimbal_behaviour = GIMBAL_ZERO_FORCE;
+        gimbal_behaviour      = GIMBAL_ZERO_FORCE;
+        last_gimbal_behaviour = gimbal_behaviour;
+        return;
     }
-
-#ifdef GIMBAL_DEBUG_OPEN
-    gimbal_behaviour = GIMBAL_OPEN;
-    return;
-#endif
-
-#if defined GIMBAL_DEBUG_SPEED || defined GIMBAL_DEBUG_ABSOLUTE_ANGEL
-    gimbal_behaviour = GIMBAL_ABSOLUTE_ANGLE;
-    return;
-#endif
-
-#ifdef GIMBAL_DEBUG_RELATIVE_ANGEL
-    gimbal_behaviour = GIMBAL_RELATIVE_ANGLE;
-    return;
 #endif
 
     //* init 模式下进行是否完成 init 任务的判断
@@ -179,18 +169,10 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
         static uint16_t init_stop_time = 0;
         init_time++;
 
-        if ((fabs(gimbal_mode_set->yaw_motor.relative_angle - INIT_YAW_SET) < GIMBAL_INIT_ANGLE_ERROR &&
-             fabs(gimbal_mode_set->pitch_motor.absolute_angle - INIT_PITCH_SET) < GIMBAL_INIT_ANGLE_ERROR)) {
-
-            if (init_stop_time < GIMBAL_INIT_STOP_TIME) {
-                init_stop_time++;
-            }
-        } else {
-
-            if (init_time < GIMBAL_INIT_TIME) {
-                init_time++;
-            }
-        }
+        if (fabs(gimbal_mode_set->yaw_motor.relative_angle - INIT_YAW_SET) < GIMBAL_INIT_ANGLE_ERROR &&
+            fabs(gimbal_mode_set->pitch_motor.absolute_angle - INIT_PITCH_SET) < GIMBAL_INIT_ANGLE_ERROR)
+            init_stop_time++;
+        if (init_time < GIMBAL_INIT_TIME) init_time++;
 
         // 超过初始化最大时间，或者已经稳定到中值一段时间，退出初始化状态开关打下档，或者掉线
         if (init_time < GIMBAL_INIT_TIME && init_stop_time < GIMBAL_INIT_STOP_TIME &&
@@ -207,7 +189,7 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
     if (switch_is_down(RC_gimbal_switch)) {
         gimbal_behaviour = GIMBAL_ZERO_FORCE;
     } else if (switch_is_mid(RC_gimbal_switch)) {
-        gimbal_behaviour = GIMBAL_RELATIVE_ANGLE;
+        gimbal_behaviour = GIMBAL_ABSOLUTE_ANGLE;
     } else if (switch_is_up(RC_gimbal_switch)) {
         gimbal_behaviour = GIMBAL_ABSOLUTE_ANGLE;
     }
@@ -215,13 +197,25 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
     //* 在某些模式切换的情况下先进入 init 模式
     // enter init mode
     // 判断进入init状态机
-    {
-        static gimbal_behaviour_e last_gimbal_behaviour = GIMBAL_ZERO_FORCE;
-        if (last_gimbal_behaviour == GIMBAL_ZERO_FORCE && gimbal_behaviour != GIMBAL_ZERO_FORCE) {
-            gimbal_behaviour = GIMBAL_INIT;
-        }
-        last_gimbal_behaviour = gimbal_behaviour;
+    if (last_gimbal_behaviour == GIMBAL_ZERO_FORCE && gimbal_behaviour != GIMBAL_ZERO_FORCE) {
+        gimbal_behaviour = GIMBAL_INIT;
     }
+
+    //* debug 时强制设置对应的模式
+#ifdef GIMBAL_DEBUG_OPEN
+    gimbal_behaviour      = GIMBAL_OPEN;
+#endif
+
+#if defined GIMBAL_DEBUG_SPEED || defined GIMBAL_DEBUG_ABSOLUTE_ANGEL
+    gimbal_behaviour      = GIMBAL_ABSOLUTE_ANGLE;
+#endif
+
+#ifdef GIMBAL_DEBUG_RELATIVE_ANGEL
+    gimbal_behaviour      = GIMBAL_RELATIVE_ANGLE;
+#endif
+
+    //* 记录上次的模式
+    last_gimbal_behaviour = gimbal_behaviour;
 }
 
 /**

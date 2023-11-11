@@ -43,6 +43,7 @@
 #include "arm_math.h"
 
 #include "gimbal_behaviour.h"
+#include "detect_task.h"
 
 #define RC_chassis_switch (behaviour_set->chassis_RC->rc.s[CHASSIS_MODE_CHANNEL]) // 遥控器底盘控制拨杆
 
@@ -144,11 +145,18 @@ static void chassis_behaviour_set(chassis_move_t *behaviour_set)
     }
 #endif
 
+#ifndef CHASSIS_DEBUG_INPUT_CODE
+    //* 遥控器未连接时为无力模式
+    if (toe_is_error(DBUS_TOE)) {
+        chassis_behaviour_mode = CHASSIS_ZERO_FORCE;
+    }
+#endif
+
     //* 记录底盘行为模式
     chassis_behaviour_mode_last = chassis_behaviour_mode;
 
-#if defined CHASSIS_DEBUG_OPEN
     //* 调试时强制设置行为模式
+#if defined CHASSIS_DEBUG_OPEN
     chassis_behaviour_mode = CHASSIS_OPEN;
 #elif defined CHASSIS_DEBUG_MOTOR_SPEED
     chassis_behaviour_mode = CHASSIS_NO_FOLLOW_YAW;

@@ -350,7 +350,7 @@ static void chassis_set_contorl(chassis_move_t *chassis_move_control)
                       chassis_move_control->chassis_yaw_motor->relative_angle);
 #endif
     } else if (chassis_move_control->chassis_rotation_strategy == ROTATION_ABSOLUTE) {
-        // ? TODO 不清楚 我怀疑这个模式和直接控制角度的是一样的，只不过这个转得更慢方便控制
+        // TODO 不清楚 我怀疑这个模式和直接控制角度的是一样的，只不过这个转得更慢方便控制
         fp32 delta_angle = 0.0f;
         // set chassis yaw angle set-point
         // 设置底盘控制的角度
@@ -358,7 +358,7 @@ static void chassis_set_contorl(chassis_move_t *chassis_move_control)
         delta_angle                           = rad_format(chassis_move_control->chassis_yaw_set - chassis_move_control->chassis_yaw);
         // calculate rotation speed
         // 计算旋转的角速度
-        // ? TODO 与上一个模式比较，这里用 delta_angle 是相当于增量式吗，为什么不用 yaw_set 和 yaw 呢？
+        // TODO 与上一个模式比较，这里用 delta_angle 是相当于增量式吗，为什么不用 yaw_set 和 yaw 呢？
         chassis_move_control->wz_set = PID_calc(&chassis_move_control->chassis_angle_pid, 0.0f, delta_angle);
     }
 }
