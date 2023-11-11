@@ -27,6 +27,20 @@
 #define GIMBAL_CAN  hcan2
 #define SHOOT_CAN   hcan2
 
+/*
+  > 当前 CAN 总线分配：
+  >     CAN1：-> FIFO0
+  >         底盘电机
+  >             3508 0x201~0x204
+  >     CAN2：-> FIFO1
+  >         射击控制电机
+  >             摩擦轮 3508 0x201, 0x202
+  >             拨弹轮 2006 0x203
+  >         云台电机
+  >             YAW   6020 0x205
+  >             PITCH 6020 0x206
+  */
+
 /* CAN send and receive ID */
 typedef enum {
     CAN_CHASSIS_ALL_ID = 0x200,
@@ -61,7 +75,6 @@ typedef enum {
     MOTOR_SHOOT_TRIGGER_ID, // 8
 
     MOTOR_NUM, // 电机总个数，也是电机报文数组的长度
-
 } motor_id_e;
 
 // rm motor data

@@ -29,6 +29,7 @@
 
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
+
 // motor data read
 #define get_motor_measure(ptr, data)                                   \
     {                                                                  \
@@ -42,6 +43,7 @@ extern CAN_HandleTypeDef hcan2;
 // 电机报文数据，数组元素对应的电机见枚举 motor_id_e
 static motor_measure_t motor_chassis[MOTOR_NUM];
 
+// 电机发送数据的 buffer
 static CAN_TxHeaderTypeDef gimbal_tx_message;
 static uint8_t gimbal_can_send_data[8];
 static CAN_TxHeaderTypeDef chassis_tx_message;
@@ -49,16 +51,6 @@ static uint8_t chassis_can_send_data[8];
 static CAN_TxHeaderTypeDef shoot_tx_message;
 static uint8_t shoot_can_send_data[8];
 
-/**
- * @brief          hal CAN fifo call back, receive motor data
- * @param[in]      hcan, the point to CAN handle
- * @retval         none
- */
-/**
- * @brief          hal库CAN回调函数,接收电机数据
- * @param[in]      hcan:CAN句柄指针
- * @retval         none
- */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
     CAN_RxHeaderTypeDef rx_header;
@@ -79,17 +71,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
             break;
         }
 
-        default: {
+        default:
             break;
-        }
     }
 }
 
-/**
- * @brief          hal库CAN回调函数,接收电机数据
- * @param[in]      hcan:CAN句柄指针
- * @retval         none
- */
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
     CAN_RxHeaderTypeDef rx_header;
@@ -98,53 +84,31 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &rx_header, rx_data);
 
     switch (rx_header.StdId) {
-        case CAN_FRIC_M1_ID: {
+        case CAN_FRIC_M1_ID:
             detect_hook(SHOOT_FRIC1_TOE);
             get_motor_measure(&motor_chassis[MOTOR_SHOOT_FRIC1_ID], rx_data);
             break;
-        }
-        case CAN_FRIC_M2_ID: {
+        case CAN_FRIC_M2_ID:
             detect_hook(SHOOT_FRIC2_TOE);
             get_motor_measure(&motor_chassis[MOTOR_SHOOT_FRIC2_ID], rx_data);
             break;
-        }
-        case CAN_TRIGGER_ID: {
+        case CAN_TRIGGER_ID:
             detect_hook(SHOOT_TRIGGER_TOE);
             get_motor_measure(&motor_chassis[MOTOR_SHOOT_TRIGGER_ID], rx_data);
             break;
-        }
         case CAN_YAW_MOTOR_ID:
-        case CAN_PIT_MOTOR_ID: {
-            static uint8_t i = 0;
-            // get motor id
-            i = rx_header.StdId - (CAN_CHASSIS_ALL_ID + 1);
-            get_motor_measure(&motor_chassis[i], rx_data);
-            // TODO 这里的 detect 不对
-            detect_hook(CHASSIS_MOTOR1_TOE + i);
+            detect_hook(YAW_GIMBAL_MOTOR_TOE);
+            get_motor_measure(&motor_chassis[MOTOR_GIMBAL_YAW_ID], rx_data);
             break;
-        }
-        default: {
+        case CAN_PIT_MOTOR_ID:
+            detect_hook(PITCH_GIMBAL_MOTOR_TOE);
+            get_motor_measure(&motor_chassis[MOTOR_GIMBAL_PITCH_ID], rx_data);
             break;
-        }
+        default:
+            break;
     }
 }
 
-/**
- * @brief          send control current of motor (0x205, 0x206, 0x207, 0x208)
- * @param[in]      yaw: (0x205) 6020 motor control current, range [-30000,30000]
- * @param[in]      pitch: (0x206) 6020 motor control current, range [-30000,30000]
- * @param[in]      shoot: (0x207) 2006 motor control current, range [-10000,10000]
- * @param[in]      rev: (0x208) reserve motor control current
- * @retval         none
- */
-/**
- * @brief          发送电机控制电流(0x205,0x206,0x207,0x208)
- * @param[in]      yaw: (0x205) 6020电机控制电流, 范围 [-30000,30000]
- * @param[in]      pitch: (0x206) 6020电机控制电流, 范围 [-30000,30000]
- * @param[in]      shoot: (0x207) 2006电机控制电流, 范围 [-10000,10000]
- * @param[in]      rev: (0x208) 保留，电机控制电流
- * @retval         none
- */
 void CAN_cmd_gimbal(int16_t yaw, int16_t pitch, int16_t rev1, int16_t rev2)
 {
     uint32_t send_mail_box;
@@ -163,14 +127,6 @@ void CAN_cmd_gimbal(int16_t yaw, int16_t pitch, int16_t rev1, int16_t rev2)
     HAL_CAN_AddTxMessage(&GIMBAL_CAN, &gimbal_tx_message, gimbal_can_send_data, &send_mail_box);
 }
 
-/**
- * @brief          发送电机控制电流(0x205,0x206,0x207,0x208)
- * @param[in]      yaw: (0x205) 6020电机控制电流, 范围 [-30000,30000]
- * @param[in]      pitch: (0x206) 6020电机控制电流, 范围 [-30000,30000]
- * @param[in]      shoot: (0x207) 2006电机控制电流, 范围 [-10000,10000]
- * @param[in]      rev: (0x208) 保留，电机控制电流
- * @retval         none
- */
 void CAN_cmd_shoot(int16_t fric1, int16_t fric2, int16_t trigger, int16_t rev)
 {
     uint32_t send_mail_box;
@@ -189,11 +145,6 @@ void CAN_cmd_shoot(int16_t fric1, int16_t fric2, int16_t trigger, int16_t rev)
     HAL_CAN_AddTxMessage(&SHOOT_CAN, &shoot_tx_message, shoot_can_send_data, &send_mail_box);
 }
 
-/**
- * @brief          send CAN packet of ID 0x700, it will set chassis motor 3508 to quick ID setting
- * @param[in]      none
- * @retval         none
- */
 /**
  * @brief          发送ID为0x700的CAN包,它会设置3508电机进入快速设置ID
  * @param[in]      none
@@ -218,22 +169,6 @@ void CAN_cmd_chassis_reset_ID(void)
     HAL_CAN_AddTxMessage(&CHASSIS_CAN, &chassis_tx_message, chassis_can_send_data, &send_mail_box);
 }
 
-/**
- * @brief          send control current of motor (0x201, 0x202, 0x203, 0x204)
- * @param[in]      motor1: (0x201) 3508 motor control current, range [-16384,16384]
- * @param[in]      motor2: (0x202) 3508 motor control current, range [-16384,16384]
- * @param[in]      motor3: (0x203) 3508 motor control current, range [-16384,16384]
- * @param[in]      motor4: (0x204) 3508 motor control current, range [-16384,16384]
- * @retval         none
- */
-/**
- * @brief          发送电机控制电流(0x201,0x202,0x203,0x204)
- * @param[in]      motor1: (0x201) 3508电机控制电流, 范围 [-16384,16384]
- * @param[in]      motor2: (0x202) 3508电机控制电流, 范围 [-16384,16384]
- * @param[in]      motor3: (0x203) 3508电机控制电流, 范围 [-16384,16384]
- * @param[in]      motor4: (0x204) 3508电机控制电流, 范围 [-16384,16384]
- * @retval         none
- */
 void CAN_cmd_chassis(int16_t motor1, int16_t motor2, int16_t motor3, int16_t motor4)
 {
     uint32_t send_mail_box;
@@ -254,10 +189,10 @@ void CAN_cmd_chassis(int16_t motor1, int16_t motor2, int16_t motor3, int16_t mot
 }
 
 /**
-  * @brief          返回指定的电机报文数据指针
-  * @param[in]      id
-  * @retval         电机数据指针
-  */
+ * @brief          返回指定的电机报文数据指针
+ * @param[in]      id
+ * @retval         电机数据指针
+ */
 const motor_measure_t *get_motor_measure_point(motor_id_e id)
 {
     return &motor_chassis[id];
