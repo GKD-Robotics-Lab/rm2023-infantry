@@ -20,7 +20,7 @@
 #include "cmsis_os.h"
 #include "bsp_servo_pwm.h"
 #include "remote_control.h"
-#include "UI.h"
+//#include "UI.h"
 #include "string.h"
 
 #define SERVO_MIN_PWM   500
@@ -62,11 +62,11 @@ void servo_task(void const * argument)
     //Char_Draw(&change_white, "001", UI_Graph_ADD, 9, UI_Color_White, 2, 8, 5, 200, 200, "cover");
     //Char_Draw(&change_white, "002", UI_Graph_ADD, 9, UI_Color_Black, 2, 8, 5, 200, 200, "cover");
 
-    Graph_Data change_white, change_black;;
-    Line_Draw(&change_white, "001", UI_Graph_Change, 9, UI_Color_White, 3, 200, 200, 250, 200);
-    Line_Draw(&change_black, "001", UI_Graph_Change, 9, UI_Color_Black, 3, 200, 200, 250, 200);
-    memset(&change_white, 0, sizeof(change_white));
-    memset(&change_black, 0, sizeof(change_black));
+//    Graph_Data change_white, change_black;;
+//    Line_Draw(&change_white, "001", UI_Graph_Change, 9, UI_Color_White, 3, 200, 200, 250, 200);
+//    Line_Draw(&change_black, "001", UI_Graph_Change, 9, UI_Color_Black, 3, 200, 200, 250, 200);
+//    memset(&change_white, 0, sizeof(change_white));
+//    memset(&change_black, 0, sizeof(change_black));
 
     while(1)
     {
