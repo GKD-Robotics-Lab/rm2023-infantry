@@ -1,8 +1,8 @@
 /**
   ****************************(C) COPYRIGHT 2019 DJI****************************
   * @file       usb_task.c/h
-  * @brief      usb outputs the error message.usbÊä³ö´íÎóÐÅÏ¢
-  * @note       
+  * @brief      usb outputs the error message.usbï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+  * @note
   * @history
   *  Version    Date            Author          Modification
   *  V1.0.0     Nov-11-2019     RM              1. done
@@ -46,7 +46,7 @@ void usb_task(void const * argument)
     {
         osDelay(1000);
         usb_printf(
-"******************************\r\n\
+                "******************************\r\n\
 voltage percentage:%d%% \r\n\
 DBUS:%s\r\n\
 chassis motor1:%s\r\n\
@@ -61,21 +61,21 @@ accel sensor:%s\r\n\
 mag sensor:%s\r\n\
 referee usart:%s\r\n\
 ******************************\r\n",
-            get_battery_percentage(), 
-            status[error_list_usb_local[DBUS_TOE].error_exist],
-            status[error_list_usb_local[CHASSIS_MOTOR1_TOE].error_exist],
-            status[error_list_usb_local[CHASSIS_MOTOR2_TOE].error_exist],
-            status[error_list_usb_local[CHASSIS_MOTOR3_TOE].error_exist],
-            status[error_list_usb_local[CHASSIS_MOTOR4_TOE].error_exist],
-            status[error_list_usb_local[YAW_GIMBAL_MOTOR_TOE].error_exist],
-            status[error_list_usb_local[PITCH_GIMBAL_MOTOR_TOE].error_exist],
-            status[error_list_usb_local[BOARD_GYRO_TOE].error_exist],
-            status[error_list_usb_local[BOARD_ACCEL_TOE].error_exist],
-            status[error_list_usb_local[BOARD_MAG_TOE].error_exist],
-            status[error_list_usb_local[REFEREE_TOE].error_exist],
-            status[error_list_usb_local[SHOOT_TRIGGER_TOE].error_exist],
-            status[error_list_usb_local[SHOOT_FRIC1_TOE].error_exist],
-            status[error_list_usb_local[SHOOT_FRIC2_TOE].error_exist]);
+                get_battery_percentage(),
+                status[error_list_usb_local[DBUS_TOE].error_exist],
+                status[error_list_usb_local[CHASSIS_MOTOR1_TOE].error_exist],
+                status[error_list_usb_local[CHASSIS_MOTOR2_TOE].error_exist],
+                status[error_list_usb_local[CHASSIS_MOTOR3_TOE].error_exist],
+                status[error_list_usb_local[CHASSIS_MOTOR4_TOE].error_exist],
+                status[error_list_usb_local[YAW_GIMBAL_MOTOR_TOE].error_exist],
+                status[error_list_usb_local[PITCH_GIMBAL_MOTOR_TOE].error_exist],
+                status[error_list_usb_local[BOARD_GYRO_TOE].error_exist],
+                status[error_list_usb_local[BOARD_ACCEL_TOE].error_exist],
+                status[error_list_usb_local[BOARD_MAG_TOE].error_exist],
+                status[error_list_usb_local[REFEREE_TOE].error_exist],
+                status[error_list_usb_local[SHOOT_TRIGGER_TOE].error_exist],
+                status[error_list_usb_local[SHOOT_FRIC1_TOE].error_exist],
+                status[error_list_usb_local[SHOOT_FRIC2_TOE].error_exist]);
 
     }
 
