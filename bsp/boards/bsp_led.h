@@ -2,16 +2,14 @@
 #define BSP_LED_H
 #include "struct_typedef.h"
 
-void bsp_led_init(void);
-
 /**
   * @brief          aRGB show
   * @param[in]      aRGB: 0xaaRRGGBB, 'aa' is alpha, 'RR' is red, 'GG' is green, 'BB' is blue
   * @retval         none
   */
 /**
-  * @brief          ÏÔÊ¾RGB
-  * @param[in]      aRGB:0xaaRRGGBB,'aa' ÊÇÍ¸Ã÷¶È,'RR'ÊÇºìÉ«,'GG'ÊÇÂÌÉ«,'BB'ÊÇÀ¶É«
+  * @brief          æ˜¾ç¤ºRGB
+  * @param[in]      aRGB:0xaaRRGGBB,'aa' æ˜¯é€æ˜åº¦,'RR'æ˜¯çº¢è‰²,'GG'æ˜¯ç»¿è‰²,'BB'æ˜¯è“è‰²
   * @retval         none
   */
 extern void aRGB_led_show(uint32_t aRGB);
