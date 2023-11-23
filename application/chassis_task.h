@@ -61,7 +61,7 @@
 #define MOTOR_SPEED_TO_CHASSIS_SPEED_VY 0.25f
 #define MOTOR_SPEED_TO_CHASSIS_SPEED_WZ 0.25f
 #define MOTOR_DISTANCE_TO_CENTER        0.2f
-#define CHASSIS_WZ_SET_SCALE            0.1f
+#define CHASSIS_WZ_SET_SCALE            0.0f
 // m3508 rmp change to chassis speed,
 // m3508转化成底盘速度(m/s)的比例，
 #define M3508_MOTOR_RPM_TO_VECTOR       0.000415809748903494517209f
@@ -106,11 +106,11 @@
 #define M3505_MOTOR_SPEED_PID_DEAD_BAND 0.0f
 // chassis follow angle PID
 // 底盘旋转跟随PID
-#define CHASSIS_FOLLOW_GIMBAL_PID_KP        20.0f //原始 40.0f
-#define CHASSIS_FOLLOW_GIMBAL_PID_KI        0.0f
-#define CHASSIS_FOLLOW_GIMBAL_PID_KD        100.0f //原始 0.0f
+#define CHASSIS_FOLLOW_GIMBAL_PID_KP        6.0f //原始 40.0f
+#define CHASSIS_FOLLOW_GIMBAL_PID_KI        0.025f
+#define CHASSIS_FOLLOW_GIMBAL_PID_KD        0.0f //原始 0.0f
 #define CHASSIS_FOLLOW_GIMBAL_PID_MAX_OUT   6.0f
-#define CHASSIS_FOLLOW_GIMBAL_PID_MAX_IOUT  0.2f
+#define CHASSIS_FOLLOW_GIMBAL_PID_MAX_IOUT  0.1f
 #define CHASSIS_FOLLOW_GIMBAL_PID_DEAD_BAND 0.0f
 
 //! 遥控器参数

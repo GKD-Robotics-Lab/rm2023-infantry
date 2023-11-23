@@ -26,7 +26,7 @@ typedef enum _pid_mode {
 } pid_mode_e;
 
 // PID 相关参数
-typedef struct
+typedef struct _pid_typedef
 {
     pid_mode_e mode;
     // PID 三参数
@@ -49,13 +49,13 @@ typedef struct
     fp32 Iout;
     fp32 Dout;
 
-    fp32 (*feedforward)(fp32); // 前馈控制的函数指针
-    fp32 Fout;
+    fp32 (*compensate)(struct _pid_typedef *); // 前馈控制的函数指针
+    fp32 Cout;
 
 } pid_typedef;
 
 extern void PID_init(pid_typedef *pid, pid_mode_e mode, const fp32 PID[3], fp32 max_out, fp32 max_iout, fp32 dead_band);
-extern void PID_add_feedforward(pid_typedef *pid, fp32 (*feedforward)(fp32));
+extern void PID_add_compensate(pid_typedef *pid, fp32 (*compensate)(pid_typedef *));
 extern fp32 PID_calc(pid_typedef *pid, fp32 ref, fp32 set);
 extern fp32 PID_calc_specifyD(pid_typedef *pid, fp32 ref, fp32 set, fp32 diff);
 extern void PID_clear(pid_typedef *pid);

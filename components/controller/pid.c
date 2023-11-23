@@ -46,21 +46,21 @@ void PID_init(pid_typedef *pid, pid_mode_e mode, const fp32 PID[3], fp32 max_out
     pid->dead_band = dead_band;
 
     pid->error[0] = pid->error[1] = pid->error[2] = pid->Pout = pid->Iout = pid->Dout = pid->out = 0.0f;
-    pid->last_diff = 0.0f;
+    pid->last_diff                                                                               = 0.0f;
 
-    pid->feedforward = NULL;
-    pid->Fout        = 0.0f;
+    pid->compensate = NULL;
+    pid->Cout       = 0.0f;
 }
 
 /**
- * @brief 为 pid 添加前馈处理
- * 
- * @param pid 
- * @param feedforward 前馈处理函数的函数指针
+ * @brief 为 pid 添加补偿
+ *
+ * @param pid
+ * @param compensate 补偿处理函数的函数指针
  */
-void PID_add_feedforward(pid_typedef *pid, fp32 (*feedforward)(fp32))
+void PID_add_compensate(pid_typedef *pid, fp32 (*compensate)(pid_typedef *))
 {
-    pid->feedforward = feedforward;
+    pid->compensate = compensate;
 }
 
 /**
@@ -90,19 +90,27 @@ fp32 PID_calc(pid_typedef *pid, fp32 ref, fp32 set)
             pid->Iout += pid->Ki * pid->error[0];
             pid->Dout = pid->Kd * (pid->error[0] - pid->error[1]);
             ABS_LIMIT(pid->Iout, pid->max_iout);
-            if (pid->feedforward != NULL) pid->Fout = pid->feedforward(pid->set);
-            pid->out = pid->Pout + pid->Iout + pid->Dout + pid->Fout;
+            pid->out = pid->Pout + pid->Iout + pid->Dout;
             ABS_LIMIT(pid->out, pid->max_out);
+            if (pid->compensate != NULL) {
+                pid->Cout = pid->compensate(pid);
+                pid->out += pid->Cout;
+                ABS_LIMIT(pid->out, pid->max_out);
+            }
         } // 如果在误差死区范围内，沿用上次的输出
     } else if (pid->mode == PID_DELTA) {
-        pid->out -= pid->Fout;
+        pid->out -= pid->Cout;
         if (ABS(pid->error[0]) > pid->dead_band) {
             pid->Pout = pid->Kp * (pid->error[0] - pid->error[1]);
             pid->Iout = pid->Ki * pid->error[0];
             pid->Dout = pid->Kd * (pid->error[0] - 2.0f * pid->error[1] + pid->error[2]);
-            if (pid->feedforward != NULL) pid->Fout = pid->feedforward(pid->set);
-            pid->out += pid->Pout + pid->Iout + pid->Dout + pid->Fout;
+            pid->out += pid->Pout + pid->Iout + pid->Dout;
             ABS_LIMIT(pid->out, pid->max_out);
+            if (pid->compensate != NULL) {
+                pid->Cout = pid->compensate(pid);
+                pid->out += pid->Cout;
+                ABS_LIMIT(pid->out, pid->max_out);
+            }
         } // 如果在误差死区范围内，沿用上次的输出
     }
 
@@ -138,19 +146,27 @@ fp32 PID_calc_specifyD(pid_typedef *pid, fp32 ref, fp32 set, fp32 diff)
             pid->Iout += pid->Ki * pid->error[0];
             pid->Dout = pid->Kd * diff;
             ABS_LIMIT(pid->Iout, pid->max_iout);
-            if (pid->feedforward != NULL) pid->Fout = pid->feedforward(pid->set);
-            pid->out = pid->Pout + pid->Iout + pid->Dout + pid->Fout;
+            pid->out = pid->Pout + pid->Iout + pid->Dout;
             ABS_LIMIT(pid->out, pid->max_out);
+            if (pid->compensate != NULL) {
+                pid->Cout = pid->compensate(pid);
+                pid->out += pid->Cout;
+                ABS_LIMIT(pid->out, pid->max_out);
+            }
         } // 如果在误差死区范围内，沿用上次的输出
     } else if (pid->mode == PID_DELTA) {
-        pid->out -= pid->Fout;
+        pid->out -= pid->Cout;
         if (ABS(pid->error[0]) > pid->dead_band) {
             pid->Pout = pid->Kp * (pid->error[0] - pid->error[1]);
             pid->Iout = pid->Ki * pid->error[0];
             pid->Dout = pid->Kd * (diff - pid->last_diff);
-            if (pid->feedforward != NULL) pid->Fout = pid->feedforward(pid->set);
-            pid->out += pid->Pout + pid->Iout + pid->Dout + pid->Fout;
+            pid->out += pid->Pout + pid->Iout + pid->Dout;
             ABS_LIMIT(pid->out, pid->max_out);
+            if (pid->compensate != NULL) {
+                pid->Cout = pid->compensate(pid);
+                pid->out += pid->Cout;
+                ABS_LIMIT(pid->out, pid->max_out);
+            }
             pid->last_diff = diff;
         } // 如果在误差死区范围内，沿用上次的输出
     }
@@ -172,7 +188,7 @@ void PID_clear(pid_typedef *pid)
     }
 
     pid->error[0] = pid->error[1] = pid->error[2] = 0.0f;
-    pid->last_diff = 0.0f;
+    pid->last_diff                                = 0.0f;
     pid->out = pid->Pout = pid->Iout = pid->Dout = 0.0f;
     pid->fdb = pid->set = 0.0f;
 }

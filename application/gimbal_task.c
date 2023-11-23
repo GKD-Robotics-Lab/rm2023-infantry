@@ -31,8 +31,6 @@
 #include "cmsis_os.h"
 #include "config.h"
 
-#include "bsp_usart.h"
-
 #include "arm_math.h"
 #include "CAN_receive.h"
 #include "user_lib.h"
@@ -41,6 +39,12 @@
 #include "gimbal_behaviour.h"
 #include "INS_task.h"
 #include "pid.h"
+
+#ifdef GIMBAL_DEBUG
+#include "bsp_usart.h"
+#include "string.h"
+extern UART_HandleTypeDef huart1;
+#endif
 
 // motor enconde value format, range[0-8191]
 // 电机编码值规整 0—8191
@@ -81,6 +85,8 @@ static void (*gimbal_motor_control_func[GIMBAL_MOTOR_MODE_LEN])(gimbal_motor_t *
                                                                                      gimbal_motor_absolute_angle_control,
                                                                                      gimbal_motor_relative_angle_control};
 
+static fp32 gimbal_motor_yaw_speed_compensate(pid_typedef *pid);
+
 #ifdef GIMBAL_DEBUG_INPUT_CODE
 static fp32 gimbal_debug_input(void);
 #endif
@@ -119,19 +125,37 @@ void gimbal_task(void const *pvParameters)
         gimbal_control_loop();                // 云台控制PID计算
 
 #if defined GIMBAL_DEBUG_OPEN && defined PRINT_ON
-        usart1_printf("%f, %f, %f, %d\r\n", gimbal_control.yaw_motor.absolute_angle, gimbal_control.yaw_motor.relative_angle, gimbal_control.yaw_motor.speed, gimbal_control.yaw_motor.current_set);
+        {
+            static uint8_t data[8] = {0};
+            volatile fp32 current  = (fp32)gimbal_control.yaw_motor.current_set;
+            memcpy(&data[0], &gimbal_control.yaw_motor.speed, 4);
+            memcpy(&data[4], &current, 4);
+            if (HAL_UART_GetState(&huart1) == HAL_UART_STATE_READY)
+                HAL_UART_Transmit_DMA(&huart1, data, 8);
+        }
+        // usart1_printf("%f, %f, %f, %d\r\n", gimbal_control.yaw_motor.absolute_angle, gimbal_control.yaw_motor.relative_angle, gimbal_control.yaw_motor.speed, gimbal_control.yaw_motor.current_set);
+        // usart1_printf("%f, %f, %f, %d\r\n", gimbal_control.pitch_motor.absolute_angle, gimbal_control.pitch_motor.relative_angle, gimbal_control.pitch_motor.speed, gimbal_control.pitch_motor.current_set);
 #endif
 
 #if defined GIMBAL_DEBUG_SPEED && defined PRINT_ON
-        usart1_printf("%f, %f, %d\r\n", gimbal_control.yaw_motor.speed, gimbal_control.yaw_motor.speed_set, gimbal_control.yaw_motor.current_set);
+        {
+            static uint8_t data[8] = {0};
+            memcpy(&data[0], &gimbal_control.yaw_motor.speed, 4);
+            memcpy(&data[4], &gimbal_control.yaw_motor.speed_set, 4);
+            if (HAL_UART_GetState(&huart1) == HAL_UART_STATE_READY)
+                HAL_UART_Transmit_DMA(&huart1, data, 8);
+        }
+        // usart1_printf("%f, %f, %d\r\n", gimbal_control.yaw_motor.speed, gimbal_control.yaw_motor.speed_set, gimbal_control.yaw_motor.current_set);
+        // usart1_printf("%f, %f, %d\r\n", gimbal_control.pitch_motor.speed, gimbal_control.pitch_motor.speed_set, gimbal_control.pitch_motor.current_set);
 #endif
 
 #if defined GIMBAL_DEBUG_ABSOLUTE_ANGEL && defined PRINT_ON
-        usart1_printf("%f, %f, %f, %f, %d\r\n", gimbal_control.pitch_motor.absolute_angle, gimbal_control.pitch_motor.absolute_angle_set, gimbal_control.pitch_motor.speed, gimbal_control.pitch_motor.speed_set, gimbal_control.pitch_motor.current_set);
+        static uint32_t t, n;
+        t = xTaskGetTickCount();
+        n++;
+        // usart1_printf("%f, %f, %f, %f, %f, %f, %d\r\n", gimbal_control.yaw_motor.absolute_angle, gimbal_control.yaw_motor.absolute_angle_set, gimbal_control.yaw_motor.relative_angle, gimbal_control.yaw_motor.relative_angle_set, gimbal_control.yaw_motor.speed, gimbal_control.yaw_motor.speed_set, gimbal_control.yaw_motor.current_set);
+        usart1_printf("%.3f,%.3f,%.3f,%d,%d\r\n", gimbal_control.yaw_motor.absolute_angle, gimbal_control.yaw_motor.absolute_angle_set, gimbal_control.yaw_motor.relative_angle, t, n);
 #endif
-
-// TODO
-        // usart1_printf("%f, %f, %f, %f, %f, %f, %d\r\n", gimbal_control.pitch_motor.absolute_angle, gimbal_control.pitch_motor.absolute_angle_set, gimbal_control.pitch_motor.relative_angle, gimbal_control.pitch_motor.relative_angle_set, gimbal_control.pitch_motor.speed, gimbal_control.pitch_motor.speed_set, gimbal_control.pitch_motor.current_set);
 
         if (!(toe_is_error(YAW_GIMBAL_MOTOR_TOE) && toe_is_error(PITCH_GIMBAL_MOTOR_TOE))) {
             if (toe_is_error(DBUS_TOE)) {
@@ -204,6 +228,9 @@ static void gimbal_init(void)
     PID_init(&gimbal_control.pitch_motor.absolute_angle_pid, PID_POSITION, Pitch_absolute_angle_pid, PITCH_GYRO_ABSOLUTE_PID_MAX_OUT, PITCH_GYRO_ABSOLUTE_PID_MAX_IOUT, PITCH_GYRO_ABSOLUTE_PID_DEAD_BAND);
     PID_init(&gimbal_control.pitch_motor.relative_angle_pid, PID_POSITION, Pitch_relative_angle_pid, PITCH_ENCODE_RELATIVE_PID_MAX_OUT, PITCH_ENCODE_RELATIVE_PID_MAX_IOUT, PITCH_ENCODE_RELATIVE_PID_DEAD_BAND);
     PID_init(&gimbal_control.pitch_motor.speed_pid, PID_POSITION, Pitch_speed_pid, PITCH_SPEED_PID_MAX_OUT, PITCH_SPEED_PID_MAX_IOUT, PITCH_SPEED_PID_DEAD_BAND);
+
+    // TODO
+    PID_add_compensate(&gimbal_control.yaw_motor.speed_pid, gimbal_motor_yaw_speed_compensate);
 
     //* 进行一次反馈数据更新并设置初始值
     gimbal_feedback_update();
@@ -405,6 +432,11 @@ static void gimbal_motor_raw_angle_control(gimbal_motor_t *gimbal_motor)
     if (gimbal_motor == NULL) {
         return;
     }
+
+#if defined GIMBAL_DEBUG_OPEN && defined GIMBAL_DEBUG_INPUT_CODE
+    gimbal_motor->raw_cmd_current = gimbal_debug_input();
+#endif
+
     gimbal_motor->current_set = (int16_t)gimbal_motor->raw_cmd_current;
 }
 
@@ -420,7 +452,7 @@ static void gimbal_motor_absolute_angle_control(gimbal_motor_t *gimbal_motor)
     }
     gimbal_motor->speed_set = PID_calc_specifyD(&gimbal_motor->absolute_angle_pid, rad_format(gimbal_motor->absolute_angle - gimbal_motor->absolute_angle_set), 0.0f, gimbal_motor->speed);
 
-#ifdef GIMBAL_DEBUG_SPEED
+#if defined GIMBAL_DEBUG_SPEED && defined GIMBAL_DEBUG_INPUT_CODE
     gimbal_motor->speed_set = gimbal_debug_input();
 #endif
     gimbal_motor->current_set = (int16_t)PID_calc(&gimbal_motor->speed_pid, gimbal_motor->speed, gimbal_motor->speed_set);
@@ -440,6 +472,21 @@ static void gimbal_motor_relative_angle_control(gimbal_motor_t *gimbal_motor)
     gimbal_motor->current_set = (int16_t)PID_calc(&gimbal_motor->speed_pid, gimbal_motor->speed, gimbal_motor->speed_set);
 }
 
+static fp32 gimbal_motor_yaw_speed_compensate(pid_typedef *pid)
+{
+    fp32 fric_compensation = 0;
+    fp32 feedforward = 0;
+
+    if (ABS(pid->set) > YAW_FRIC_COMPENSATION_DEADBAND) {
+        fric_compensation = pid->set * YAW_FRIC_COMPENSATION_GAIN;
+        ABS_LIMIT(fric_compensation, YAW_FRIC_COMPENSATION_MAX);
+    }
+
+    feedforward = pid->set / YAW_FEEDFORWARD_GAIN;
+
+    return fric_compensation + feedforward;
+}
+
 #ifdef GIMBAL_DEBUG_INPUT_CODE
 /**
  * @brief 作为云台调试控制值控制输入
@@ -448,21 +495,85 @@ static void gimbal_motor_relative_angle_control(gimbal_motor_t *gimbal_motor)
  */
 static fp32 gimbal_debug_input(void)
 {
-    // fp32 input      = 0;
-    // uint32_t period = 3000;                                   // 控制周期 | 单位 ms
-    // uint32_t t      = (uint32_t)xTaskGetTickCount() % period; // 时间 | 单位 ms | 范围 0~period | tick 约 50 天才会溢出一次，不用担心
+    fp32 input = 0;
 
-    // //* 示例 产生方波输入 BEGIN
-    // if (t < (period / 2)) {
-    //     input = 0;
+    //* 示例 1 产生恒定值输入 BEGIN
+    // input = 15.0f;
+    //* 示例 1 产生恒定值输入 END
+
+    //* 示例 2 产生方波输入 BEGIN
+    const uint32_t period = 5000;                                   // 控制周期 | 单位 ms
+    uint32_t t            = (uint32_t)xTaskGetTickCount() % period; // 时间 | 单位 ms | 范围 0~period | tick 约 50 天才会溢出一次，不用担心
+
+    if (t < (period / 2)) {
+        input = 0.0f;
+    } else {
+        input = 10.0f;
+    }
+    //* 示例 2 产生方波输入 END
+
+    //* 示例 3 产生频率改变的正弦波输入 BEGIN
+    // uint32_t t           = (uint32_t)xTaskGetTickCount();
+    // const fp32 f[]       = {0.5f, 0.75f, 1.0f, 1.2f, 1.4f, 1.6f, 1.8f, 2.0f, 2.25f, 2.5f, 2.75f, 3.0f, 3.25f, 3.5f, 4.0f, 4.5f, 5.0f, 5.5f, 6.0f, 6.5f, 7.0f, 7.5f, 8.0f, 8.5f, 9.0f, 9.5f, 10.0f, 10.5f, 11.0f, 11.5f, 12.0f, 12.5f, 13.0f, 13.5f, 14.0f, 14.5f, 15.0f, 16.0f, 17.0f, 18.0f, 19.0f, 20.0f, 22.0f, 24.0f, 26.0f, 28.0f, 30.0f, 32.0f, 34.0f, 36.0f, 38.0f, 40.0f, 50.0f, 60.0f, 70.0f, 80.0f, 90.0f, 100.0f, 110.0f, 120.0f, 140.0f, 160.0f, 180.0f, 200.0f, 225.0f, 250.0f};
+    // const uint16_t f_len = sizeof(f) / sizeof(fp32);
+    // static fp32 f_format = 1.0f;
+
+    // static uint16_t i        = 0;
+    // static uint16_t i_format = 0;
+
+    // static uint32_t t_start  = 0;
+    // static uint32_t t_need   = 2000.0f;
+    // static uint32_t t_passed = 0;
+
+    // if (t < 30000) {
+    //     const uint32_t period = 5000;                                   // 控制周期 | 单位 ms
+    //     uint32_t t1           = (uint32_t)xTaskGetTickCount() % period; // 时间 | 单位 ms | 范围 0~period | tick 约 50 天才会溢出一次，不用担心
+
+    //     if (t1 < (period / 2)) {
+    //         input = 6000.0f;
+    //     } else {
+    //         input = 24000.0f;
+    //     }
+    // } else if (t < 35000) {
+    //     input = 15000.0f;
     // } else {
-    //     // input = (fp32)MAX_MOTOR_CAN_CURRENT;
-    //     // input = MAX_WHEEL_SPEED;
-    //     input = PI / 3.0f;
-    // }
-    // //* 示例 产生方波输入 END
+    //     if (t_start == 0) t_start = t;
 
-    return 10.0f;
+    //     t_passed = t - t_start;
+
+    //     if (t_passed >= t_need) {
+    //         i++;
+    //         if (i >= f_len * 2) i = 0;
+    //         i_format = i >= f_len ? (2 * f_len - i - 1) : i;
+
+    //         t_start  = (uint32_t)xTaskGetTickCount();
+    //         t_passed = 0;
+    //         t_need   = 1000.0f / f[i_format];
+    //         f_format = 1000.0f / t_need;
+    //         if (i_format < 10)
+    //             t_need *= 3;
+    //         else if (i_format < 20)
+    //             t_need *= 5;
+    //         else if (i_format < 40)
+    //             t_need *= 10;
+    //         else
+    //             t_need *= 20;
+    //     }
+
+    //     input = 6000.0f + 9000.0f * (1 + arm_sin_f32(rad_format(2 * PI * f_format * t_passed / 1000.0f)));
+    // }
+    //* 示例 3 产生频率改变的正弦波输入 END
+
+    //* 示例 4 产生阶梯输入 BEGIN
+    // static uint32_t t;
+    // t = xTaskGetTickCount();
+
+    // input = (t / 2000u) * 1000u;
+
+    // if (input > 30000u) input = 60000u - input;
+    //* 示例 4 产生阶梯输入 END
+
+    return input;
 }
 #endif
 

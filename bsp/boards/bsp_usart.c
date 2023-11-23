@@ -24,8 +24,8 @@ void usart1_printf(const char *fmt, ...)
     static uint16_t len;                                // 必须使用static
     va_start(args, fmt);
 
-    while (HAL_UART_GetState(&huart1) != HAL_UART_STATE_READY)
-        ;
+    if (HAL_UART_GetState(&huart1) != HAL_UART_STATE_READY)
+        return;
     // return length of string
     // 返回字符串长度
     len = vsnprintf(ptx_buf, USART1_TX_BUF_LEN, fmt, args);

@@ -33,25 +33,25 @@
 #include "remote_control.h"
 
 //! time
-#define GIMBAL_TASK_INIT_TIME 201
+#define GIMBAL_TASK_INIT_TIME     201
 #define GIMBAL_TASK_WAIT_IMU_TIME 501
-#define GIMBAL_CONTROL_TIME 1
+#define GIMBAL_CONTROL_TIME       1
 
 //! PID
 //*pitch
-#define PITCH_SPEED_PID_KP        2900.0f
-#define PITCH_SPEED_PID_KI        60.0f
-#define PITCH_SPEED_PID_KD        0.0f
-#define PITCH_SPEED_PID_MAX_OUT   30000.0f
-#define PITCH_SPEED_PID_MAX_IOUT  10000.0f
-#define PITCH_SPEED_PID_DEAD_BAND 0.0f
+#define PITCH_SPEED_PID_KP                  2900.0f
+#define PITCH_SPEED_PID_KI                  60.0f
+#define PITCH_SPEED_PID_KD                  0.0f
+#define PITCH_SPEED_PID_MAX_OUT             30000.0f
+#define PITCH_SPEED_PID_MAX_IOUT            10000.0f
+#define PITCH_SPEED_PID_DEAD_BAND           0.0f
 
-#define PITCH_GYRO_ABSOLUTE_PID_KP        15.0f
-#define PITCH_GYRO_ABSOLUTE_PID_KI        0.0f
-#define PITCH_GYRO_ABSOLUTE_PID_KD        0.0f
-#define PITCH_GYRO_ABSOLUTE_PID_MAX_OUT   10.0f
-#define PITCH_GYRO_ABSOLUTE_PID_MAX_IOUT  0.0f
-#define PITCH_GYRO_ABSOLUTE_PID_DEAD_BAND 0.0f
+#define PITCH_GYRO_ABSOLUTE_PID_KP          15.0f
+#define PITCH_GYRO_ABSOLUTE_PID_KI          0.0f
+#define PITCH_GYRO_ABSOLUTE_PID_KD          0.0f
+#define PITCH_GYRO_ABSOLUTE_PID_MAX_OUT     10.0f
+#define PITCH_GYRO_ABSOLUTE_PID_MAX_IOUT    0.0f
+#define PITCH_GYRO_ABSOLUTE_PID_DEAD_BAND   0.0f
 
 #define PITCH_ENCODE_RELATIVE_PID_KP        15.0f
 #define PITCH_ENCODE_RELATIVE_PID_KI        0.00f
@@ -61,19 +61,19 @@
 #define PITCH_ENCODE_RELATIVE_PID_DEAD_BAND 0.0f
 
 //* yaw
-#define YAW_SPEED_PID_KP        8200.0f
-#define YAW_SPEED_PID_KI        15.0f
-#define YAW_SPEED_PID_KD        0.0f
-#define YAW_SPEED_PID_MAX_OUT   30000.0f
-#define YAW_SPEED_PID_MAX_IOUT  5000.0f
-#define YAW_SPEED_PID_DEAD_BAND 0.0f
+#define YAW_SPEED_PID_KP                  7000.0f // 8000.0f // 5390.0f
+#define YAW_SPEED_PID_KI                  12.0f // 12.0f   // 51.0f  
+#define YAW_SPEED_PID_KD                  0.0f
+#define YAW_SPEED_PID_MAX_OUT             30000.0f
+#define YAW_SPEED_PID_MAX_IOUT            5000.0f
+#define YAW_SPEED_PID_DEAD_BAND           0.0f
 
-#define YAW_GYRO_ABSOLUTE_PID_KP        32.0f
-#define YAW_GYRO_ABSOLUTE_PID_KI        0.0f
-#define YAW_GYRO_ABSOLUTE_PID_KD        0.3f
-#define YAW_GYRO_ABSOLUTE_PID_MAX_OUT   10.0f
-#define YAW_GYRO_ABSOLUTE_PID_MAX_IOUT  0.0f
-#define YAW_GYRO_ABSOLUTE_PID_DEAD_BAND 0.0f
+#define YAW_GYRO_ABSOLUTE_PID_KP          32.0f
+#define YAW_GYRO_ABSOLUTE_PID_KI          0.0f
+#define YAW_GYRO_ABSOLUTE_PID_KD          0.3f
+#define YAW_GYRO_ABSOLUTE_PID_MAX_OUT     10.0f
+#define YAW_GYRO_ABSOLUTE_PID_MAX_IOUT    0.0f
+#define YAW_GYRO_ABSOLUTE_PID_DEAD_BAND   0.0f
 
 #define YAW_ENCODE_RELATIVE_PID_KP        8.0f
 #define YAW_ENCODE_RELATIVE_PID_KI        0.0f
@@ -103,8 +103,8 @@
 #define GIMBAL_INIT_PITCH_SPEED 0.004f
 #define GIMBAL_INIT_YAW_SPEED   0.005f
 // 初始化时云台要转到的角度
-#define INIT_YAW_SET            0.0f
-#define INIT_PITCH_SET          0.0f
+#define INIT_YAW_SET   0.0f
+#define INIT_PITCH_SET 0.0f
 
 //* encoder
 // 电机码盘值最大以及中值
@@ -126,6 +126,12 @@
 #define PITCH_MAX_RELATIVE_ANGLE 0.25f
 #define PITCH_MIN_RELATIVE_ANGLE -0.45f
 
+//* yaw compensate 
+#define YAW_FRIC_COMPENSATION_DEADBAND 0.01f
+#define YAW_FRIC_COMPENSATION_GAIN 10000.0f
+#define YAW_FRIC_COMPENSATION_MAX 2477.0f
+#define YAW_FEEDFORWARD_GAIN 0.001307727781454f
+
 //! remote control
 //* channel
 // yaw,pitch控制通道以及状态开关通道
@@ -135,21 +141,21 @@
 //* deadband
 // rocker value deadband
 // 遥控器输入死区，因为遥控器存在差异，摇杆在中间，其值不一定为零
-#define RC_DEADBAND         10
+#define RC_DEADBAND 10
 //* ratio
-#define YAW_RC_SEN          -0.000010f
-#define PITCH_RC_SEN        -0.000011f // 0.005
-#define YAW_MOUSE_SEN       0.00008f
-#define PITCH_MOUSE_SEN     0.00014f
+#define YAW_RC_SEN      -0.000010f
+#define PITCH_RC_SEN    -0.000011f // 0.005
+#define YAW_MOUSE_SEN   0.00008f
+#define PITCH_MOUSE_SEN 0.00014f
 //* key define
 // turn 180°
 // 掉头180 按键
 #define TURN_KEYBOARD KEY_PRESSED_OFFSET_F
 
 typedef enum {
-    GIMBAL_MOTOR_RAW = 0, // 电机原始值控制
-    GIMBAL_MOTOR_GYRO,    // 电机陀螺仪角度控制
-    GIMBAL_MOTOR_GYRO_LIMIT, // 带限位的电机陀螺仪角度控制
+    GIMBAL_MOTOR_RAW = 0,       // 电机原始值控制
+    GIMBAL_MOTOR_GYRO,          // 电机陀螺仪角度控制
+    GIMBAL_MOTOR_GYRO_LIMIT,    // 带限位的电机陀螺仪角度控制
     GIMBAL_MOTOR_ENCONDE_LIMIT, // 带限位的电机编码值角度控制
 
     GIMBAL_MOTOR_MODE_LEN,
@@ -158,7 +164,6 @@ typedef enum {
 // 云台电机结构体
 typedef struct
 {
-    // TODO 重新分类
     //* 电机模式
     gimbal_motor_mode_e motor_mode;
     gimbal_motor_mode_e last_motor_mode;

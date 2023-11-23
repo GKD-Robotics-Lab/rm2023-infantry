@@ -1,0 +1,3 @@
+C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/standard_robot.elf.dir
+C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/edit_cache.dir
+C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/rebuild_cache.dir

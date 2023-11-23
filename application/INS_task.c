@@ -21,8 +21,6 @@
   ****************************(C) COPYRIGHT 2019 DJI****************************
   */
 
-// TODO 这里的零漂是怎么计算的
-
 #include "INS_task.h"
 
 #include "main.h"
@@ -98,7 +96,7 @@ static const float timing_time = 0.001f; // tast run time , unit s.任务运行�
 static fp32 accel_fliter_1[3] = {0.0f, 0.0f, 0.0f};
 static fp32 accel_fliter_2[3] = {0.0f, 0.0f, 0.0f};
 static fp32 accel_fliter_3[3] = {0.0f, 0.0f, 0.0f};
-//? 低通滤波系数的设置
+// TODO 低通滤波系数的设置
 static const fp32 fliter_num[3] = {1.929454039488895f, -0.93178349823448126f, 0.002329458745586203f};
 
 //* 根据安装方式旋转和计算零漂后得到的传感器数据
