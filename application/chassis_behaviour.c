@@ -27,11 +27,7 @@
  * >               在这个新的函数, 你能给 "vx","vy",and "wz" 赋值想要的速度参数
  * >           3.  在"chassis_behaviour_mode_set"这个函数中，添加新的逻辑判断，给chassis_behaviour_mode赋值成CHASSIS_XXX_XXX
  * >               在函数最后，添加"else if(chassis_behaviour_mode == CHASSIS_XXX_XXX)" ,然后选择底盘控制策略
- * >           4.  在"chassis_behaviour_control_set" 函数的最后，添加
- * >               else if(chassis_behaviour_mode == CHASSIS_XXX_XXX)
- * >               {
- * >                   chassis_xxx_xxx_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
- * >               }
+ * >           4.  在 chassis_behaviour_control_func 数组里添加对应的函数
  ==============================================================================
  @ endverbatim
  ****************************(C) COPYRIGHT 2019 DJI****************************
@@ -48,18 +44,24 @@
 #define RC_chassis_switch (behaviour_set->chassis_RC->rc.s[CHASSIS_MODE_CHANNEL]) // 遥控器底盘控制拨杆
 
 static void chassis_behaviour_set(chassis_move_t *behaviour_set);
+
 static void chassis_zero_force_control(fp32 *vx_can_set, fp32 *vy_can_set, fp32 *wz_can_set, chassis_move_t *chassis_move_rc_to_vector);
 static void chassis_no_move_control(fp32 *vx_set, fp32 *vy_set, fp32 *wz_set, chassis_move_t *chassis_move_rc_to_vector);
 static void chassis_infantry_follow_gimbal_yaw_control(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, chassis_move_t *chassis_move_rc_to_vector);
-static void chassis_engineer_follow_chassis_yaw_control(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, chassis_move_t *chassis_move_rc_to_vector);
 static void chassis_no_follow_yaw_control(fp32 *vx_set, fp32 *vy_set, fp32 *wz_set, chassis_move_t *chassis_move_rc_to_vector);
 static void chassis_open_set_control(fp32 *vx_set, fp32 *vy_set, fp32 *wz_set, chassis_move_t *chassis_move_rc_to_vector);
 static void chassis_spin_control(fp32 *vx_set, fp32 *vy_set, fp32 *wz_set, chassis_move_t *chassis_move_rc_to_vector);
+static void (*chassis_behaviour_control_func[CHASSIS_BEHAVIOUR_LEN])(fp32 *, fp32 *, fp32 *, chassis_move_t *) = {chassis_zero_force_control,
+                                                                                                                  chassis_no_move_control,
+                                                                                                                  chassis_infantry_follow_gimbal_yaw_control,
+                                                                                                                  chassis_no_follow_yaw_control,
+                                                                                                                  chassis_open_set_control,
+                                                                                                                  chassis_spin_control};
 
 // 单独放在这防止了文件互相包含的问题，也方便了添加新模式
 // highlight, the variable chassis behaviour mode
 // 底盘行为模式
-chassis_behaviour_e chassis_behaviour_mode = CHASSIS_ZERO_FORCE;
+chassis_behaviour_e chassis_behaviour_mode             = CHASSIS_ZERO_FORCE;
 static chassis_behaviour_e chassis_behaviour_mode_last = CHASSIS_ZERO_FORCE;
 
 /**
@@ -85,9 +87,6 @@ void chassis_behaviour_mode_set(chassis_move_t *chassis_move_mode)
     } else if (chassis_behaviour_mode == CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW) {
         chassis_move_mode->chassis_translation_strategy = TRANSLATION_VECTOR_FOLLOW_GIMBAL;
         chassis_move_mode->chassis_rotation_strategy    = ROTATION_RELATIVE;
-    } else if (chassis_behaviour_mode == CHASSIS_ENGINEER_FOLLOW_CHASSIS_YAW) {
-        chassis_move_mode->chassis_translation_strategy = TRANSLATION_VECTOR_FOLLOW_BODY;
-        chassis_move_mode->chassis_rotation_strategy    = ROTATION_ABSOLUTE;
     } else if (chassis_behaviour_mode == CHASSIS_NO_FOLLOW_YAW) {
         chassis_move_mode->chassis_translation_strategy = TRANSLATION_VECTOR_FOLLOW_BODY;
         chassis_move_mode->chassis_rotation_strategy    = ROTATION_DIRECT;
@@ -124,16 +123,22 @@ static void chassis_behaviour_set(chassis_move_t *behaviour_set)
         else
             behaviour_set->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_ADD;
     } else if (chassis_behaviour_mode_last == CHASSIS_SPIN && chassis_behaviour_mode != CHASSIS_SPIN) {
-        // 设置小陀螺退出减速
-        if (behaviour_set->wz >= 0)
-            behaviour_set->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_SUB;
-        else
-            behaviour_set->chassis_spin_ramp.input = CHASSIS_SPIN_RAMP_SUB;
-        // 若小陀螺速度已减至足够小，则退出小陀螺模式
-        if (ABS(behaviour_set->chassis_spin_ramp.out) <= CHASSIS_WZ_SPIN_OUT)
-            behaviour_set->chassis_spin_ramp.out = 0; // 清空输出
-        else                                              // 否则继续在小陀螺模式中减速
-            chassis_behaviour_mode = CHASSIS_SPIN;
+        // 若小陀螺速度已减至足够小并且在不会反转的区间，则退出小陀螺模式
+        if (ABS(behaviour_set->chassis_spin_ramp.out) > CHASSIS_WZ_SPIN_OUT) {
+            // 设置小陀螺退出减速
+            if (behaviour_set->wz >= 0)
+                behaviour_set->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_SUB;
+            else
+                behaviour_set->chassis_spin_ramp.input = CHASSIS_SPIN_RAMP_SUB;
+            chassis_behaviour_mode = CHASSIS_SPIN; // 继续在小陀螺模式中减速
+        } else {
+            behaviour_set->chassis_spin_ramp.input = 0;
+            // BUG 还没退出小陀螺模式又将拨杆拨上会进入小陀螺低速旋转模式
+            if (((int)behaviour_set->wz ^ (int)(*behaviour_set->pchassis_relative_angle)) > 0)
+                behaviour_set->chassis_spin_ramp.out = 0; // 清空输出
+            else
+                chassis_behaviour_mode = CHASSIS_SPIN; // 否则继续在小陀螺模式中减速
+        }
     }
 
 #ifndef CHASSIS_DEBUG
@@ -175,37 +180,12 @@ static void chassis_behaviour_set(chassis_move_t *behaviour_set)
  */
 void chassis_behaviour_control_set(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, chassis_move_t *chassis_move_rc_to_vector)
 {
-
     if (vx_set == NULL || vy_set == NULL || angle_set == NULL || chassis_move_rc_to_vector == NULL) {
         return;
     }
 
-    if (chassis_behaviour_mode == CHASSIS_ZERO_FORCE) {
-        chassis_zero_force_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
-    } else if (chassis_behaviour_mode == CHASSIS_NO_MOVE) {
-        chassis_no_move_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
-    } else if (chassis_behaviour_mode == CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW) {
-        chassis_infantry_follow_gimbal_yaw_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
-    } else if (chassis_behaviour_mode == CHASSIS_ENGINEER_FOLLOW_CHASSIS_YAW) {
-        chassis_engineer_follow_chassis_yaw_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
-    } else if (chassis_behaviour_mode == CHASSIS_NO_FOLLOW_YAW) {
-        chassis_no_follow_yaw_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
-    } else if (chassis_behaviour_mode == CHASSIS_OPEN) {
-        chassis_open_set_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
-    }
-    //! STEP 4 添加新的行为模式遥控器控制值获取 BEGIN
-    /*
-    >   在"chassis_behaviour_control_set" 函数的最后，添加
-    >     else if(chassis_behaviour_mode == CHASSIS_XXX_XXX)
-    >     {
-    >         chassis_xxx_xxx_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
-    >     }
-    */
-    else if (chassis_behaviour_mode == CHASSIS_SPIN) {
-        chassis_spin_control(vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
-    }
-
-    //! STEP 4 添加新的行为模式遥控器控制值获取 END
+    if (chassis_behaviour_control_func[chassis_behaviour_mode] != NULL)
+        chassis_behaviour_control_func[chassis_behaviour_mode](vx_set, vy_set, angle_set, chassis_move_rc_to_vector);
 }
 
 /**
@@ -347,26 +327,6 @@ static void chassis_infantry_follow_gimbal_yaw_control(fp32 *vx_set, fp32 *vy_se
 
     //* 改模式下摇摆的角度就是底盘的相对角度
     *angle_set = swing_angle;
-}
-
-/**
- * @brief          底盘跟随底盘yaw的行为状态机下，底盘模式是跟随底盘角度，底盘旋转速度会根据角度差计算底盘旋转的角速度
- * @author         RM
- * @param[out]     vx_set 前进的速度, 正值 前进速度， 负值 后退速度
- * @param[out]     vy_set 左右的速度, 正值 左移速度， 负值 右移速度
- * @param[out]     angle_set 底盘设置的yaw，范围 -PI到PI
- * @param[in]      chassis_move_rc_to_vector 底盘数据
- * @retval         返回空
- */
-static void chassis_engineer_follow_chassis_yaw_control(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, chassis_move_t *chassis_move_rc_to_vector)
-{
-    if (vx_set == NULL || vy_set == NULL || angle_set == NULL || chassis_move_rc_to_vector == NULL) {
-        return;
-    }
-
-    chassis_rc_to_control_vector(vx_set, vy_set, chassis_move_rc_to_vector);
-
-    *angle_set = rad_format(chassis_move_rc_to_vector->chassis_yaw_set - CHASSIS_ANGLE_Z_RC_SEN * chassis_move_rc_to_vector->chassis_RC->rc.ch[CHASSIS_WZ_CHANNEL]);
 }
 
 /**

@@ -39,16 +39,16 @@
 
 //! PID
 //*pitch
-#define PITCH_SPEED_PID_KP                  2900.0f
-#define PITCH_SPEED_PID_KI                  60.0f
+#define PITCH_SPEED_PID_KP                  5000.0f
+#define PITCH_SPEED_PID_KI                  10.0f
 #define PITCH_SPEED_PID_KD                  0.0f
 #define PITCH_SPEED_PID_MAX_OUT             30000.0f
-#define PITCH_SPEED_PID_MAX_IOUT            10000.0f
+#define PITCH_SPEED_PID_MAX_IOUT            5000.0f
 #define PITCH_SPEED_PID_DEAD_BAND           0.0f
 
 #define PITCH_GYRO_ABSOLUTE_PID_KP          15.0f
 #define PITCH_GYRO_ABSOLUTE_PID_KI          0.0f
-#define PITCH_GYRO_ABSOLUTE_PID_KD          0.0f
+#define PITCH_GYRO_ABSOLUTE_PID_KD          0.3f
 #define PITCH_GYRO_ABSOLUTE_PID_MAX_OUT     10.0f
 #define PITCH_GYRO_ABSOLUTE_PID_MAX_IOUT    0.0f
 #define PITCH_GYRO_ABSOLUTE_PID_DEAD_BAND   0.0f
@@ -62,17 +62,17 @@
 
 //* yaw
 #define YAW_SPEED_PID_KP                  7000.0f // 8000.0f // 5390.0f
-#define YAW_SPEED_PID_KI                  12.0f // 12.0f   // 51.0f  
+#define YAW_SPEED_PID_KI                  8.0f // 12.0f   // 51.0f  
 #define YAW_SPEED_PID_KD                  0.0f
 #define YAW_SPEED_PID_MAX_OUT             30000.0f
-#define YAW_SPEED_PID_MAX_IOUT            5000.0f
+#define YAW_SPEED_PID_MAX_IOUT            3000.0f
 #define YAW_SPEED_PID_DEAD_BAND           0.0f
 
 #define YAW_GYRO_ABSOLUTE_PID_KP          32.0f
-#define YAW_GYRO_ABSOLUTE_PID_KI          0.0f
-#define YAW_GYRO_ABSOLUTE_PID_KD          0.3f
+#define YAW_GYRO_ABSOLUTE_PID_KI          0.000f
+#define YAW_GYRO_ABSOLUTE_PID_KD          0.2f
 #define YAW_GYRO_ABSOLUTE_PID_MAX_OUT     10.0f
-#define YAW_GYRO_ABSOLUTE_PID_MAX_IOUT    0.0f
+#define YAW_GYRO_ABSOLUTE_PID_MAX_IOUT    0.03f
 #define YAW_GYRO_ABSOLUTE_PID_DEAD_BAND   0.0f
 
 #define YAW_ENCODE_RELATIVE_PID_KP        8.0f

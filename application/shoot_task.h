@@ -54,7 +54,7 @@
 #define TRIGGER_MOTOR_ECD_TO_ANGLE    M2006_MOTOR_RPM_TO_VECTOR // 电机编码器反馈值转化为角度 (rad) 的比例
 
 // 拨弹轮速度及堵转相关参数
-#define TRIGGER_SPEED               10.0f // 拨弹轮发射时速度
+#define TRIGGER_SPEED               8.0f // 拨弹轮发射时速度
 #define TRIGGER_CONTINUE_FIRE_SPEED 15.0f // 拨弹轮连续发射时速度
 #define TRIGGER_REVERSE_SPEED       -5.0f // 拨弹轮堵转倒退时速度
 #define TRIGGER_BLOCK_SPEED         2.0f  // 认定为堵转时的速度
@@ -62,11 +62,11 @@
 #define TRIGGER_REVERSE_TIME        500   // 一次反转的时长
 
 // 拨弹轮电机 PID
-#define TRIGGER_SPEED_PID_KP        1000.0f
-#define TRIGGER_SPEED_PID_KI        2.0f
+#define TRIGGER_SPEED_PID_KP        666.0f
+#define TRIGGER_SPEED_PID_KI        0.8f
 #define TRIGGER_SPEED_PID_KD        0.0f
 #define TRIGGER_SPEED_PID_MAX_OUT   10000.0f
-#define TRIGGER_SPEED_PID_MAX_IOUT  10000.0f
+#define TRIGGER_SPEED_PID_MAX_IOUT  2000.0f
 #define TRIGGER_SPEED_PID_DEAD_BAND 0.0f
 
 //! 遥控器键盘射击状态控制相关参数

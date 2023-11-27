@@ -175,6 +175,8 @@ static void chassis_init(chassis_move_t *chassis_move_init)
 
     /* 获取底盘角度数据来源指针 */
     // get gyro sensor euler angle point
+    // 获取底盘相对云台角度指针
+    chassis_move_init->pchassis_relative_angle = &get_yaw_motor_point()->relative_angle;
     // 获取陀螺仪姿态角指针
     chassis_move_init->chassis_INS_angle = get_INS_angle_point();
     // get gimbal motor data point
@@ -342,15 +344,14 @@ static void chassis_set_contorl(chassis_move_t *chassis_move_control)
 #endif
         // calculate ratation speed
         // 计算旋转PID角速度
-        chassis_move_control->wz_set = -PID_calc(&chassis_move_control->chassis_angle_pid, chassis_move_control->chassis_yaw_motor->relative_angle, chassis_move_control->chassis_relative_angle_set);
+        chassis_move_control->wz_set = -PID_calc(&chassis_move_control->chassis_angle_pid, *(chassis_move_control->pchassis_relative_angle), chassis_move_control->chassis_relative_angle_set);
 #if defined CHASSIS_DEBUG_ANGEL && defined PRINT_ON
         usart1_printf("%.2f,%.2f,%.2f\r\n",
                       chassis_move_control->chassis_relative_angle_set,
                       chassis_move_control->wz_set,
-                      chassis_move_control->chassis_yaw_motor->relative_angle);
+                      *(chassis_move_control->pchassis_relative_angle));
 #endif
     } else if (chassis_move_control->chassis_rotation_strategy == ROTATION_ABSOLUTE) {
-        // TODO 不清楚 我怀疑这个模式和直接控制角度的是一样的，只不过这个转得更慢方便控制
         fp32 delta_angle = 0.0f;
         // set chassis yaw angle set-point
         // 设置底盘控制的角度
@@ -358,7 +359,6 @@ static void chassis_set_contorl(chassis_move_t *chassis_move_control)
         delta_angle                           = rad_format(chassis_move_control->chassis_yaw_set - chassis_move_control->chassis_yaw);
         // calculate rotation speed
         // 计算旋转的角速度
-        // TODO 与上一个模式比较，这里用 delta_angle 是相当于增量式吗，为什么不用 yaw_set 和 yaw 呢？
         chassis_move_control->wz_set = PID_calc(&chassis_move_control->chassis_angle_pid, 0.0f, delta_angle);
     }
 }

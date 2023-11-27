@@ -68,7 +68,7 @@
 #define CHASSIS_MOTOR_RPM_TO_VECTOR_SEN M3508_MOTOR_RPM_TO_VECTOR
 // 小陀螺缓启停的加速度
 #define CHASSIS_SPIN_RAMP_ADD 25.0f
-#define CHASSIS_SPIN_RAMP_SUB 15.0f
+#define CHASSIS_SPIN_RAMP_SUB 10.0f
 // 小陀螺模式的自旋速度
 #define CHASSIS_WZ_SPIN 10.0f
 // 小陀螺模式退出的速度
@@ -77,10 +77,10 @@
 //* 底盘运动限制
 // chassis 3508 max motor control current
 // 底盘3508最大can发送电流值
-#define MAX_MOTOR_CAN_CURRENT 14000.0f
+#define MAX_MOTOR_CAN_CURRENT 16000.0f
 // single chassis motor max speed
 // 单个底盘电机最大速度
-#define MAX_WHEEL_SPEED      2.5f
+#define MAX_WHEEL_SPEED      2.6f
 #define MAX_WHEEL_SPEED_SPIN 3.0f
 // chassis forward or back max speed
 // 底盘运动过程最大前进速度
@@ -106,11 +106,11 @@
 #define M3505_MOTOR_SPEED_PID_DEAD_BAND 0.0f
 // chassis follow angle PID
 // 底盘旋转跟随PID
-#define CHASSIS_FOLLOW_GIMBAL_PID_KP        6.0f //原始 40.0f
-#define CHASSIS_FOLLOW_GIMBAL_PID_KI        0.025f
-#define CHASSIS_FOLLOW_GIMBAL_PID_KD        0.0f //原始 0.0f
+#define CHASSIS_FOLLOW_GIMBAL_PID_KP        7.0f // 原始 40.0f
+#define CHASSIS_FOLLOW_GIMBAL_PID_KI        0.0f
+#define CHASSIS_FOLLOW_GIMBAL_PID_KD        0.2f // 原始 0.0f
 #define CHASSIS_FOLLOW_GIMBAL_PID_MAX_OUT   6.0f
-#define CHASSIS_FOLLOW_GIMBAL_PID_MAX_IOUT  0.1f
+#define CHASSIS_FOLLOW_GIMBAL_PID_MAX_IOUT  0.0f
 #define CHASSIS_FOLLOW_GIMBAL_PID_DEAD_BAND 0.0f
 
 //! 遥控器参数
@@ -157,8 +157,8 @@
 //* 遥控器滤波参数
 #define CHASSIS_ACCEL_X_NUM 0.1666666667f
 #define CHASSIS_ACCEL_Y_NUM 0.3333333333f
-#define RAMP_KEY_ADD_VX 3.0f
-#define RAMP_KEY_ADD_VY 3.0f
+#define RAMP_KEY_ADD_VX     3.0f
+#define RAMP_KEY_ADD_VY     3.0f
 
 //* 遥控器摇杆死区设置
 // rocker value deadline
@@ -212,7 +212,7 @@ typedef struct
     // 小陀螺缓启停所用的斜波函数
     ramp_function_source_t chassis_spin_ramp;
     // 底盘与云台的相对角度
-    fp32 chassis_relative_angle;     // the relative angle between chassis and gimbal.底盘与云台的相对角度，单位 rad
+    const fp32* pchassis_relative_angle;     // the relative angle between chassis and gimbal.底盘与云台的相对角度，单位 rad
     fp32 chassis_relative_angle_set; // the set relative angle.设置相对云台控制角度
     // 底盘的绝对角度，底盘没有陀螺仪时由云台的陀螺仪及电机角度计算得到
     fp32 chassis_yaw; // the yaw angle calculated by gyro sensor and gimbal motor.陀螺仪和云台电机叠加的yaw角度
@@ -222,8 +222,8 @@ typedef struct
 
     //* 底盘电机结构体及其 PID 结构体
     chassis_motor_t motor_chassis[4]; // chassis motor data.底盘电机数据
-    pid_typedef motor_speed_pid[4];         // motor speed PID.底盘电机速度pid
-    pid_typedef chassis_angle_pid;          // follow angle PID.底盘跟随角度pid
+    pid_typedef motor_speed_pid[4];   // motor speed PID.底盘电机速度pid
+    pid_typedef chassis_angle_pid;    // follow angle PID.底盘跟随角度pid
 
     //* 底盘角度数据来源指针
     const gimbal_motor_t *chassis_yaw_motor;   // will use the relative angle of yaw gimbal motor to calculate the euler angle.底盘使用到yaw云台电机的相对角度来计算底盘的欧拉角.

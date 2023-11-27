@@ -59,8 +59,8 @@ todo test
 #ifdef GIMBAL_DEBUG
     //* STEP 2 选择要调试的电机 *//
     // #define GIMBAL_DEBUG_NO_FORCE
-    // #define GIMBAL_DEBUG_ONLY_PITCH
-    #define GIMBAL_DEBUG_ONLY_YAW
+    #define GIMBAL_DEBUG_ONLY_PITCH
+    // #define GIMBAL_DEBUG_ONLY_YAW
     //* STEP 3 选择调试的输入来源 *//
     // #define GIMBAL_DEBUG_INPUT_RC // 控制值来源于遥控器
     #define GIMBAL_DEBUG_INPUT_CODE // 控制值在代码中设置

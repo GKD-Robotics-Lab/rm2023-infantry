@@ -135,8 +135,8 @@ events:
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-0zt8u4"
-      binary: "C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-0zt8u4"
+      source: "C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-f8qrtx"
+      binary: "C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-f8qrtx"
     cmakeVariables:
       CMAKE_C_FLAGS: ""
       CMAKE_C_FLAGS_DEBUG: "-g"
@@ -145,13 +145,13 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-0zt8u4'
+        Change Dir: 'C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-f8qrtx'
         
-        Run Build Command(s): C:/CMake/bin/cmake.exe -E env VERBOSE=1 C:/Users/16212/.eide/bin/builder/msys/bin/make.exe -f Makefile cmTC_65daf/fast
-        /usr/bin/make  -f CMakeFiles/cmTC_65daf.dir/build.make CMakeFiles/cmTC_65daf.dir/build
-        make[1]: Entering directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-0zt8u4'
-        Building C object CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj
-        "C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-gcc.exe"   -v -o CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj -c C:/CMake/share/cmake-3.27/Modules/CMakeCCompilerABI.c
+        Run Build Command(s): C:/CMake/bin/cmake.exe -E env VERBOSE=1 C:/Users/16212/.eide/bin/builder/msys/bin/make.exe -f Makefile cmTC_2b00f/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_2b00f.dir/build.make CMakeFiles/cmTC_2b00f.dir/build
+        make[1]: Entering directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-f8qrtx'
+        Building C object CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj
+        "C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-gcc.exe"   -v -o CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj -c C:/CMake/share/cmake-3.27/Modules/CMakeCCompilerABI.c
         Using built-in specs.
         COLLECT_GCC=c:\\GNU Arm Embedded Toolchain\\bin\\arm-none-eabi-gcc.exe
         Target: arm-none-eabi
@@ -159,8 +159,8 @@ events:
         Thread model: single
         Supported LTO compression algorithms: zlib
         gcc version 12.3.1 20230626 (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_65daf.dir/'
-         c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/cc1.exe -quiet -v -iprefix c:\\gnu arm embedded toolchain\\bin\\../lib/gcc/arm-none-eabi/12.3.1/ -isysroot c:\\gnu arm embedded toolchain\\bin\\../arm-none-eabi -D__USES_INITFINI__ C:/CMake/share/cmake-3.27/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_65daf.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mcpu=arm7tdmi -mfloat-abi=soft -marm -mlibarch=armv4t -march=armv4t -version -o C:\\Users\\16212\\AppData\\Local\\Temp\\ccDpPV6N.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_2b00f.dir/'
+         c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/cc1.exe -quiet -v -iprefix c:\\gnu arm embedded toolchain\\bin\\../lib/gcc/arm-none-eabi/12.3.1/ -isysroot c:\\gnu arm embedded toolchain\\bin\\../arm-none-eabi -D__USES_INITFINI__ C:/CMake/share/cmake-3.27/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_2b00f.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mcpu=arm7tdmi -mfloat-abi=soft -marm -mlibarch=armv4t -march=armv4t -version -o C:\\Users\\16212\\AppData\\Local\\Temp\\ccBVx96N.s
         GNU C17 (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) version 12.3.1 20230626 (arm-none-eabi)
         	compiled by GNU C version 9.3-win32 20200320, GMP version 6.2.1, MPFR version 3.1.6, MPC version 1.0.3, isl version isl-0.15-1-g835ea3a-GMP
         
@@ -181,18 +181,18 @@ events:
         
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: fb91a105811bc5825517df4b6b01bd08
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_65daf.dir/'
-         c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/as.exe -v -march=armv4t -mfloat-abi=soft -meabi=5 -o CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj C:\\Users\\16212\\AppData\\Local\\Temp\\ccDpPV6N.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_2b00f.dir/'
+         c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/as.exe -v -march=armv4t -mfloat-abi=soft -meabi=5 -o CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj C:\\Users\\16212\\AppData\\Local\\Temp\\ccBVx96N.s
         GNU assembler version 2.40.0 (arm-none-eabi) using BFD version (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) 2.40.0.20230627
         COMPILER_PATH=c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/;c:/gnu arm embedded toolchain/bin/../libexec/gcc/;c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/
         LIBRARY_PATH=c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/;c:/gnu arm embedded toolchain/bin/../lib/gcc/;c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/lib/;c:/gnu arm embedded toolchain/bin/../arm-none-eabi/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.'
-        Linking C static library libcmTC_65daf.a
-        C:/CMake/bin/cmake.exe -P CMakeFiles/cmTC_65daf.dir/cmake_clean_target.cmake
-        C:/CMake/bin/cmake.exe -E cmake_link_script CMakeFiles/cmTC_65daf.dir/link.txt --verbose=1
-        arm-none-eabi-ar qc libcmTC_65daf.a CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj
-        "C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-ranlib.exe" libcmTC_65daf.a
-        make[1]: Leaving directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-0zt8u4'
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.'
+        Linking C static library libcmTC_2b00f.a
+        C:/CMake/bin/cmake.exe -P CMakeFiles/cmTC_2b00f.dir/cmake_clean_target.cmake
+        C:/CMake/bin/cmake.exe -E cmake_link_script CMakeFiles/cmTC_2b00f.dir/link.txt --verbose=1
+        arm-none-eabi-ar qc libcmTC_2b00f.a CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj
+        "C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-ranlib.exe" libcmTC_2b00f.a
+        make[1]: Leaving directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-f8qrtx'
         
       exitCode: 0
   -
@@ -224,13 +224,13 @@ events:
     message: |
       Parsed C implicit link information:
         link line regex: [^( *|.*[/\\])(arm-none-eabi-ld\\.exe|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
-        ignore line: [Change Dir: 'C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-0zt8u4']
+        ignore line: [Change Dir: 'C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-f8qrtx']
         ignore line: []
-        ignore line: [Run Build Command(s): C:/CMake/bin/cmake.exe -E env VERBOSE=1 C:/Users/16212/.eide/bin/builder/msys/bin/make.exe -f Makefile cmTC_65daf/fast]
-        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_65daf.dir/build.make CMakeFiles/cmTC_65daf.dir/build]
-        ignore line: [make[1]: Entering directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-0zt8u4']
-        ignore line: [Building C object CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj]
-        ignore line: ["C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-gcc.exe"   -v -o CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj -c C:/CMake/share/cmake-3.27/Modules/CMakeCCompilerABI.c]
+        ignore line: [Run Build Command(s): C:/CMake/bin/cmake.exe -E env VERBOSE=1 C:/Users/16212/.eide/bin/builder/msys/bin/make.exe -f Makefile cmTC_2b00f/fast]
+        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_2b00f.dir/build.make CMakeFiles/cmTC_2b00f.dir/build]
+        ignore line: [make[1]: Entering directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-f8qrtx']
+        ignore line: [Building C object CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj]
+        ignore line: ["C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-gcc.exe"   -v -o CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj -c C:/CMake/share/cmake-3.27/Modules/CMakeCCompilerABI.c]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=c:\\GNU Arm Embedded Toolchain\\bin\\arm-none-eabi-gcc.exe]
         ignore line: [Target: arm-none-eabi]
@@ -238,8 +238,8 @@ events:
         ignore line: [Thread model: single]
         ignore line: [Supported LTO compression algorithms: zlib]
         ignore line: [gcc version 12.3.1 20230626 (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_65daf.dir/']
-        ignore line: [ c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/cc1.exe -quiet -v -iprefix c:\\gnu arm embedded toolchain\\bin\\../lib/gcc/arm-none-eabi/12.3.1/ -isysroot c:\\gnu arm embedded toolchain\\bin\\../arm-none-eabi -D__USES_INITFINI__ C:/CMake/share/cmake-3.27/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_65daf.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mcpu=arm7tdmi -mfloat-abi=soft -marm -mlibarch=armv4t -march=armv4t -version -o C:\\Users\\16212\\AppData\\Local\\Temp\\ccDpPV6N.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_2b00f.dir/']
+        ignore line: [ c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/cc1.exe -quiet -v -iprefix c:\\gnu arm embedded toolchain\\bin\\../lib/gcc/arm-none-eabi/12.3.1/ -isysroot c:\\gnu arm embedded toolchain\\bin\\../arm-none-eabi -D__USES_INITFINI__ C:/CMake/share/cmake-3.27/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_2b00f.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mcpu=arm7tdmi -mfloat-abi=soft -marm -mlibarch=armv4t -march=armv4t -version -o C:\\Users\\16212\\AppData\\Local\\Temp\\ccBVx96N.s]
         ignore line: [GNU C17 (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) version 12.3.1 20230626 (arm-none-eabi)]
         ignore line: [	compiled by GNU C version 9.3-win32 20200320  GMP version 6.2.1  MPFR version 3.1.6  MPC version 1.0.3  isl version isl-0.15-1-g835ea3a-GMP]
         ignore line: []
@@ -260,8 +260,8 @@ events:
         ignore line: []
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [Compiler executable checksum: fb91a105811bc5825517df4b6b01bd08]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_65daf.dir/']
-        ignore line: [ c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/as.exe -v -march=armv4t -mfloat-abi=soft -meabi=5 -o CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj C:\\Users\\16212\\AppData\\Local\\Temp\\ccDpPV6N.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_2b00f.dir/']
+        ignore line: [ c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/as.exe -v -march=armv4t -mfloat-abi=soft -meabi=5 -o CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj C:\\Users\\16212\\AppData\\Local\\Temp\\ccBVx96N.s]
         ignore line: [GNU assembler version 2.40.0 (arm-none-eabi) using BFD version (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) 2.40.0.20230627]
         ignore line: [COMPILER_PATH=c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/]
         ignore line: [c:/gnu arm embedded toolchain/bin/../libexec/gcc/]
@@ -270,13 +270,13 @@ events:
         ignore line: [c:/gnu arm embedded toolchain/bin/../lib/gcc/]
         ignore line: [c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/lib/]
         ignore line: [c:/gnu arm embedded toolchain/bin/../arm-none-eabi/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.']
-        ignore line: [Linking C static library libcmTC_65daf.a]
-        ignore line: [C:/CMake/bin/cmake.exe -P CMakeFiles/cmTC_65daf.dir/cmake_clean_target.cmake]
-        ignore line: [C:/CMake/bin/cmake.exe -E cmake_link_script CMakeFiles/cmTC_65daf.dir/link.txt --verbose=1]
-        ignore line: [arm-none-eabi-ar qc libcmTC_65daf.a CMakeFiles/cmTC_65daf.dir/CMakeCCompilerABI.c.obj]
-        ignore line: ["C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-ranlib.exe" libcmTC_65daf.a]
-        ignore line: [make[1]: Leaving directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-0zt8u4']
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.']
+        ignore line: [Linking C static library libcmTC_2b00f.a]
+        ignore line: [C:/CMake/bin/cmake.exe -P CMakeFiles/cmTC_2b00f.dir/cmake_clean_target.cmake]
+        ignore line: [C:/CMake/bin/cmake.exe -E cmake_link_script CMakeFiles/cmTC_2b00f.dir/link.txt --verbose=1]
+        ignore line: [arm-none-eabi-ar qc libcmTC_2b00f.a CMakeFiles/cmTC_2b00f.dir/CMakeCCompilerABI.c.obj]
+        ignore line: ["C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-ranlib.exe" libcmTC_2b00f.a]
+        ignore line: [make[1]: Leaving directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-f8qrtx']
         ignore line: []
         ignore line: []
         implicit libs: []
@@ -294,8 +294,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-jstzuy"
-      binary: "C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-jstzuy"
+      source: "C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-h29kfs"
+      binary: "C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-h29kfs"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -304,13 +304,13 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-jstzuy'
+        Change Dir: 'C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-h29kfs'
         
-        Run Build Command(s): C:/CMake/bin/cmake.exe -E env VERBOSE=1 C:/Users/16212/.eide/bin/builder/msys/bin/make.exe -f Makefile cmTC_58529/fast
-        /usr/bin/make  -f CMakeFiles/cmTC_58529.dir/build.make CMakeFiles/cmTC_58529.dir/build
-        make[1]: Entering directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-jstzuy'
-        Building CXX object CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj
-        "C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-g++.exe"   -v -o CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj -c C:/CMake/share/cmake-3.27/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s): C:/CMake/bin/cmake.exe -E env VERBOSE=1 C:/Users/16212/.eide/bin/builder/msys/bin/make.exe -f Makefile cmTC_d9c0b/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_d9c0b.dir/build.make CMakeFiles/cmTC_d9c0b.dir/build
+        make[1]: Entering directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-h29kfs'
+        Building CXX object CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj
+        "C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-g++.exe"   -v -o CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj -c C:/CMake/share/cmake-3.27/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
         COLLECT_GCC=c:\\GNU Arm Embedded Toolchain\\bin\\arm-none-eabi-g++.exe
         Target: arm-none-eabi
@@ -318,8 +318,8 @@ events:
         Thread model: single
         Supported LTO compression algorithms: zlib
         gcc version 12.3.1 20230626 (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_58529.dir/'
-         c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/cc1plus.exe -quiet -v -iprefix c:\\gnu arm embedded toolchain\\bin\\../lib/gcc/arm-none-eabi/12.3.1/ -isysroot c:\\gnu arm embedded toolchain\\bin\\../arm-none-eabi -D__USES_INITFINI__ C:/CMake/share/cmake-3.27/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_58529.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mcpu=arm7tdmi -mfloat-abi=soft -marm -mlibarch=armv4t -march=armv4t -version -o C:\\Users\\16212\\AppData\\Local\\Temp\\cccbIRiK.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_d9c0b.dir/'
+         c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/cc1plus.exe -quiet -v -iprefix c:\\gnu arm embedded toolchain\\bin\\../lib/gcc/arm-none-eabi/12.3.1/ -isysroot c:\\gnu arm embedded toolchain\\bin\\../arm-none-eabi -D__USES_INITFINI__ C:/CMake/share/cmake-3.27/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_d9c0b.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mcpu=arm7tdmi -mfloat-abi=soft -marm -mlibarch=armv4t -march=armv4t -version -o C:\\Users\\16212\\AppData\\Local\\Temp\\cccG2z41.s
         GNU C++17 (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) version 12.3.1 20230626 (arm-none-eabi)
         	compiled by GNU C version 9.3-win32 20200320, GMP version 6.2.1, MPFR version 3.1.6, MPC version 1.0.3, isl version isl-0.15-1-g835ea3a-GMP
         
@@ -346,18 +346,18 @@ events:
         
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: e7b3f66350dc9cf5c9189807aa34626d
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_58529.dir/'
-         c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/as.exe -v -march=armv4t -mfloat-abi=soft -meabi=5 -o CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj C:\\Users\\16212\\AppData\\Local\\Temp\\cccbIRiK.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_d9c0b.dir/'
+         c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/as.exe -v -march=armv4t -mfloat-abi=soft -meabi=5 -o CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj C:\\Users\\16212\\AppData\\Local\\Temp\\cccG2z41.s
         GNU assembler version 2.40.0 (arm-none-eabi) using BFD version (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) 2.40.0.20230627
         COMPILER_PATH=c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/;c:/gnu arm embedded toolchain/bin/../libexec/gcc/;c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/
         LIBRARY_PATH=c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/;c:/gnu arm embedded toolchain/bin/../lib/gcc/;c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/lib/;c:/gnu arm embedded toolchain/bin/../arm-none-eabi/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.'
-        Linking CXX static library libcmTC_58529.a
-        C:/CMake/bin/cmake.exe -P CMakeFiles/cmTC_58529.dir/cmake_clean_target.cmake
-        C:/CMake/bin/cmake.exe -E cmake_link_script CMakeFiles/cmTC_58529.dir/link.txt --verbose=1
-        arm-none-eabi-ar qc libcmTC_58529.a CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj
-        "C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-ranlib.exe" libcmTC_58529.a
-        make[1]: Leaving directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-jstzuy'
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.'
+        Linking CXX static library libcmTC_d9c0b.a
+        C:/CMake/bin/cmake.exe -P CMakeFiles/cmTC_d9c0b.dir/cmake_clean_target.cmake
+        C:/CMake/bin/cmake.exe -E cmake_link_script CMakeFiles/cmTC_d9c0b.dir/link.txt --verbose=1
+        arm-none-eabi-ar qc libcmTC_d9c0b.a CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj
+        "C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-ranlib.exe" libcmTC_d9c0b.a
+        make[1]: Leaving directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-h29kfs'
         
       exitCode: 0
   -
@@ -395,13 +395,13 @@ events:
     message: |
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(arm-none-eabi-ld\\.exe|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
-        ignore line: [Change Dir: 'C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-jstzuy']
+        ignore line: [Change Dir: 'C:/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-h29kfs']
         ignore line: []
-        ignore line: [Run Build Command(s): C:/CMake/bin/cmake.exe -E env VERBOSE=1 C:/Users/16212/.eide/bin/builder/msys/bin/make.exe -f Makefile cmTC_58529/fast]
-        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_58529.dir/build.make CMakeFiles/cmTC_58529.dir/build]
-        ignore line: [make[1]: Entering directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-jstzuy']
-        ignore line: [Building CXX object CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj]
-        ignore line: ["C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-g++.exe"   -v -o CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj -c C:/CMake/share/cmake-3.27/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Run Build Command(s): C:/CMake/bin/cmake.exe -E env VERBOSE=1 C:/Users/16212/.eide/bin/builder/msys/bin/make.exe -f Makefile cmTC_d9c0b/fast]
+        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_d9c0b.dir/build.make CMakeFiles/cmTC_d9c0b.dir/build]
+        ignore line: [make[1]: Entering directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-h29kfs']
+        ignore line: [Building CXX object CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj]
+        ignore line: ["C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-g++.exe"   -v -o CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj -c C:/CMake/share/cmake-3.27/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=c:\\GNU Arm Embedded Toolchain\\bin\\arm-none-eabi-g++.exe]
         ignore line: [Target: arm-none-eabi]
@@ -409,8 +409,8 @@ events:
         ignore line: [Thread model: single]
         ignore line: [Supported LTO compression algorithms: zlib]
         ignore line: [gcc version 12.3.1 20230626 (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_58529.dir/']
-        ignore line: [ c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/cc1plus.exe -quiet -v -iprefix c:\\gnu arm embedded toolchain\\bin\\../lib/gcc/arm-none-eabi/12.3.1/ -isysroot c:\\gnu arm embedded toolchain\\bin\\../arm-none-eabi -D__USES_INITFINI__ C:/CMake/share/cmake-3.27/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_58529.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mcpu=arm7tdmi -mfloat-abi=soft -marm -mlibarch=armv4t -march=armv4t -version -o C:\\Users\\16212\\AppData\\Local\\Temp\\cccbIRiK.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_d9c0b.dir/']
+        ignore line: [ c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/cc1plus.exe -quiet -v -iprefix c:\\gnu arm embedded toolchain\\bin\\../lib/gcc/arm-none-eabi/12.3.1/ -isysroot c:\\gnu arm embedded toolchain\\bin\\../arm-none-eabi -D__USES_INITFINI__ C:/CMake/share/cmake-3.27/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_d9c0b.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mcpu=arm7tdmi -mfloat-abi=soft -marm -mlibarch=armv4t -march=armv4t -version -o C:\\Users\\16212\\AppData\\Local\\Temp\\cccG2z41.s]
         ignore line: [GNU C++17 (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) version 12.3.1 20230626 (arm-none-eabi)]
         ignore line: [	compiled by GNU C version 9.3-win32 20200320  GMP version 6.2.1  MPFR version 3.1.6  MPC version 1.0.3  isl version isl-0.15-1-g835ea3a-GMP]
         ignore line: []
@@ -437,8 +437,8 @@ events:
         ignore line: []
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [Compiler executable checksum: e7b3f66350dc9cf5c9189807aa34626d]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_58529.dir/']
-        ignore line: [ c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/as.exe -v -march=armv4t -mfloat-abi=soft -meabi=5 -o CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj C:\\Users\\16212\\AppData\\Local\\Temp\\cccbIRiK.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_d9c0b.dir/']
+        ignore line: [ c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/as.exe -v -march=armv4t -mfloat-abi=soft -meabi=5 -o CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj C:\\Users\\16212\\AppData\\Local\\Temp\\cccG2z41.s]
         ignore line: [GNU assembler version 2.40.0 (arm-none-eabi) using BFD version (Arm GNU Toolchain 12.3.Rel1 (Build arm-12.35)) 2.40.0.20230627]
         ignore line: [COMPILER_PATH=c:/gnu arm embedded toolchain/bin/../libexec/gcc/arm-none-eabi/12.3.1/]
         ignore line: [c:/gnu arm embedded toolchain/bin/../libexec/gcc/]
@@ -447,13 +447,13 @@ events:
         ignore line: [c:/gnu arm embedded toolchain/bin/../lib/gcc/]
         ignore line: [c:/gnu arm embedded toolchain/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/lib/]
         ignore line: [c:/gnu arm embedded toolchain/bin/../arm-none-eabi/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.']
-        ignore line: [Linking CXX static library libcmTC_58529.a]
-        ignore line: [C:/CMake/bin/cmake.exe -P CMakeFiles/cmTC_58529.dir/cmake_clean_target.cmake]
-        ignore line: [C:/CMake/bin/cmake.exe -E cmake_link_script CMakeFiles/cmTC_58529.dir/link.txt --verbose=1]
-        ignore line: [arm-none-eabi-ar qc libcmTC_58529.a CMakeFiles/cmTC_58529.dir/CMakeCXXCompilerABI.cpp.obj]
-        ignore line: ["C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-ranlib.exe" libcmTC_58529.a]
-        ignore line: [make[1]: Leaving directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-jstzuy']
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-mcpu=arm7tdmi' '-mfloat-abi=soft' '-marm' '-mlibarch=armv4t' '-march=armv4t' '-dumpdir' 'CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.']
+        ignore line: [Linking CXX static library libcmTC_d9c0b.a]
+        ignore line: [C:/CMake/bin/cmake.exe -P CMakeFiles/cmTC_d9c0b.dir/cmake_clean_target.cmake]
+        ignore line: [C:/CMake/bin/cmake.exe -E cmake_link_script CMakeFiles/cmTC_d9c0b.dir/link.txt --verbose=1]
+        ignore line: [arm-none-eabi-ar qc libcmTC_d9c0b.a CMakeFiles/cmTC_d9c0b.dir/CMakeCXXCompilerABI.cpp.obj]
+        ignore line: ["C:/GNU Arm Embedded Toolchain/bin/arm-none-eabi-ranlib.exe" libcmTC_d9c0b.a]
+        ignore line: [make[1]: Leaving directory `/c/Users/16212/Documents/dir_en/Robomaster/code/lite_infantry/vscode-cmake-build/CMakeFiles/CMakeScratch/TryCompile-h29kfs']
         ignore line: []
         ignore line: []
         implicit libs: []
