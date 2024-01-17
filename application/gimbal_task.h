@@ -39,7 +39,7 @@
 
 //! PID
 //*pitch
-#define PITCH_SPEED_PID_KP                  5000.0f
+#define PITCH_SPEED_PID_KP                  3000.0f
 #define PITCH_SPEED_PID_KI                  10.0f
 #define PITCH_SPEED_PID_KD                  0.0f
 #define PITCH_SPEED_PID_MAX_OUT             30000.0f
@@ -86,7 +86,7 @@
 //* direction
 // 云台实际旋转方向是否与电机旋转方向反向
 // 1 为正向，-1 为反向
-#define PITCH_MOTOR_DIR -1
+#define PITCH_MOTOR_DIR 1
 #define YAW_MOTOR_DIR   1
 
 //* turn
@@ -118,11 +118,11 @@
 
 //* limit
 // 云台中值与云台控制值限幅
-#define YAW_OFFSET_ECD           4200
+#define YAW_OFFSET_ECD           3096
 #define YAW_MAX_RELATIVE_ANGLE   0.1f
 #define YAW_MIN_RELATIVE_ANGLE   -0.1f
 
-#define PITCH_OFFSET_ECD         8000
+#define PITCH_OFFSET_ECD         600
 #define PITCH_MAX_RELATIVE_ANGLE 0.25f
 #define PITCH_MIN_RELATIVE_ANGLE -0.45f
 

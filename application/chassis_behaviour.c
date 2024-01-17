@@ -107,7 +107,7 @@ static void chassis_behaviour_set(chassis_move_t *behaviour_set)
 {
     //* 遥控器设置底盘行为模式
     if (switch_is_down(RC_chassis_switch)) {
-        chassis_behaviour_mode = CHASSIS_NO_FOLLOW_YAW;
+        chassis_behaviour_mode = CHASSIS_NO_MOVE;
     } else if (switch_is_mid(RC_chassis_switch) || (behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_TEMP_STOP_KEYBOARD)) {
         chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;
     } else if (switch_is_up(RC_chassis_switch) || (behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_KEYBOARD)) {
@@ -115,39 +115,39 @@ static void chassis_behaviour_set(chassis_move_t *behaviour_set)
     }
 
     //* 进出小陀螺模式的过渡
-    if (chassis_behaviour_mode_last != CHASSIS_SPIN && chassis_behaviour_mode == CHASSIS_SPIN) {
-        behaviour_set->chassis_spin_ramp.out = behaviour_set->wz;
-        // 设置小陀螺启动增速
-        if (behaviour_set->wz >= 0)
-            behaviour_set->chassis_spin_ramp.input = CHASSIS_SPIN_RAMP_ADD;
-        else
-            behaviour_set->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_ADD;
-    } else if (chassis_behaviour_mode_last == CHASSIS_SPIN && chassis_behaviour_mode != CHASSIS_SPIN) {
-        // 若小陀螺速度已减至足够小并且在不会反转的区间，则退出小陀螺模式
-        if (ABS(behaviour_set->chassis_spin_ramp.out) > CHASSIS_WZ_SPIN_OUT) {
-            // 设置小陀螺退出减速
-            if (behaviour_set->wz >= 0)
-                behaviour_set->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_SUB;
-            else
-                behaviour_set->chassis_spin_ramp.input = CHASSIS_SPIN_RAMP_SUB;
-            chassis_behaviour_mode = CHASSIS_SPIN; // 继续在小陀螺模式中减速
-        } else {
-            behaviour_set->chassis_spin_ramp.input = 0;
-            // BUG 还没退出小陀螺模式又将拨杆拨上会进入小陀螺低速旋转模式
-            if (((int)behaviour_set->wz ^ (int)(*behaviour_set->pchassis_relative_angle)) > 0)
-                behaviour_set->chassis_spin_ramp.out = 0; // 清空输出
-            else
-                chassis_behaviour_mode = CHASSIS_SPIN; // 否则继续在小陀螺模式中减速
-        }
-    }
+    /**if (chassis_behaviour_mode_last != CHASSIS_SPIN && chassis_behaviour_mode == CHASSIS_SPIN) {*/
+    /**    behaviour_set->chassis_spin_ramp.out = behaviour_set->wz;*/
+    /**    // 设置小陀螺启动增速*/
+    /**    if (behaviour_set->wz >= 0)*/
+    /**        behaviour_set->chassis_spin_ramp.input = CHASSIS_SPIN_RAMP_ADD;*/
+    /**    else*/
+    /**        behaviour_set->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_ADD;*/
+    /**} else if (chassis_behaviour_mode_last == CHASSIS_SPIN && chassis_behaviour_mode != CHASSIS_SPIN) {*/
+    /**    // 若小陀螺速度已减至足够小并且在不会反转的区间，则退出小陀螺模式*/
+    /**    if (ABS(behaviour_set->chassis_spin_ramp.out) > CHASSIS_WZ_SPIN_OUT) {*/
+    /**        // 设置小陀螺退出减速*/
+    /**        if (behaviour_set->wz >= 0)*/
+    /**            behaviour_set->chassis_spin_ramp.input = -CHASSIS_SPIN_RAMP_SUB;*/
+    /**        else*/
+    /**            behaviour_set->chassis_spin_ramp.input = CHASSIS_SPIN_RAMP_SUB;*/
+    /**        chassis_behaviour_mode = CHASSIS_SPIN; // 继续在小陀螺模式中减速*/
+    /**    } else {*/
+    /**        behaviour_set->chassis_spin_ramp.input = 0;*/
+    /**        // BUG 还没退出小陀螺模式又将拨杆拨上会进入小陀螺低速旋转模式*/
+    /**        [>if (((int)behaviour_set->wz ^ (int)(*behaviour_set->pchassis_relative_angle)) > 0)<]*/
+    /**            behaviour_set->chassis_spin_ramp.out = 0; // 清空输出*/
+    /**        [>else<]*/
+    /**            [>chassis_behaviour_mode = CHASSIS_SPIN; // 否则继续在小陀螺模式中减速<]*/
+    /**    }*/
+    /**}*/
 
 #ifndef CHASSIS_DEBUG
     //* 检查是否需要强制底盘不动
     // when gimbal in some mode, such as init mode, chassis must's move
     // 当云台在某些模式下，像初始化， 底盘不动
-    if (gimbal_cmd_to_chassis_stop()) {
-        chassis_behaviour_mode = CHASSIS_NO_MOVE;
-    }
+		if (gimbal_cmd_to_chassis_stop()) {
+				chassis_behaviour_mode = CHASSIS_NO_MOVE;
+		}
 #endif
 
 #ifndef CHASSIS_DEBUG_INPUT_CODE
@@ -420,7 +420,7 @@ static void chassis_spin_control(fp32 *vx_set, fp32 *vy_set, fp32 *wz_set, chass
 
     //* 使用斜波函数为底盘增加角速度
     ramp_calc(&chassis_move_rc_to_vector->chassis_spin_ramp, chassis_move_rc_to_vector->chassis_spin_ramp.input);
-    *wz_set = chassis_move_rc_to_vector->chassis_spin_ramp.out /* * (0.75 - 0.25 * sin(ts))*/;
+    *wz_set = CHASSIS_WZ_SPIN/* * (0.75 - 0.25 * sin(ts))*/;
 }
 
 //! STEP 2 实现新的行为模式控制函数 END

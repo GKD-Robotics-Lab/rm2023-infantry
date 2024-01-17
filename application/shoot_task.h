@@ -47,10 +47,14 @@
 #define TRIGGER_MOTOR_REDUCTION_RATIO 36 // 拨弹轮电机减速比
 #define FULL_ECD_COUNT                (TRIGGER_MOTOR_REDUCTION_RATIO / 2)
 
+#define PIT_NUM_HERO                       6  // 拨弹结构一圈坑位数
+#define TRIGGER_MOTOR_REDUCTION_RATIO_3508 19 // 拨弹轮电机减速比
+#define FULL_ECD_COUNT_3508                (TRIGGER_MOTOR_REDUCTION_RATIO_3508 / 2)
+
 #define HALF_ECD_RANGE                4096 // 电机反馈码盘值范围
 #define ECD_RANGE                     8191 // TODO 8192? 重复定义？
 
-#define M2006_MOTOR_RPM_TO_VECTOR     (2 * 3.1415926f / (ECD_RANGE * TRIGGER_MOTOR_REDUCTION_RATIO))
+#define M2006_MOTOR_RPM_TO_VECTOR     (2 * 3.1415926f / (ECD_RANGE * TRIGGER_MOTOR_REDUCTION_RATIO_3508))
 #define TRIGGER_MOTOR_ECD_TO_ANGLE    M2006_MOTOR_RPM_TO_VECTOR // 电机编码器反馈值转化为角度 (rad) 的比例
 
 // 拨弹轮速度及堵转相关参数

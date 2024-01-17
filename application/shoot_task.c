@@ -239,7 +239,7 @@ static void shoot_feedback_update(void)
     //* 拨弹轮速度获取
     trigger_speed[2]            = trigger_speed[1];
     trigger_speed[1]            = trigger_speed[0];
-    trigger_speed[0]            = trigger_speed[1] * trigger_speed_fliter_num[0] + trigger_speed[2] * trigger_speed_fliter_num[1] + rpm_to_radps(shoot_control.trigger.motor_measure->speed_rpm) * trigger_speed_fliter_num[2] / TRIGGER_MOTOR_REDUCTION_RATIO;
+    trigger_speed[0]            = trigger_speed[1] * trigger_speed_fliter_num[0] + trigger_speed[2] * trigger_speed_fliter_num[1] + rpm_to_radps(shoot_control.trigger.motor_measure->speed_rpm) * trigger_speed_fliter_num[2] / TRIGGER_MOTOR_REDUCTION_RATIO_3508;
     shoot_control.trigger.speed = trigger_speed[0];
 
     //* 拨弹轮角度获取
@@ -249,11 +249,13 @@ static void shoot_feedback_update(void)
     } else if (shoot_control.trigger.motor_measure->ecd - shoot_control.trigger.motor_measure->last_ecd < -HALF_ECD_RANGE) {
         shoot_control.trigger.ecd_count++;
     }
-    if (shoot_control.trigger.ecd_count == FULL_ECD_COUNT) {
-        shoot_control.trigger.ecd_count = -(FULL_ECD_COUNT - 1);
-    } else if (shoot_control.trigger.ecd_count == -FULL_ECD_COUNT) {
-        shoot_control.trigger.ecd_count = FULL_ECD_COUNT - 1;
+
+    if (shoot_control.trigger.ecd_count == FULL_ECD_COUNT_3508) {
+        shoot_control.trigger.ecd_count = -(FULL_ECD_COUNT_3508 - 1);
+    } else if (shoot_control.trigger.ecd_count == -FULL_ECD_COUNT_3508) {
+        shoot_control.trigger.ecd_count = FULL_ECD_COUNT_3508 - 1;
     }
+
     // 计算输出轴角度
     shoot_control.trigger.angle = (shoot_control.trigger.ecd_count * ECD_RANGE + shoot_control.trigger.motor_measure->ecd) * TRIGGER_MOTOR_ECD_TO_ANGLE;
 
@@ -275,7 +277,7 @@ static void shoot_switch_mode(void)
                 shoot_control.shoot_mode = SHOOT_READY;
             break;
         case SHOOT_FIRE:
-            if (rad_format(shoot_control.trigger.angle - shoot_control.trigger.last_angle) > 2 * PI / PIT_NUM)
+            if (rad_format(shoot_control.trigger.angle - shoot_control.trigger.last_angle) > 2 * PI / PIT_NUM_HERO)
                 shoot_control.shoot_mode = SHOOT_DONE;
             break;
         case SHOOT_DONE:

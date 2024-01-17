@@ -67,12 +67,12 @@
 #define M3508_MOTOR_RPM_TO_VECTOR       0.000415809748903494517209f
 #define CHASSIS_MOTOR_RPM_TO_VECTOR_SEN M3508_MOTOR_RPM_TO_VECTOR
 // 小陀螺缓启停的加速度
-#define CHASSIS_SPIN_RAMP_ADD 25.0f
+#define CHASSIS_SPIN_RAMP_ADD 125.0f
 #define CHASSIS_SPIN_RAMP_SUB 10.0f
 // 小陀螺模式的自旋速度
 #define CHASSIS_WZ_SPIN 10.0f
 // 小陀螺模式退出的速度
-#define CHASSIS_WZ_SPIN_OUT (CHASSIS_WZ_SPIN / 2.0f)
+#define CHASSIS_WZ_SPIN_OUT (CHASSIS_WZ_SPIN / 1.5f)
 
 //* 底盘运动限制
 // chassis 3508 max motor control current
@@ -80,8 +80,8 @@
 #define MAX_MOTOR_CAN_CURRENT 16000.0f
 // single chassis motor max speed
 // 单个底盘电机最大速度
-#define MAX_WHEEL_SPEED      2.6f
-#define MAX_WHEEL_SPEED_SPIN 3.0f
+#define MAX_WHEEL_SPEED      9.0f
+#define MAX_WHEEL_SPEED_SPIN 15.0f
 // chassis forward or back max speed
 // 底盘运动过程最大前进速度
 #define NORMAL_MAX_CHASSIS_SPEED_X 2.0f
@@ -106,10 +106,10 @@
 #define M3505_MOTOR_SPEED_PID_DEAD_BAND 0.0f
 // chassis follow angle PID
 // 底盘旋转跟随PID
-#define CHASSIS_FOLLOW_GIMBAL_PID_KP        7.0f // 原始 40.0f
+#define CHASSIS_FOLLOW_GIMBAL_PID_KP        15.0f // 原始 40.0f
 #define CHASSIS_FOLLOW_GIMBAL_PID_KI        0.0f
 #define CHASSIS_FOLLOW_GIMBAL_PID_KD        0.2f // 原始 0.0f
-#define CHASSIS_FOLLOW_GIMBAL_PID_MAX_OUT   6.0f
+#define CHASSIS_FOLLOW_GIMBAL_PID_MAX_OUT   9.0f
 #define CHASSIS_FOLLOW_GIMBAL_PID_MAX_IOUT  0.0f
 #define CHASSIS_FOLLOW_GIMBAL_PID_DEAD_BAND 0.0f
 

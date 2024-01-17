@@ -78,7 +78,7 @@ todo test
 
 //* buzzer
 #ifdef BUZZER_ON
-    // #define CALI_BUZZER_ON // 打开此宏时当校准时会有蜂鸣器提示声
+		#define CALI_BUZZER_ON // 打开此宏时当校准时会有蜂鸣器提示声
 
     #ifdef CALI_BUZZER_ON
         #define CALI_GYRO_BUZZER_ON // 设置陀螺仪校准时是否要蜂鸣器提示
