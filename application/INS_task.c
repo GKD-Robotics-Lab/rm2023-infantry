@@ -44,7 +44,7 @@
 
 #define IMU_temp_PWM(pwm) imu_pwm_set(pwm) // pwm给定
 
-#define BMI088_BOARD_INSTALL_SPIN_MATRIX {0.0f, 1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}
+#define BMI088_BOARD_INSTALL_SPIN_MATRIX {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}
 #define IST8310_BOARD_INSTALL_SPIN_MATRIX {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}
 
 static void imu_cali_slove(fp32 gyro[3], fp32 accel[3], fp32 mag[3], bmi088_real_data_t *bmi088, ist8310_real_data_t *ist8310);
