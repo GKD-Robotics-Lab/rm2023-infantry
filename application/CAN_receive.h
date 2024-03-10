@@ -59,6 +59,8 @@ typedef enum {
     CAN_FRIC_M2_ID   = 0x202,
     CAN_TRIGGER_ID   = 0x203,
 
+    CAN_SUPERC_ID = 0x0FF,
+
 } can_msg_id_e;
 
 typedef enum {
@@ -91,6 +93,7 @@ extern void CAN_cmd_gimbal(int16_t yaw, int16_t pitch, int16_t rev1, int16_t rev
 extern void CAN_cmd_shoot(int16_t trigger, int16_t fric1, int16_t fric2, int16_t rev);
 extern void CAN_cmd_chassis_reset_ID(void);
 extern void CAN_cmd_chassis(int16_t motor1, int16_t motor2, int16_t motor3, int16_t motor4);
+extern void CAN_cmd_superC(uint16_t power_limit);
 extern const motor_measure_t *get_motor_measure_point(motor_id_e i);
 
 #endif
