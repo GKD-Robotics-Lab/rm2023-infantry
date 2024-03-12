@@ -59,8 +59,8 @@ typedef enum {
     CAN_FRIC_M2_ID   = 0x202,
     CAN_TRIGGER_ID   = 0x203,
 
-    CAN_SUPERC_RX_ID = 0x0FF,
-    CAN_SUPERC_TX_ID = 0x0FE,
+    CAN_SUPERC_RX_ID = 0x0FE,
+    CAN_SUPERC_TX_ID = 0x0FF,
 
 } can_msg_id_e;
 

@@ -199,12 +199,12 @@ void CAN_cmd_chassis(int16_t motor1, int16_t motor2, int16_t motor3, int16_t mot
 void CAN_cmd_superC(uint16_t power_limit)
 {
     uint32_t send_mail_box;
-    superC_tx_message.StdId = 0xFE;
+    superC_tx_message.StdId = CAN_SUPERC_TX_ID;
     superC_tx_message.IDE   = CAN_ID_STD;
     superC_tx_message.RTR   = CAN_RTR_DATA;
     superC_tx_message.DLC   = 0x02;
-    superC_can_send_data[0] = power_limit >> 8;
-    superC_can_send_data[1] = power_limit;
+    superC_can_send_data[0] = 66;
+    superC_can_send_data[1] = 8;
 
     HAL_CAN_AddTxMessage(&CHASSIS_CAN, &superC_tx_message, superC_can_send_data, &send_mail_box);
 }
