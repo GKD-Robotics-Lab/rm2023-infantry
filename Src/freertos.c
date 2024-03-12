@@ -36,7 +36,7 @@
 #include "voltage_task.h"
 #include "servo_task.h"
 #include "shoot_task.h"
-#include "superC_usart_task.h"
+#include "superC_can_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,7 +68,7 @@ osThreadId usb_task_handle;
 osThreadId battery_voltage_handle;
 osThreadId servo_task_handle;
 osThreadId shootTaskHandle;
-osThreadId superC_usart_task_handle;
+osThreadId superC_can_task_handle;
 /* USER CODE END Variables */
 osThreadId testHandle;
 
@@ -183,15 +183,15 @@ void MX_FREERTOS_Init(void)
     if (led_RGB_flow_handle == NULL)
         Error_Handler();
 
-    // osThreadDef(REFEREE, referee_usart_task, osPriorityNormal, 0, 128);
-    // referee_usart_task_handle = osThreadCreate(osThread(REFEREE), NULL);
-    // if (referee_usart_task_handle == NULL)
-    //     Error_Handler();
-    //
-    // osThreadDef(SUPERC, superC_usart_task, osPriorityNormal, 0, 128);
-    // superC_usart_task_handle = osThreadCreate(osThread(SUPERC), NULL);
-    // if (superC_usart_task_handle == NULL)
-    //     Error_Handler();
+    osThreadDef(REFEREE, referee_usart_task, osPriorityNormal, 0, 128);
+    referee_usart_task_handle = osThreadCreate(osThread(REFEREE), NULL);
+    if (referee_usart_task_handle == NULL)
+        Error_Handler();
+
+    osThreadDef(SUPERC, superC_can_task, osPriorityNormal, 0, 128);
+    superC_can_task_handle = osThreadCreate(osThread(SUPERC), NULL);
+    if (superC_can_task_handle == NULL)
+        Error_Handler();
 
     // osThreadDef(USBTask, usb_task, osPriorityNormal, 0, 128);
     // usb_task_handle = osThreadCreate(osThread(USBTask), NULL);

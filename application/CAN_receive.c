@@ -26,6 +26,7 @@
 #include "bsp_rng.h"
 
 #include "detect_task.h"
+#include "superC_can_task.h"
 
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
@@ -71,6 +72,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
             get_motor_measure(&motor_chassis[i], rx_data);
             detect_hook(CHASSIS_MOTOR1_TOE + i);
             break;
+        }
+
+        case CAN_SUPERC_RX_ID: {
+            superC_power_remaining = rx_data[0];
+            superC_bat_remaining = rx_data[1];
         }
 
         default:
@@ -193,7 +199,7 @@ void CAN_cmd_chassis(int16_t motor1, int16_t motor2, int16_t motor3, int16_t mot
 void CAN_cmd_superC(uint16_t power_limit)
 {
     uint32_t send_mail_box;
-    superC_tx_message.StdId = 0xFF;
+    superC_tx_message.StdId = 0xFE;
     superC_tx_message.IDE   = CAN_ID_STD;
     superC_tx_message.RTR   = CAN_RTR_DATA;
     superC_tx_message.DLC   = 0x02;
