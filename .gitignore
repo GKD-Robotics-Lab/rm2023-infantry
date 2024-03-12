@@ -15,3 +15,5 @@
 *.eide-template
 compile_commands.json
 .cache/
+gdb-*
+debug-*

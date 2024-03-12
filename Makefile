@@ -22,22 +22,24 @@ FPU := -mfpu=fpv4-sp-d16
 FLOAT-ABI := -mfloat-abi=hard
 # macros for gcc
 AS_DEFINES :=
-C_DEFINES :=  \
+C_DEFINES := \
 USE_HAL_DRIVER \
 STM32F407xx \
 ARM_MATH_CM4
 
 # link script
 LDSCRIPT := STM32F407IGHX_FLASH.ld
-LIBDIR := 
-
+LIBS := -lahrs
 # figure out compiler settings
 CC := $(GCC_PREFIX)gcc
 AS := $(GCC_PREFIX)gcc -x assembler-with-cpp
 CP := $(GCC_PREFIX)objcopy
 SZ := $(GCC_PREFIX)size
+GDB := $(GCC_PREFIX)gdb
 HEX := $(CP) -O ihex
-BIN := $(CP) -O binary -S
+BIN := $(CP) -O binary
+OOCD := openocd
+OOCDFLAGS := -f interface/cmsis-dap.cfg -f target/stm32f4x.cfg
 
 
 # --------------------------------------------------------------
@@ -79,10 +81,10 @@ CXXFLAGS = $(MCU) $(C_DEFS) $(INC_FLAGS) $(OPT) -Wall -fdata-sections -ffunction
 # C
 CFLAGS = $(MCU) $(C_DEFS) $(INC_FLAGS) $(OPT) -Wall -fdata-sections -ffunction-sections -MMD -MP $(addprefix -MF,$(@:%.c.o=%.c.d))
 ifeq ($(DEBUG), 1)
-	CFLAGS += -g -gdwarf-2
+	CFLAGS += -g -gdwarf-3
 endif
 # libraries
-LIBS := -lc -lm 
+LIBS += -lc -lm 
 LDFLAGS := $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIB_FLAGS) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections 
 
 # --------------------------------------------------------------
@@ -113,8 +115,11 @@ $(BUILD_DIR)/%.s.o: %.s Makefile | $(BUILD_DIR)
 $(BUILD_DIR)/$(TARGET).elf: $(OBJS) Makefile
 	@mkdir -p $(dir $@)
 	@echo -e "\e[1;36m[LD]\e[0;0m linking..." 
-	@$(CC) $(OBJ) $(LDFLAGS) -o $@
-	$(SZ) $@
+	@$(CC) $(OBJS) $(LDFLAGS) -o $@
+	@$(SZ) $@
+	@$(CP) --only-keep-debug $@ $@.gnu_debuglink.debug
+	@$(CP) --strip-all $@ $@.gnu_debuglink
+	@$(CP) --add-gnu-debuglink=$@.gnu_debuglink.debug $@.gnu_debuglink
 
 # Build step for generate hex file 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
@@ -124,7 +129,7 @@ $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 # Build step for generate bin file 
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	@echo -e "\e[1;32m[BIN]\e[0;0m generating bin..."
-	$(BIN) $< $@
+	@$(BIN) $< $@
 	
 # mkdir for build if it not exist
 $(BUILD_DIR):
@@ -135,7 +140,19 @@ $(BUILD_DIR):
 # --------------------------------------------------------------
 .PHONY: clean
 clean:
-	-rm -fR $(BUILD_DIR)
+	@echo -e "\e[0;31mcleaning...\e[0;0m"
+	@-rm -fR $(BUILD_DIR)
+
+.PHONY: flash
+flash: $(BUILD_DIR)/$(TARGET).bin
+	@echo -e "\e[1;33m[OpenOCD]\e[0;0m programming..."
+	@$(OOCD) $(OOCDFLAGS) -c "program $(BUILD_DIR)/$(TARGET).bin 0x08000000 verify reset exit"
+
+# .PHONY: debug
+# debug: all
+# 	@printf "  GDB DEBUG $<\n"
+#     $(Q)$(GDB) -iex 'target extended | $(OOCD) $(OOCDFLAGS) -c "gdb_port pipe"' \
+#     -iex 'monitor reset halt' -ex 'load' -ex 'break main' $(BUILD_DIR)/$(TARGET).elf
 
 # --------------------------------------------------------------
 # dependencies
