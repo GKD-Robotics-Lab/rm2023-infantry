@@ -144,15 +144,17 @@ clean:
 	@-rm -fR $(BUILD_DIR)
 
 .PHONY: flash
-flash: $(BUILD_DIR)/$(TARGET).bin
+flash: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).bin $(BUILD_DIR)/$(TARGET).hex
 	@echo -e "\e[1;33m[OpenOCD]\e[0;0m programming..."
 	@$(OOCD) $(OOCDFLAGS) -c "program $(BUILD_DIR)/$(TARGET).bin 0x08000000 verify reset exit"
 
-# .PHONY: debug
-# debug: all
-# 	@printf "  GDB DEBUG $<\n"
-#     $(Q)$(GDB) -iex 'target extended | $(OOCD) $(OOCDFLAGS) -c "gdb_port pipe"' \
-#     -iex 'monitor reset halt' -ex 'load' -ex 'break main' $(BUILD_DIR)/$(TARGET).elf
+.PHONY: debug
+debug: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).bin $(BUILD_DIR)/$(TARGET).hex
+	@echo -e "\e[1;33mgenerating debug files...\e[0;0m"
+	@echo "#!/bin/sh" > debug-ocd.sh
+	@echo "#!/bin/sh" > debug-gdb.sh
+	@echo "openocd -f interface/cmsis-dap.cfg -f target/stm32f4x.cfg" >> debug-ocd.sh
+	@echo "gdbfrontend -g /usr/bin/arm-none-eabi-gdb -G $(BUILD_DIR)/$(TARGET).elf -V" >> debug-gdb.sh
 
 # --------------------------------------------------------------
 # dependencies
