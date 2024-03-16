@@ -18,6 +18,7 @@
 #include "bsp_led.h"
 #include "cmsis_os.h"
 #include "main.h"
+#include "usart.h"
 
 #define RGB_FLOW_COLOR_CHANGE_TIME 1000
 #define RGB_FLOW_COLOR_LENGHT      6
@@ -45,7 +46,6 @@ void led_RGB_flow_task(void const *argument)
     bsp_led_init();
 
     while (1) {
-
         for (i = 0; i < RGB_FLOW_COLOR_LENGHT; i++) {
             alpha = (RGB_flow_color[i] & 0xFF000000) >> 24;
             red   = ((RGB_flow_color[i] & 0x00FF0000) >> 16);

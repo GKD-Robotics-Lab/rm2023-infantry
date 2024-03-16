@@ -3,6 +3,7 @@
 #include "referee.h"
 #include "cmsis_os.h"
 #include "bsp_usart.h"
+#include "usart.h"
 
 uint8_t superC_power_remaining;
 uint8_t superC_bat_remaining;
