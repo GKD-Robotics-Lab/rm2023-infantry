@@ -11,6 +11,7 @@
         "stm32f4xx_hal_conf.h": "c",
         "stm32f4xx_hal_rcc.h": "c",
         "detect_task.h": "c",
-        "custom_ui_task.h": "c"
+        "custom_ui_task.h": "c",
+        "bsp_usart.h": "c"
     }
 }
