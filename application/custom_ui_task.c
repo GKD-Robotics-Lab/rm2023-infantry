@@ -10,11 +10,20 @@ Crosshair_Data_Type Crosshair_Data;
 UI_DisplayData_Type UI_Data;
 State_Indicate_Type State_Data;
 
-void draw_crosshair();
-void ui_parameter_init();
+void draw_crosshair_hero();
+void draw_crosshair_infantry();
 void update_dynamic_paramater();
 void UI_clear();
+void custom_UI_init();
+void int_to_str(char *to_str, int number);
 void cap_text_format(char *to_str, int cap_percent);
+void spin_state_str(char *to_str, int spin_state);
+void fric_state_str(char *to_str, int fric_state);
+void ui_parameter_init();
+void cap_text_format(char *to_str, int cap_percent);
+void sync_parameter();
+void state_str(char *to_str, int cap_percent, int spin_state, int fric_state);
+
 
 void custom_ui_task(void const * argument)
 {
@@ -22,24 +31,19 @@ void custom_ui_task(void const * argument)
     for (;;)
     {
         sync_parameter();
-        // Crosshair_Data.shoot_dist_percent = (u32)(UI_Data.distance*(100/8));
-        // State_Data.cap_percent = (u32)(UI_Data.distance*(100/8));
         update_dynamic_paramater();
-        
-        UI_Data.distance += 0.1; 
-        if(UI_Data.distance >= 8.0) UI_Data.distance=0.0;
 
-        osDelay(100); //Ë¢ĞÂÂÊ=10Hz
+        osDelay(100); //åˆ·æ–°ç‡=10Hz
     }
 }
 
-/*»­¾²Ö¹×¼ĞÇ*/
-void draw_crosshair()
+/*ç”»è‹±é›„çš„é™æ­¢å‡†æ˜Ÿ*/
+void draw_crosshair_hero()
 {
     Graph_Data still_cross_line[7];
     char line_id[7][3] = {"L1", "L2", "L3", "L4", "L5", "L6", "L7"};
-    /*×¼ĞÇ*/
-    //ºá×ÅµÄÖ÷×¼ĞÇ
+    /*å‡†æ˜Ÿ*/
+    //æ¨ªç€çš„ä¸»å‡†æ˜Ÿ
     Line_Draw(&still_cross_line[0], "L1", UI_Graph_ADD, 0, 
         Crosshair_Data.cross_colar,
         Crosshair_Data.line_width,
@@ -47,7 +51,7 @@ void draw_crosshair()
         Crosshair_Data.center[1],
         Crosshair_Data.center[0]+(Crosshair_Data.cross_width/2),
         Crosshair_Data.center[1]);
-    //Êú×ÅµÄÖ÷×¼ĞÇ
+    //ç«–ç€çš„ä¸»å‡†æ˜Ÿ
     Line_Draw(&still_cross_line[1], "L2", UI_Graph_ADD, 0, 
         Crosshair_Data.cross_colar,
         Crosshair_Data.line_width,
@@ -55,7 +59,7 @@ void draw_crosshair()
         Crosshair_Data.center[1]+(Crosshair_Data.cross_high/2)+Crosshair_Data.cross_high_offset,
         Crosshair_Data.center[0],
         Crosshair_Data.center[1]-(Crosshair_Data.cross_high/2)+Crosshair_Data.cross_high_offset);
-    //5¸ö±ê³ß
+    //5ä¸ªæ ‡å°º
     for(int i=0; i<5; i++)
     {
         Line_Draw(&still_cross_line[i+2], line_id[i+2], UI_Graph_ADD, 0, 
@@ -70,45 +74,49 @@ void draw_crosshair()
         still_cross_line[3], still_cross_line[4], still_cross_line[5],
         still_cross_line[6]);
     
-    osDelay(100); //È·±£¼ä¸ô
-    //±ê³ß
+    osDelay(100); //ç¡®ä¿é—´éš”
+    //æ ‡å°º
 }
 
-/*»­Éä»÷²ÎÊı*/
-// void draw_shoot_paramater()
-// {
-//     String_Data dist_text;
-//     Graph_Data dist_bar;
-//     //»æÖÆ¾àÀë  
-//     String_Draw(&dist_text, "C1", UI_Graph_ADD, 1, Crosshair_Data.shoot_text_color,
-//         Crosshair_Data.dist_text_size, 4, 30, 
-//         Crosshair_Data.dist_start_point[0] + Crosshair_Data.center[0], 
-//         Crosshair_Data.dist_start_point[1] + Crosshair_Data.center[1], "1.4m");       
-//     String_ReFresh(dist_text);
+/*ç”»è‹±é›„çš„é™æ­¥å…µå‡†æ˜Ÿ*/
+void draw_crosshair_infantry()
+{
+    Graph_Data still_cross_line[2];
+    /*å‡†æ˜Ÿ*/
+    //æ¨ªç€çš„ä¸»å‡†æ˜Ÿ
+    Line_Draw(&still_cross_line[0], "L1", UI_Graph_ADD, 0, 
+        Crosshair_Data.cross_colar,
+        Crosshair_Data.line_width,
+        Crosshair_Data.center[0]-(Crosshair_Data.cross_width/2),
+        Crosshair_Data.center[1],
+        Crosshair_Data.center[0]+(Crosshair_Data.cross_width/2),
+        Crosshair_Data.center[1]);
+    //ç«–ç€çš„ä¸»å‡†æ˜Ÿ
+    Line_Draw(&still_cross_line[1], "L2", UI_Graph_ADD, 0, 
+        Crosshair_Data.cross_colar,
+        Crosshair_Data.line_width,
+        Crosshair_Data.center[0],
+        Crosshair_Data.center[1]+(Crosshair_Data.cross_high/2)+Crosshair_Data.cross_high_offset,
+        Crosshair_Data.center[0],
+        Crosshair_Data.center[1]-(Crosshair_Data.cross_high/2)+Crosshair_Data.cross_high_offset);
+    UI_ReFresh(2, still_cross_line[0], still_cross_line[1]);
+    
+    osDelay(100); //ç¡®ä¿é—´éš”
+    //æ ‡å°º
+}
 
-//     Line_Draw(&dist_bar, "DS", UI_Graph_ADD, 1, Crosshair_Data.shoot_bar_color,
-//         Crosshair_Data.dist_display_width, 
-//         Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0],
-//         Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width,
-//         Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0] + ((Crosshair_Data.dist_display_length*Crosshair_Data.shoot_dist_percent)/100),
-//         Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width);
-
-//     UI_ReFresh(1, dist_bar);
-//     osDelay(100);
-// }
-
-/*Ë¢ĞÂ¶¯Ì¬²ÎÊı*/
+/*åˆ·æ–°åŠ¨æ€å‚æ•°*/
 void update_dynamic_paramater()
 {
-    /*×¼ĞÇË¢ĞÂ²¿·Ö*/
+    /*å‡†æ˜Ÿåˆ·æ–°éƒ¨åˆ†*/
     Graph_Data shoot_distance_bar, cap_percentage;
     String_Data shoot_distance_text, cap_percent_text;
     char dist_text[5], cap_text[10];
 
-    //É¾³ı¾ÉĞÅÏ¢
+    //åˆ é™¤æ—§ä¿¡æ¯
     UI_Delete(UI_Data_Del_Layer, 1); 
 
-    //²â¾à²¿·ÖµÄË¢ĞÂ
+    //æµ‹è·éƒ¨åˆ†çš„åˆ·æ–°
     int_to_str(&dist_text, (int)(UI_Data.distance*100));
     Line_Draw(&shoot_distance_bar, "DS", UI_Graph_ADD, 1, Crosshair_Data.shoot_bar_color,
         Crosshair_Data.dist_display_width, 
@@ -116,12 +124,8 @@ void update_dynamic_paramater()
         Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width,
         Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0] + ((Crosshair_Data.dist_display_length*Crosshair_Data.shoot_dist_percent)/100),
         Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width);
-    // String_Draw(&shoot_distance_text, "S1", UI_Graph_ADD, 1, Crosshair_Data.shoot_text_color,
-    // Crosshair_Data.dist_text_size, 3, 30, 
-    // Crosshair_Data.dist_start_point[0] + Crosshair_Data.center[0], 
-    // Crosshair_Data.dist_start_point[1] + Crosshair_Data.center[1], &dist_text);
 
-    /*Ë¢ĞÂ³¬µç²¿·Ö*/
+    /*åˆ·æ–°è¶…ç”µéƒ¨åˆ†*/
     Line_Draw(&cap_percentage, "CP", UI_Graph_ADD, 1, State_Data.cap_bar_color, State_Data.cap_display_with,
                 State_Data.cap_text_pos[0],
                 State_Data.cap_text_pos[1] - State_Data.cap_text_size,
@@ -134,9 +138,10 @@ void update_dynamic_paramater()
                 State_Data.cap_text_pos[0],
                 State_Data.cap_text_pos[1], &cap_text);
 
-    // //Ó¦ÓÃË¢ĞÂ
-    UI_ReFresh(2, shoot_distance_bar, cap_percentage);
-    // String_ReFresh(shoot_distance_text);
+    //åº”ç”¨åˆ·æ–°(è‹±é›„æ˜¾ç¤ºæµ‹è·å’Œå‡†æ˜Ÿï¼Œæ­¥å…µæ— å‡†æ˜Ÿ)
+    if(UI_MODE == UI_HERO)  UI_ReFresh(2, shoot_distance_bar, cap_percentage);
+    else if(UI_MODE == UI_INFANTRY) UI_ReFresh(1, cap_percentage);
+    
     String_ReFresh(cap_percent_text);
  }
 
@@ -150,8 +155,8 @@ void custom_UI_init()
 {
     UI_clear();
     ui_parameter_init();
-    draw_crosshair();
-    //draw_shoot_paramater();
+    if(UI_MODE == UI_HERO) draw_crosshair_hero();
+    else if(UI_MODE == UI_INFANTRY) draw_crosshair_infantry();
 }
 
 void int_to_str(char *to_str, int number)
@@ -162,7 +167,7 @@ void int_to_str(char *to_str, int number)
     to_str[3] = '\0';
 }
 
-//Éú³É³¬µç°Ù·Ö±ÈÎÄ×Ö
+//ç”Ÿæˆè¶…ç”µç™¾åˆ†æ¯”æ–‡å­—
 void cap_text_format(char *to_str, int cap_percent)
 {
     to_str[0] = 'C';
@@ -177,7 +182,7 @@ void cap_text_format(char *to_str, int cap_percent)
     to_str[9] = '\0';
 }
 
-//Éú³É×ÔĞı×Ö·û´®
+//ç”Ÿæˆè‡ªæ—‹å­—ç¬¦ä¸²
 void spin_state_str(char *to_str, int spin_state)
 {
     to_str[0] = 'S';
@@ -201,7 +206,7 @@ void spin_state_str(char *to_str, int spin_state)
     }
 }
 
-//Éú³ÉÄ¦²ÁÂÖ×Ö·û´®
+//ç”Ÿæˆæ‘©æ“¦è½®å­—ç¬¦ä¸²
 void fric_state_str(char *to_str, int fric_state)
 {
     to_str[0] = 'F';
@@ -240,19 +245,13 @@ void state_str(char *to_str, int cap_percent, int spin_state, int fric_state)
     for(int i=9; i<17; i++) to_str[i] = spin_str[i-9];
     to_str[17] = '\n';
 
-    //×Ö·û´®ÏŞÖÆ£¬¸Ä³ÉµçÈİÖ»ÏÔÊ¾ÈıÎ»Êı×Ö
+    //å­—ç¬¦ä¸²é•¿åº¦é™åˆ¶ï¼Œæ”¹æˆç”µå®¹åªæ˜¾ç¤ºä¸‰ä½æ•°å­—
     to_str[18] = ((cap_percent/100) % 10) + 48;
     to_str[19] = ((cap_percent/10) % 10) + 48;
     to_str[20] = (cap_percent % 10) + 48;
-    //for(int i=18; i<29; i++) to_str[i] = cap_str[i-18];
-    //to_str[27] = '\0';
-
-    // for(int i=0; i<9; i++)  to_str[i] = fric_str[i];
-
-    
 }
 
-//Í¬²½UI_DisplayData_TypeµÄ×´Ì¬µ½UI¿ØÖÆ½á¹¹Ìå
+//åŒæ­¥UI_DisplayData_Typeçš„çŠ¶æ€åˆ°UIæ§åˆ¶ç»“æ„ä½“
 void sync_parameter()
 {
     Crosshair_Data.shoot_dist_percent = (u32)(UI_Data.distance*(100/8));
@@ -265,71 +264,71 @@ void ui_parameter_init()
 {
     UI_Data.distance = 0.0;
 
-    /*×¼ĞÇ²ÎÊı³õÊ¼»¯*/
-    Crosshair_Data.center[0] = 960;     //ÖĞĞÄX
-    Crosshair_Data.center[1] = 540;     //ÖĞĞÄY
-    Crosshair_Data.cross_width = 500;   //¿í
-    Crosshair_Data.cross_high = 700;   //¸ß
-    Crosshair_Data.cross_high_offset = -100; //¸ßÆ«ÒÆ
+    /*å‡†æ˜Ÿå‚æ•°åˆå§‹åŒ–*/
+    Crosshair_Data.center[0] = CROSS_CENTER_X;     //ä¸­å¿ƒX
+    Crosshair_Data.center[1] = CROSS_CENTER_Y;     //ä¸­å¿ƒY
+    Crosshair_Data.cross_width = 500;   //å®½
+    Crosshair_Data.cross_high = 700;   //é«˜
+    Crosshair_Data.cross_high_offset = -100; //é«˜åç§»
 
-    Crosshair_Data.ballistic_ruler[0] = 100;     //1m±ê³ß
-    Crosshair_Data.ballistic_ruler[1] = 200;     //2m±ê³ß
-    Crosshair_Data.ballistic_ruler[2] = 300;     //3m±ê³ß
-    Crosshair_Data.ballistic_ruler[3] = 400;     //4m±ê³ß
-    Crosshair_Data.ballistic_ruler[4] = 500;     //5m±ê³ß
+    Crosshair_Data.ballistic_ruler[0] = CROSS_1M;     //1mæ ‡å°º
+    Crosshair_Data.ballistic_ruler[1] = CROSS_2M;     //2mæ ‡å°º
+    Crosshair_Data.ballistic_ruler[2] = CROSS_3M;     //3mæ ‡å°º
+    Crosshair_Data.ballistic_ruler[3] = CROSS_4M;     //4mæ ‡å°º
+    Crosshair_Data.ballistic_ruler[4] = CROSS_5M;     //5mæ ‡å°º
 
-    Crosshair_Data.ruler_length[0] = 400;   //1m±ê³ß³¤¶È
-    Crosshair_Data.ruler_length[1] = 300;   //2m±ê³ß³¤¶È
-    Crosshair_Data.ruler_length[2] = 200;   //3m±ê³ß³¤¶È
-    Crosshair_Data.ruler_length[3] = 100;   //4m±ê³ß³¤¶È
-    Crosshair_Data.ruler_length[4] = 50;   //5m±ê³ß³¤¶È
+    Crosshair_Data.ruler_length[0] = 400;   //1mæ ‡å°ºé•¿åº¦
+    Crosshair_Data.ruler_length[1] = 300;   //2mæ ‡å°ºé•¿åº¦
+    Crosshair_Data.ruler_length[2] = 200;   //3mæ ‡å°ºé•¿åº¦
+    Crosshair_Data.ruler_length[3] = 100;   //4mæ ‡å°ºé•¿åº¦
+    Crosshair_Data.ruler_length[4] = 50;   //5mæ ‡å°ºé•¿åº¦
 
-    Crosshair_Data.line_width = 2;     //Ïß¿í¶È
-    Crosshair_Data.cross_colar = UI_Color_Orange;   //×¼ĞÇÑÕÉ«
-    Crosshair_Data.ruler_colar = UI_Color_Yellow;   //±ê³ßÑÕÉ«
+    Crosshair_Data.line_width = 2;     //çº¿å®½åº¦
+    Crosshair_Data.cross_colar = UI_Color_Orange;   //å‡†æ˜Ÿé¢œè‰²
+    Crosshair_Data.ruler_colar = UI_Color_Yellow;   //æ ‡å°ºé¢œè‰²
 
-    Crosshair_Data.dist_indicate_color = UI_Color_Purplish_red; //²â¾à³ßÑÕÉ«
-    Crosshair_Data.dist_indicate_length = 150;  //²â¾à³ß³¤¶È
-    Crosshair_Data.dist_indicate_width = 30;    //²â¾à³ß¿í¶È
+    Crosshair_Data.dist_indicate_color = UI_Color_Purplish_red; //æµ‹è·å°ºé¢œè‰²
+    Crosshair_Data.dist_indicate_length = 150;  //æµ‹è·å°ºé•¿åº¦
+    Crosshair_Data.dist_indicate_width = 30;    //æµ‹è·å°ºå®½åº¦
 
-    Crosshair_Data.distance = 0;    //Ä¬ÈÏ¾àÀë=0
+    Crosshair_Data.distance = 0;    //é»˜è®¤è·ç¦»=0
 
 
-    /*²â¾à&ÉäËÙÏÔÊ¾*/
-    Crosshair_Data.dist_start_point[0] = 140;      //²â¾àÆğÊ¼X(Ïà¶ÔÖĞĞÄ)
-    Crosshair_Data.dist_start_point[1] = 20;       //²â¾àÆğÊ¼Y(Ïà¶ÔÖĞĞÄ)
-    Crosshair_Data.dist_display_length = 100;       //²âËÙÌõ³¤¶È
-    Crosshair_Data.dist_display_width = 8;        //²âËÙÌõ¿í¶È
-    Crosshair_Data.dist_text_size = 15;             //²âËÙÎÄ×Ö×ÖºÅ
+    /*æµ‹è·&å°„é€Ÿæ˜¾ç¤º*/
+    Crosshair_Data.dist_start_point[0] = 140;      //æµ‹è·èµ·å§‹X(ç›¸å¯¹ä¸­å¿ƒ)
+    Crosshair_Data.dist_start_point[1] = 20;       //æµ‹è·èµ·å§‹Y(ç›¸å¯¹ä¸­å¿ƒ)
+    Crosshair_Data.dist_display_length = 100;       //æµ‹é€Ÿæ¡é•¿åº¦
+    Crosshair_Data.dist_display_width = 8;        //æµ‹é€Ÿæ¡å®½åº¦
+    Crosshair_Data.dist_text_size = 15;             //æµ‹é€Ÿæ–‡å­—å­—å·
     Crosshair_Data.shoot_dist_percent = 10;
 
-    Crosshair_Data.speed_start_point[0] = 140;      //²â¾àÆğÊ¼X(Ïà¶ÔÖĞĞÄ)
-    Crosshair_Data.speed_start_point[1] = -30;       //²â¾àÆğÊ¼Y(Ïà¶ÔÖĞĞÄ)
-    Crosshair_Data.speed_display_length = 100;       //ÉäËÙÌõ³¤¶È
-    Crosshair_Data.speed_display_width = 8;         //ÉäËÙÌõ¿í¶È
-    Crosshair_Data.speed_text_size = 15;            //ÉäËÙÌõ×ÖÌå´óĞ¡
+    Crosshair_Data.speed_start_point[0] = 140;      //æµ‹è·èµ·å§‹X(ç›¸å¯¹ä¸­å¿ƒ)
+    Crosshair_Data.speed_start_point[1] = -30;       //æµ‹è·èµ·å§‹Y(ç›¸å¯¹ä¸­å¿ƒ)
+    Crosshair_Data.speed_display_length = 100;       //å°„é€Ÿæ¡é•¿åº¦
+    Crosshair_Data.speed_display_width = 8;         //å°„é€Ÿæ¡å®½åº¦
+    Crosshair_Data.speed_text_size = 15;            //å°„é€Ÿæ¡å­—ä½“å¤§å°
     Crosshair_Data.shoot_speed_percent = 10;
 
-    Crosshair_Data.shoot_text_color = UI_Color_Orange;  //×ÖÌåÑÕÉ«  
-    Crosshair_Data.shoot_bar_color = UI_Color_Cyan;     //°×·ÖÌõÑÕÉ«
+    Crosshair_Data.shoot_text_color = UI_Color_Orange;  //å­—ä½“é¢œè‰²  
+    Crosshair_Data.shoot_bar_color = UI_Color_Cyan;     //ç™½åˆ†æ¡é¢œè‰²
 
-    State_Data.cap_text_pos[0] = 1500;      //³¬µç×ÖÌåX
-    State_Data.cap_text_pos[1] = 100;       //³¬µç×ÖÌåY
-    State_Data.cap_display_with = 30;       //³¬µçÌõ¿í¶È
-    State_Data.cap_display_length = 250;    //³¬µçÌõ³¤¶È
-    State_Data.cap_text_size = 30;          //×ÖÌå´óĞ¡
-    State_Data.cap_text_color = UI_Color_Orange;    //ÎÄ×ÖÑÕÉ«
-    State_Data.cap_bar_color = UI_Color_Orange;     //°Ù·ÖÌõÑÕÉ«
+    State_Data.cap_text_pos[0] = 1500;      //è¶…ç”µå­—ä½“X
+    State_Data.cap_text_pos[1] = 100;       //è¶…ç”µå­—ä½“Y
+    State_Data.cap_display_with = 30;       //è¶…ç”µæ¡å®½åº¦
+    State_Data.cap_display_length = 250;    //è¶…ç”µæ¡é•¿åº¦
+    State_Data.cap_text_size = 30;          //å­—ä½“å¤§å°
+    State_Data.cap_text_color = UI_Color_Orange;    //æ–‡å­—é¢œè‰²
+    State_Data.cap_bar_color = UI_Color_Orange;     //ç™¾åˆ†æ¡é¢œè‰²
 
     State_Data.cap_percent = 100;
 
-    State_Data.fric_state = 0;  //Ä¦²ÁÂÖ¿ª¹Ø×´Ì¬
-    State_Data.spin_state = 0;  //Ğ¡ÍÓÂİ¿ª¹Ø×´Ì¬
+    State_Data.fric_state = 0;  //æ‘©æ“¦è½®å¼€å…³çŠ¶æ€
+    State_Data.spin_state = 0;  //å°é™€èºå¼€å…³çŠ¶æ€
 
-    /*¶¯Ì¬²ÎÊı*/
-    UI_Data.distance = 0.0;           //¾àÀë
-    UI_Data.shoot_speed = 0.0;        //µ¯ËÙ
-    UI_Data.Super_cap_percent = 35.0;  //³¬µç°Ù·Ö±È
-    UI_Data.spin_state = 0;         //×ÔĞı×´Ì¬
-    UI_Data.fric_state = 0;         //Ä¦²ÁÂÖ×´Ì¬
+    /*åŠ¨æ€å‚æ•°*/
+    UI_Data.distance = 2.0;           //è·ç¦»
+    UI_Data.shoot_speed = 0.0;        //å¼¹é€Ÿ
+    UI_Data.Super_cap_percent = 35.0;  //è¶…ç”µç™¾åˆ†æ¯”
+    UI_Data.spin_state = 0;         //è‡ªæ—‹çŠ¶æ€
+    UI_Data.fric_state = 0;         //æ‘©æ“¦è½®çŠ¶æ€
 }

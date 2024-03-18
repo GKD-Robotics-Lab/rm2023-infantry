@@ -11,7 +11,7 @@ RM自定义UI协议       基于RM2020学生串口通信协议V1.1
 #include "string.h"
 #include "INS_task.h"
 #include "cmsis_os.h"
-
+#include "custom_ui_task.h"
 
 static unsigned char UI_com[512];
 static int UI_tot = 0;
@@ -392,9 +392,6 @@ int String_ReFresh(String_Data string_Data)
     UI_Data_Operate datahead;
     imageData=string_Data;
 
-    va_list ap;
-    //va_start(ap,cnt);
-
     framepoint=(unsigned char *)&framehead;
     framehead.SOF=UI_SOF;
     framehead.Data_Length=6+45;
@@ -444,8 +441,6 @@ int String_ReFresh(String_Data string_Data)
     }
 
     UI_Send();
-
-    va_end(ap);
 
     UI_Seq++;                                                         //包序号+1
     return 0;

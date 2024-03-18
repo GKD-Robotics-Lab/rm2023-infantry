@@ -1,9 +1,7 @@
 #ifndef __RM_CILENT_UI__
 #define __RM_CILENT_UI__
 
-/*英雄*/
-#define Robot_ID UI_Data_RobotID_RHero
-#define Cilent_ID UI_Data_CilentID_RHero        //机器人角色设置
+
 
 #include "stm32f4xx.h"
 #include "stdarg.h"

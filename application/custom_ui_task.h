@@ -3,65 +3,85 @@
 #include "main.h"
 #include "UI.h"
 
-/*UIÏÔÊ¾²ÎÊıµÄ½á¹¹Ìå*/
+/*å‡†æ˜Ÿä¸­å¿ƒä½ç½®*/
+#define CROSS_CENTER_X 960
+#define CROSS_CENTER_Y 540
+
+/*å¼¹é“æ ‡å®š*/
+#define CROSS_1M 100
+#define CROSS_2M 200
+#define CROSS_3M 300
+#define CROSS_4M 400
+#define CROSS_5M 500
+
+/*æœºå™¨äººè§’è‰²*/
+#define Robot_ID UI_Data_RobotID_RHero
+#define Cilent_ID UI_Data_CilentID_RHero
+
+/*UIæ¨¡å¼*/
+#define UI_INFANTRY 1
+#define UI_HERO 2
+#define UI_MODE UI_HERO
+
+/*UIæ˜¾ç¤ºå‚æ•°çš„ç»“æ„ä½“*/
 typedef struct
 {
-    float distance;     //Ä¿±ê¾àÀë
-    float shoot_speed;  //ÉäËÙ
-    float Super_cap_percent;    //³¬µç°Ù·Ö±È
-    int spin_state;     //Ğ¡ÍÓÂİ×´Ì¬
-    int fric_state;     //Ä¦²ÁÂÖ×´Ì¬
+    float distance;     //ç›®æ ‡è·ç¦»
+    float shoot_speed;  //å°„é€Ÿ
+    float Super_cap_percent;    //è¶…ç”µç™¾åˆ†æ¯”
+    int spin_state;     //å°é™€èºçŠ¶æ€
+    int fric_state;     //æ‘©æ“¦è½®çŠ¶æ€
 } UI_DisplayData_Type;
 
-/*ÃèÊö×¼ĞÇµÄ½á¹¹Ìå*/
+/*æè¿°å‡†æ˜Ÿçš„ç»“æ„ä½“*/
 typedef struct
 {
-    /*×¼ĞÇ±¾Ìå*/
-    u32 center[2]; //×¼ĞÇÖĞĞÄ
-    u32 ballistic_ruler[5]; //µ¯µÀ±ê³ß£¬·Ö±ğÎª1m~5mÂäµãÏà¶Ô×¼ĞÇÏÂ½µµÄ¾àÀë
-    u32 ruler_length[5]; //±ê³ßµÄ³¤¶È
-    u32 line_width; //Ïß¿í¶È
+    /*å‡†æ˜Ÿæœ¬ä½“*/
+    u32 center[2]; //å‡†æ˜Ÿä¸­å¿ƒ
+    u32 ballistic_ruler[5]; //å¼¹é“æ ‡å°ºï¼Œåˆ†åˆ«ä¸º1m~5mè½ç‚¹ç›¸å¯¹å‡†æ˜Ÿä¸‹é™çš„è·ç¦»
+    u32 ruler_length[5]; //æ ‡å°ºçš„é•¿åº¦
+    u32 line_width; //çº¿å®½åº¦
     u32 cross_width;
-    u32 cross_high; //Ê®×Ö¸ß¶È
-    u32 cross_high_offset; //Ê®×Ö¸ß¶ÈÆ«ÒÆ
-    u32 cross_colar;    //×¼ĞÇÑÕÉ«
-    u32 ruler_colar;    //±ê³ßÑÕÉ«
-    u32 dist_indicate_color;    //²â¾àÖ¸Ê¾ÑÕÉ«
-    u32 dist_indicate_length;   //²â¾àÖ¸Ê¾³¤¶È
-    u32 dist_indicate_width;   //²â¾àÖ¸Ê¾¿í¶È
-    u32 distance;   //²âµÃ¾àÀë
+    u32 cross_high; //åå­—é«˜åº¦
+    u32 cross_high_offset; //åå­—é«˜åº¦åç§»
+    u32 cross_colar;    //å‡†æ˜Ÿé¢œè‰²
+    u32 ruler_colar;    //æ ‡å°ºé¢œè‰²
+    u32 dist_indicate_color;    //æµ‹è·æŒ‡ç¤ºé¢œè‰²
+    u32 dist_indicate_length;   //æµ‹è·æŒ‡ç¤ºé•¿åº¦
+    u32 dist_indicate_width;   //æµ‹è·æŒ‡ç¤ºå®½åº¦
+    u32 distance;   //æµ‹å¾—è·ç¦»
 
-    /*²â¾à&µ¯ËÙÏÔÊ¾*/
-    u32 dist_start_point[2];    //²â¾àÎÄ×ÖÆğÊ¼Î»ÖÃ
-    u32 dist_text_size;         //²âËÙÎÄ×Ö×ÖºÅ
-    u32 dist_display_length;    //²âËÙÌõµÄ³¤¶È
-    u32 dist_display_width;     //²âËÙÌõ¿í¶È
+    /*æµ‹è·&å¼¹é€Ÿæ˜¾ç¤º*/
+    u32 dist_start_point[2];    //æµ‹è·æ–‡å­—èµ·å§‹ä½ç½®
+    u32 dist_text_size;         //æµ‹é€Ÿæ–‡å­—å­—å·
+    u32 dist_display_length;    //æµ‹é€Ÿæ¡çš„é•¿åº¦
+    u32 dist_display_width;     //æµ‹é€Ÿæ¡å®½åº¦
 
-    u32 speed_start_point[2];    //ÉäËÙÎÄ×ÖÆğÊ¼Î»ÖÃ
-    u32 speed_display_length;    //ÉäËÙÌõµÄ³¤¶È
-    u32 speed_display_width;     //ÉäËÙÌõ¿í¶È
+    u32 speed_start_point[2];    //å°„é€Ÿæ–‡å­—èµ·å§‹ä½ç½®
+    u32 speed_display_length;    //å°„é€Ÿæ¡çš„é•¿åº¦
+    u32 speed_display_width;     //å°„é€Ÿæ¡å®½åº¦
     u32 speed_text_size;
 
-    u32 shoot_text_color;       //ÎÄ×ÖÑÕÉ«
-    u32 shoot_bar_color;        //°Ù·ÖÌõÑÕÉ«
+    u32 shoot_text_color;       //æ–‡å­—é¢œè‰²
+    u32 shoot_bar_color;        //ç™¾åˆ†æ¡é¢œè‰²
 
     u32 shoot_speed_percent;
     u32 shoot_dist_percent;
 } Crosshair_Data_Type;
 
-/*ÃèÊöÓÒÏÂ½Ç×´Ì¬Ö¸Ê¾µÄ½á¹¹Ìå*/
+/*æè¿°å³ä¸‹è§’çŠ¶æ€æŒ‡ç¤ºçš„ç»“æ„ä½“*/
 typedef struct
 {
-    /* ³¬µç²¿·Ö */
-    u32 cap_text_pos[2];    //³¬µç×ÖÌåÎ»ÖÃ£¬×óÏÂ½Ç
-    u32 cap_display_length; //ÈİÁ¿Ìõ³¤¶È
-    u32 cap_display_with;   //ÈİÁ¿Ìõ¿í¶È
-    u32 cap_text_size;      //³¬µç×ÖºÅ
-    u32 cap_text_color;     //×ÖÌåÑÕÉ«
-    u32 cap_bar_color;      //°Ù·ÖÌõÑÕÉ«
-    int cap_percent;        //³¬µç°Ù·Ö±È
+    /* è¶…ç”µéƒ¨åˆ† */
+    u32 cap_text_pos[2];    //è¶…ç”µå­—ä½“ä½ç½®ï¼Œå·¦ä¸‹è§’
+    u32 cap_display_length; //å®¹é‡æ¡é•¿åº¦
+    u32 cap_display_with;   //å®¹é‡æ¡å®½åº¦
+    u32 cap_text_size;      //è¶…ç”µå­—å·
+    u32 cap_text_color;     //å­—ä½“é¢œè‰²
+    u32 cap_bar_color;      //ç™¾åˆ†æ¡é¢œè‰²
+    int cap_percent;        //è¶…ç”µç™¾åˆ†æ¯”
 
-    /* ×´Ì¬²¿·Ö */
+    /* çŠ¶æ€éƒ¨åˆ† */
     u32 spin_state_pos[2];
     u32 fric_state_pos[2];
     int spin_state;
@@ -71,3 +91,5 @@ typedef struct
 
 
 extern void custom_ui_task(void const * argument);
+extern void custom_UI_init();
+extern UI_DisplayData_Type UI_Data;
