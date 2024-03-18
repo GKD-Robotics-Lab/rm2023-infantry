@@ -101,6 +101,7 @@ static void shoot_init(void)
 {
     static const fp32 fric_speed_pid[3]    = {FRIC_SPEED_PID_KP, FRIC_SPEED_PID_KI, FRIC_SPEED_PID_KD};
     static const fp32 trigger_speed_pid[3] = {TRIGGER_SPEED_PID_KP, TRIGGER_SPEED_PID_KI, TRIGGER_SPEED_PID_KD};
+    static const fp32 trigger_angle_pid[3] = {TRIGGER_ANGLE_PID_KP, TRIGGER_ANGLE_PID_KI, TRIGGER_ANGLE_PID_KD};
 
     //* 射击模式初始化
     shoot_control.shoot_mode = SHOOT_DISABLE;
@@ -115,6 +116,7 @@ static void shoot_init(void)
     PID_init(&shoot_control.fric1.motor_pid, PID_DELTA, fric_speed_pid, FRIC_SPEED_PID_MAX_OUT, FRIC_SPEED_PID_MAX_OUT, FRIC_SPEED_PID_DEAD_BAND);
     PID_init(&shoot_control.fric2.motor_pid, PID_DELTA, fric_speed_pid, FRIC_SPEED_PID_MAX_OUT, FRIC_SPEED_PID_MAX_OUT, FRIC_SPEED_PID_DEAD_BAND);
     PID_init(&shoot_control.trigger.speed_pid, PID_DELTA, trigger_speed_pid, TRIGGER_SPEED_PID_MAX_OUT, TRIGGER_SPEED_PID_MAX_IOUT, TRIGGER_SPEED_PID_DEAD_BAND);
+    PID_init(&shoot_control.trigger.angle_pid, PID_POSITION, trigger_angle_pid, TRIGGER_ANGLE_PID_MAX_OUT, TRIGGER_ANGLE_PID_MAX_IOUT, TRIGGER_ANGLE_PID_DEAD_BAND);
     ramp_init(&shoot_control.fric_ramp, SHOOT_CONTROL_TIME * 0.001, FRIC_SPEED_FULL, FRIC_SPEED_STOP);
 
     //* 射击控制其他参数初始化
@@ -329,9 +331,12 @@ static void shoot_control_loop(void)
             break;
         case SHOOT_START:
         case SHOOT_READY:
-        case SHOOT_DONE:
         case SHOOT_STOP:
             // 拨弹轮不动
+            shoot_control.trigger.speed_set   = PID_calc(&shoot_control.trigger.angle_pid, (shoot_control.trigger.angle - shoot_control.trigger.last_angle), 0);
+            shoot_control.trigger.current_set = PID_calc(&shoot_control.trigger.speed_pid, shoot_control.trigger.speed, shoot_control.trigger.speed_set);
+            break;
+        case SHOOT_DONE:
             shoot_control.trigger.speed_set   = 0.0f;
             shoot_control.trigger.current_set = PID_calc(&shoot_control.trigger.speed_pid, shoot_control.trigger.speed, shoot_control.trigger.speed_set);
             break;

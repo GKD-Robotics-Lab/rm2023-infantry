@@ -28,10 +28,10 @@
 
 // 摩擦轮斜坡函数设置
 #define FRIC_SPEED_STOP  0.0f
-#define FRIC_SPEED_FULL  2000.0f // 5000.0f
-#define FRIC_SPEED_TURBO 2500.0f // 右键加速时的最大速度
-#define FRIC_RAMP_ADD    350.0f // 摩擦轮缓启停的加速度
-#define FRIC_RAMP_SUB    -300.0f
+#define FRIC_SPEED_FULL  1500.0f // 5000.0f
+#define FRIC_SPEED_TURBO 1600.0f // 右键加速时的最大速度
+#define FRIC_RAMP_ADD    500.0f // 摩擦轮缓启停的加速度
+#define FRIC_RAMP_SUB    -800.0f
 
 // 摩擦轮电机 PID
 #define FRIC_SPEED_PID_KP        60.0f
@@ -66,6 +66,13 @@
 #define TRIGGER_REVERSE_TIME        500   // 一次反转的时长
 
 // 拨弹轮电机 PID
+#define TRIGGER_ANGLE_PID_KP        12.0f
+#define TRIGGER_ANGLE_PID_KI        0.8f
+#define TRIGGER_ANGLE_PID_KD        0.0f
+#define TRIGGER_ANGLE_PID_MAX_OUT   10.0f
+#define TRIGGER_ANGLE_PID_MAX_IOUT  0.5f
+#define TRIGGER_ANGLE_PID_DEAD_BAND 0.0f
+
 #define TRIGGER_SPEED_PID_KP        666.0f
 #define TRIGGER_SPEED_PID_KI        0.8f
 #define TRIGGER_SPEED_PID_KD        0.0f
@@ -122,6 +129,7 @@ typedef struct
 
     //* 电机 PID 结构体
     pid_typedef speed_pid;
+    pid_typedef angle_pid;
 
     //* 电机上一次角度记录
     fp32 last_angle;

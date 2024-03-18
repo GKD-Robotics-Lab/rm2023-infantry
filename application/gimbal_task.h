@@ -39,21 +39,21 @@
 
 //! PID
 //*pitch
-#define PITCH_SPEED_PID_KP                  3000.0f
+#define PITCH_SPEED_PID_KP                  4500.0f
 #define PITCH_SPEED_PID_KI                  10.0f
 #define PITCH_SPEED_PID_KD                  0.0f
 #define PITCH_SPEED_PID_MAX_OUT             30000.0f
 #define PITCH_SPEED_PID_MAX_IOUT            5000.0f
 #define PITCH_SPEED_PID_DEAD_BAND           0.0f
 
-#define PITCH_GYRO_ABSOLUTE_PID_KP          15.0f
+#define PITCH_GYRO_ABSOLUTE_PID_KP          22.0f
 #define PITCH_GYRO_ABSOLUTE_PID_KI          0.0f
 #define PITCH_GYRO_ABSOLUTE_PID_KD          0.3f
 #define PITCH_GYRO_ABSOLUTE_PID_MAX_OUT     10.0f
 #define PITCH_GYRO_ABSOLUTE_PID_MAX_IOUT    0.0f
 #define PITCH_GYRO_ABSOLUTE_PID_DEAD_BAND   0.0f
 
-#define PITCH_ENCODE_RELATIVE_PID_KP        15.0f
+#define PITCH_ENCODE_RELATIVE_PID_KP        22.0f
 #define PITCH_ENCODE_RELATIVE_PID_KI        0.00f
 #define PITCH_ENCODE_RELATIVE_PID_KD        0.0f
 #define PITCH_ENCODE_RELATIVE_PID_MAX_OUT   10.0f
