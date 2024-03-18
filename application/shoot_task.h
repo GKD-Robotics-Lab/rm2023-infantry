@@ -28,16 +28,16 @@
 
 // 摩擦轮斜坡函数设置
 #define FRIC_SPEED_STOP  0.0f
-#define FRIC_SPEED_FULL  500.0f // 5000.0f
-#define FRIC_SPEED_TURBO 600.0f // 右键加速时的最大速度
-#define FRIC_RAMP_ADD    300.0f // 摩擦轮缓启停的加速度
-#define FRIC_RAMP_SUB    -200.0f
+#define FRIC_SPEED_FULL  2000.0f // 5000.0f
+#define FRIC_SPEED_TURBO 2500.0f // 右键加速时的最大速度
+#define FRIC_RAMP_ADD    350.0f // 摩擦轮缓启停的加速度
+#define FRIC_RAMP_SUB    -300.0f
 
 // 摩擦轮电机 PID
-#define FRIC_SPEED_PID_KP        50.0f
+#define FRIC_SPEED_PID_KP        60.0f
 #define FRIC_SPEED_PID_KI        0.05f
 #define FRIC_SPEED_PID_KD        0.0f
-#define FRIC_SPEED_PID_MAX_OUT   10000.0f
+#define FRIC_SPEED_PID_MAX_OUT   16380.0f
 #define FRIC_SPEED_PID_MAX_IOUT  10000.0f
 #define FRIC_SPEED_PID_DEAD_BAND 0.0f
 
