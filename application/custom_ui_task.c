@@ -28,7 +28,9 @@ void UI_init_draw();
 
 volatile String_Data state_text_data;
 volatile Graph_Data shoot_distance_bar, cap_percentage;
+volatile Graph_Data still_cross_line[7];
 volatile cap_text[30];
+volatile int count = 0;     //计数器
 
 
 void custom_ui_task(void const * argument)
@@ -42,13 +44,25 @@ void custom_ui_task(void const * argument)
         sync_parameter();
         update_dynamic_paramater();
 
-        // //测试刷新用
-        // UI_Data.Super_cap_percent+=2;
-        // if(UI_Data.Super_cap_percent>=100) UI_Data.Super_cap_percent=0;
-        // if(UI_Data.Super_cap_percent>=50) UI_Data.spin_state = 1;
-        // else UI_Data.spin_state = 0;
-        // if(UI_Data.Super_cap_percent>=70) UI_Data.fric_state = 1;
-        // else UI_Data.fric_state = 0;
+        //间隔一定时间重新初始化ui
+        if(count >= RE_INIT_CYCLE)
+        {
+            osDelay(100);
+            if(UI_MODE == UI_HERO) draw_crosshair_hero();
+            else if(UI_MODE == UI_INFANTRY) draw_crosshair_infantry();
+            osDelay(100);
+            UI_init_draw();
+            count = 0;
+        } 
+        count ++;
+
+        //测试刷新用
+        UI_Data.Super_cap_percent+=2;
+        if(UI_Data.Super_cap_percent>=100) UI_Data.Super_cap_percent=0;
+        if(UI_Data.Super_cap_percent>=50) UI_Data.spin_state = 1;
+        else UI_Data.spin_state = 0;
+        if(UI_Data.Super_cap_percent>=70) UI_Data.fric_state = 1;
+        else UI_Data.fric_state = 0;
 
         osDelay(100); //刷新率=10Hz
     }
@@ -57,7 +71,6 @@ void custom_ui_task(void const * argument)
 /*画英雄的静止准星*/
 void draw_crosshair_hero()
 {
-    Graph_Data still_cross_line[7];
     char line_id[7][3] = {"L1", "L2", "L3", "L4", "L5", "L6", "L7"};
     /*准星*/
     //横着的主准星
@@ -98,7 +111,6 @@ void draw_crosshair_hero()
 /*画英雄的静步兵准星*/
 void draw_crosshair_infantry()
 {
-    Graph_Data still_cross_line[2];
     /*准星*/
     //横着的主准星
     Line_Draw(&still_cross_line[0], "L1", UI_Graph_ADD, 0, 
@@ -277,7 +289,7 @@ void fric_state_str(char *to_str, int fric_state)
     to_str[1] = 'R';
     to_str[2] = 'I';
     to_str[3] = 'C';
-    to_str[4] = '   ';
+    to_str[4] = ' ';
     if(fric_state == 0)
     {
         to_str[5] = 'O';

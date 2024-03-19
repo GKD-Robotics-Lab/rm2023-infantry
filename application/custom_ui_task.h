@@ -23,6 +23,8 @@
 #define UI_HERO 2
 #define UI_MODE UI_HERO
 
+#define RE_INIT_CYCLE 15
+
 /*UI显示参数的结构体*/
 typedef struct
 {
