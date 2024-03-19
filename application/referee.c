@@ -187,9 +187,8 @@ void get_shoot_heat0_limit_and_heat0(uint16_t *heat0_limit, uint16_t *heat0)
     *heat0 = power_heat_data_t.shooter_heat0;
 }
 
-void get_shoot_heat1_limit_and_heat1(uint16_t *heat1_limit, uint16_t *heat1)
+void get_chassis_power_limit(uint16_t* power_limit)
 {
-    *heat1_limit = robot_state.shooter_heat1_cooling_limit;
-    *heat1 = power_heat_data_t.shooter_heat1;
+    *power_limit = robot_state.chassis_power_limit;
 }
 

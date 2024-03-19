@@ -26,6 +26,7 @@
 #include "bsp_rng.h"
 
 #include "detect_task.h"
+#include "superC_can_task.h"
 
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
@@ -50,6 +51,8 @@ static CAN_TxHeaderTypeDef chassis_tx_message;
 static uint8_t chassis_can_send_data[8];
 static CAN_TxHeaderTypeDef shoot_tx_message;
 static uint8_t shoot_can_send_data[8];
+static CAN_TxHeaderTypeDef superC_tx_message;
+static uint8_t superC_can_send_data[2];
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
@@ -69,6 +72,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
             get_motor_measure(&motor_chassis[i], rx_data);
             detect_hook(CHASSIS_MOTOR1_TOE + i);
             break;
+        }
+        
+        case CAN_SUPERC_RX_ID: {
+            superC_power_remaining = rx_data[0];
+            superC_bat_remaining = rx_data[1];
         }
 
         default:
@@ -187,6 +195,20 @@ void CAN_cmd_chassis(int16_t motor1, int16_t motor2, int16_t motor3, int16_t mot
 
     HAL_CAN_AddTxMessage(&CHASSIS_CAN, &chassis_tx_message, chassis_can_send_data, &send_mail_box);
 }
+
+void CAN_cmd_superC(uint16_t power_limit)
+{
+    uint32_t send_mail_box;
+    superC_tx_message.StdId = CAN_SUPERC_TX_ID;
+    superC_tx_message.IDE   = CAN_ID_STD;
+    superC_tx_message.RTR   = CAN_RTR_DATA;
+    superC_tx_message.DLC   = 0x02;
+    superC_can_send_data[0] = 66;
+    superC_can_send_data[1] = 8;
+
+    HAL_CAN_AddTxMessage(&CHASSIS_CAN, &superC_tx_message, superC_can_send_data, &send_mail_box);
+}
+
 
 /**
  * @brief          返回指定的电机报文数据指针
