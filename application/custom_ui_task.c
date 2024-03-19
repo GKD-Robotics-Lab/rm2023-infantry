@@ -23,48 +23,34 @@ void ui_parameter_init();
 void cap_text_format(char *to_str, int cap_percent);
 void sync_parameter();
 void state_str(char *to_str, int cap_percent, int spin_state, int fric_state);
+void UI_init_draw();
+
+
+volatile String_Data state_text_data;
+volatile Graph_Data shoot_distance_bar, cap_percentage;
+volatile cap_text[30];
 
 
 void custom_ui_task(void const * argument)
 {
     custom_UI_init();
     sync_parameter();
-
-    Graph_Data shoot_distance_bar, cap_percentage;
-
-    //测距部分的刷新
-    Line_Draw(&shoot_distance_bar, "dst", UI_Graph_ADD, 1, Crosshair_Data.shoot_bar_color,
-        Crosshair_Data.dist_display_width, 
-        Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0],
-        Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width,
-        Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0] + ((Crosshair_Data.dist_display_length*Crosshair_Data.shoot_dist_percent)/100),
-        Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width);
-
-    /*刷新超电部分*/
-    Line_Draw(&cap_percentage, "cap", UI_Graph_ADD, 1, State_Data.cap_bar_color, State_Data.cap_display_with,
-                State_Data.cap_text_pos[0],
-                State_Data.cap_text_pos[1] - State_Data.cap_text_size,
-                State_Data.cap_text_pos[0] + ((State_Data.cap_display_length*State_Data.cap_percent)/100),
-                State_Data.cap_text_pos[1] - State_Data.cap_text_size);
-    osDelay(100);
-    UI_ReFresh(2, shoot_distance_bar, cap_percentage);
-    osDelay(100);
-    // String_Data state_text_data;
-    // String_Draw(&state_text_data, "sta", UI_Graph_ADD, 1, UI_Color_Orange,
-    //     20, 4, 20, 500, 500, "TEST");
-
+    UI_init_draw();
 
     while(1)
     {
         sync_parameter();
         update_dynamic_paramater();
 
+        // //测试刷新用
+        // UI_Data.Super_cap_percent+=2;
+        // if(UI_Data.Super_cap_percent>=100) UI_Data.Super_cap_percent=0;
+        // if(UI_Data.Super_cap_percent>=50) UI_Data.spin_state = 1;
+        // else UI_Data.spin_state = 0;
+        // if(UI_Data.Super_cap_percent>=70) UI_Data.fric_state = 1;
+        // else UI_Data.fric_state = 0;
 
-        UI_Data.Super_cap_percent+=2;
-        if(UI_Data.Super_cap_percent>=100) UI_Data.Super_cap_percent=0;
-
-
-        osDelay(100); //刷新率=5Hz
+        osDelay(100); //刷新率=10Hz
     }
 }
 
@@ -136,13 +122,37 @@ void draw_crosshair_infantry()
     //标尺
 }
 
+void UI_init_draw()
+{
+    //测距部分的刷新
+    Line_Draw(&shoot_distance_bar, "dst", UI_Graph_ADD, 1, Crosshair_Data.shoot_bar_color,
+        Crosshair_Data.dist_display_width, 
+        Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0],
+        Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width,
+        Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0] + ((Crosshair_Data.dist_display_length*Crosshair_Data.shoot_dist_percent)/100),
+        Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width);
+
+    /*刷新超电部分*/
+    Line_Draw(&cap_percentage, "cap", UI_Graph_ADD, 1, State_Data.cap_bar_color, State_Data.cap_display_with,
+                State_Data.cap_text_pos[0],
+                State_Data.cap_text_pos[1] - State_Data.cap_text_size*4.8,
+                State_Data.cap_text_pos[0] + ((State_Data.cap_display_length*State_Data.cap_percent)/100),
+                State_Data.cap_text_pos[1] - State_Data.cap_text_size*4.8);
+    UI_ReFresh(2, shoot_distance_bar, cap_percentage);
+    osDelay(100);
+    state_str(&cap_text, State_Data.cap_percent, State_Data.spin_state, State_Data.fric_state);
+    
+    String_Draw(&state_text_data, "sta", UI_Graph_ADD, 1, State_Data.cap_text_color,
+                State_Data.cap_text_size, 21, 2, 
+                State_Data.cap_text_pos[0],
+                State_Data.cap_text_pos[1], &cap_text);
+    String_ReFresh(state_text_data);
+    osDelay(100);
+}
+
 /*刷新动态参数*/
 void update_dynamic_paramater()
 {
-    /*准星刷新部分*/
-    Graph_Data shoot_distance_bar, cap_percentage;
-    String_Data shoot_distance_text, cap_percent_text;
-    char dist_text[5], cap_text[30];
 
     //测距部分的刷新
     Line_Draw(&shoot_distance_bar, "dst", UI_Graph_Change, 1, Crosshair_Data.shoot_bar_color,
@@ -152,16 +162,16 @@ void update_dynamic_paramater()
         Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0] + ((Crosshair_Data.dist_display_length*Crosshair_Data.shoot_dist_percent)/100),
         Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width);
 
-    /*刷新超电部分*/
+    //超电的刷新
     Line_Draw(&cap_percentage, "cap", UI_Graph_Change, 1, State_Data.cap_bar_color, State_Data.cap_display_with,
                 State_Data.cap_text_pos[0],
-                State_Data.cap_text_pos[1] - State_Data.cap_text_size,
+                State_Data.cap_text_pos[1] - State_Data.cap_text_size*4.8,
                 State_Data.cap_text_pos[0] + ((State_Data.cap_display_length*State_Data.cap_percent)/100),
-                State_Data.cap_text_pos[1] - State_Data.cap_text_size);
-    
+                State_Data.cap_text_pos[1] - State_Data.cap_text_size*4.8);
+    //状态的刷新
     state_str(&cap_text, State_Data.cap_percent, State_Data.spin_state, State_Data.fric_state);
-    String_Draw(&cap_percent_text, "sta", UI_Graph_ADD, 1, State_Data.cap_text_color,
-                State_Data.cap_text_size, 21, 30, 
+    String_Draw(&state_text_data, "sta", UI_Graph_Change, 1, State_Data.cap_text_color,
+                State_Data.cap_text_size, 21, 2, 
                 State_Data.cap_text_pos[0],
                 State_Data.cap_text_pos[1], &cap_text);
 
@@ -169,7 +179,7 @@ void update_dynamic_paramater()
     if(UI_MODE == UI_HERO)  UI_ReFresh(2, shoot_distance_bar, cap_percentage);
     else if(UI_MODE == UI_INFANTRY) UI_ReFresh(1, cap_percentage);
     osDelay(100);
-    String_ReFresh(cap_percent_text);
+    String_ReFresh(state_text_data);
  }
 
 /*刷新动态参数*/
@@ -366,8 +376,8 @@ void ui_parameter_init()
     Crosshair_Data.shoot_text_color = UI_Color_Orange;  //字体颜色  
     Crosshair_Data.shoot_bar_color = UI_Color_Cyan;     //白分条颜色
 
-    State_Data.cap_text_pos[0] = 1500;      //超电字体X
-    State_Data.cap_text_pos[1] = 500;       //超电字体Y
+    State_Data.cap_text_pos[0] = 1600;      //超电字体X
+    State_Data.cap_text_pos[1] = 800;       //超电字体Y
     State_Data.cap_display_with = 30;       //超电条宽度
     State_Data.cap_display_length = 250;    //超电条长度
     State_Data.cap_text_size = 30;          //字体大小
@@ -380,7 +390,7 @@ void ui_parameter_init()
     State_Data.spin_state = 0;  //小陀螺开关状态
 
     /*动态参数*/
-    UI_Data.distance = 2.0;           //距离
+    UI_Data.distance = 0.0;           //距离
     UI_Data.shoot_speed = 0.0;        //弹速
     UI_Data.Super_cap_percent = 35.0;  //超电百分比
     UI_Data.spin_state = 0;         //自旋状态
