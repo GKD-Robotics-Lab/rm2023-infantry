@@ -150,7 +150,7 @@
 //* key define
 // turn 180°
 // 掉头180 按键
-#define TURN_KEYBOARD KEY_PRESSED_OFFSET_F
+// #define TURN_KEYBOARD KEY_PRESSED_OFFSET_F
 
 typedef enum {
     GIMBAL_MOTOR_RAW = 0,       // 电机原始值控制
