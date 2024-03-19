@@ -10,7 +10,7 @@
 
 #pragma pack(1)                           //按1字节对齐
 
-#define NULL 0
+//#define NULL 0
 #define __FALSE 100
 
 #define UI_MODE_SWITCH_KEYBOARD KEY_PRESSED_OFFSET_X

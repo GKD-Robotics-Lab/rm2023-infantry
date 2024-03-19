@@ -11,7 +11,7 @@ UI_DisplayData_Type UI_Data;
 State_Indicate_Type State_Data;
 
 void draw_crosshair_hero();
-void draw_crosshair_infantry();
+void draw_crosshair_infantry(); 
 void update_dynamic_paramater();
 void UI_clear();
 void custom_UI_init();
@@ -28,12 +28,43 @@ void state_str(char *to_str, int cap_percent, int spin_state, int fric_state);
 void custom_ui_task(void const * argument)
 {
     custom_UI_init();
-    for (;;)
+    sync_parameter();
+
+    Graph_Data shoot_distance_bar, cap_percentage;
+
+    //测距部分的刷新
+    Line_Draw(&shoot_distance_bar, "dst", UI_Graph_ADD, 1, Crosshair_Data.shoot_bar_color,
+        Crosshair_Data.dist_display_width, 
+        Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0],
+        Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width,
+        Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0] + ((Crosshair_Data.dist_display_length*Crosshair_Data.shoot_dist_percent)/100),
+        Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width);
+
+    /*刷新超电部分*/
+    Line_Draw(&cap_percentage, "cap", UI_Graph_ADD, 1, State_Data.cap_bar_color, State_Data.cap_display_with,
+                State_Data.cap_text_pos[0],
+                State_Data.cap_text_pos[1] - State_Data.cap_text_size,
+                State_Data.cap_text_pos[0] + ((State_Data.cap_display_length*State_Data.cap_percent)/100),
+                State_Data.cap_text_pos[1] - State_Data.cap_text_size);
+    osDelay(100);
+    UI_ReFresh(2, shoot_distance_bar, cap_percentage);
+    osDelay(100);
+    // String_Data state_text_data;
+    // String_Draw(&state_text_data, "sta", UI_Graph_ADD, 1, UI_Color_Orange,
+    //     20, 4, 20, 500, 500, "TEST");
+
+
+    while(1)
     {
         sync_parameter();
         update_dynamic_paramater();
 
-        osDelay(100); //刷新率=10Hz
+
+        UI_Data.Super_cap_percent+=2;
+        if(UI_Data.Super_cap_percent>=100) UI_Data.Super_cap_percent=0;
+
+
+        osDelay(100); //刷新率=5Hz
     }
 }
 
@@ -111,14 +142,10 @@ void update_dynamic_paramater()
     /*准星刷新部分*/
     Graph_Data shoot_distance_bar, cap_percentage;
     String_Data shoot_distance_text, cap_percent_text;
-    char dist_text[5], cap_text[10];
-
-    //删除旧信息
-    UI_Delete(UI_Data_Del_Layer, 1); 
+    char dist_text[5], cap_text[30];
 
     //测距部分的刷新
-    int_to_str(&dist_text, (int)(UI_Data.distance*100));
-    Line_Draw(&shoot_distance_bar, "DS", UI_Graph_ADD, 1, Crosshair_Data.shoot_bar_color,
+    Line_Draw(&shoot_distance_bar, "dst", UI_Graph_Change, 1, Crosshair_Data.shoot_bar_color,
         Crosshair_Data.dist_display_width, 
         Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0],
         Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width,
@@ -126,14 +153,14 @@ void update_dynamic_paramater()
         Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width);
 
     /*刷新超电部分*/
-    Line_Draw(&cap_percentage, "CP", UI_Graph_ADD, 1, State_Data.cap_bar_color, State_Data.cap_display_with,
+    Line_Draw(&cap_percentage, "cap", UI_Graph_Change, 1, State_Data.cap_bar_color, State_Data.cap_display_with,
                 State_Data.cap_text_pos[0],
                 State_Data.cap_text_pos[1] - State_Data.cap_text_size,
                 State_Data.cap_text_pos[0] + ((State_Data.cap_display_length*State_Data.cap_percent)/100),
                 State_Data.cap_text_pos[1] - State_Data.cap_text_size);
     
     state_str(&cap_text, State_Data.cap_percent, State_Data.spin_state, State_Data.fric_state);
-    String_Draw(&cap_percent_text, "CI", UI_Graph_ADD, 1, State_Data.cap_text_color,
+    String_Draw(&cap_percent_text, "sta", UI_Graph_ADD, 1, State_Data.cap_text_color,
                 State_Data.cap_text_size, 21, 30, 
                 State_Data.cap_text_pos[0],
                 State_Data.cap_text_pos[1], &cap_text);
@@ -141,9 +168,36 @@ void update_dynamic_paramater()
     //应用刷新(英雄显示测距和准星，步兵无准星)
     if(UI_MODE == UI_HERO)  UI_ReFresh(2, shoot_distance_bar, cap_percentage);
     else if(UI_MODE == UI_INFANTRY) UI_ReFresh(1, cap_percentage);
-    
+    osDelay(100);
     String_ReFresh(cap_percent_text);
  }
+
+/*刷新动态参数*/
+// void update_dynamic_paramater()
+// {
+//     Graph_Data shoot_distance_bar, cap_percentage;
+//     String_Data state_text_data;
+//     char state_text[30];
+
+//     //测距部分的刷新
+//     Line_Draw(&shoot_distance_bar, "dst", UI_Graph_Change, 1, Crosshair_Data.shoot_bar_color,
+//         Crosshair_Data.dist_display_width, 
+//         Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0],
+//         Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width,
+//         Crosshair_Data.center[0] + Crosshair_Data.dist_start_point[0] + ((Crosshair_Data.dist_display_length*Crosshair_Data.shoot_dist_percent)/100),
+//         Crosshair_Data.center[1] + Crosshair_Data.dist_start_point[1] - Crosshair_Data.dist_display_width);
+
+//     /*刷新超电部分*/
+//     Line_Draw(&cap_percentage, "cap", UI_Graph_Change, 1, State_Data.cap_bar_color, State_Data.cap_display_with,
+//                 State_Data.cap_text_pos[0],
+//                 State_Data.cap_text_pos[1] - State_Data.cap_text_size,
+//                 State_Data.cap_text_pos[0] + ((State_Data.cap_display_length*State_Data.cap_percent)/100),
+//                 State_Data.cap_text_pos[1] - State_Data.cap_text_size);
+//     UI_ReFresh(2, shoot_distance_bar, cap_percentage);
+//     state_str(&state_text, State_Data.cap_percent, State_Data.spin_state, State_Data.fric_state);
+//     // osDelay(110);
+//     // String_ReFresh(state_text_data);
+//  }
 
 void UI_clear()
 {
@@ -313,7 +367,7 @@ void ui_parameter_init()
     Crosshair_Data.shoot_bar_color = UI_Color_Cyan;     //白分条颜色
 
     State_Data.cap_text_pos[0] = 1500;      //超电字体X
-    State_Data.cap_text_pos[1] = 100;       //超电字体Y
+    State_Data.cap_text_pos[1] = 500;       //超电字体Y
     State_Data.cap_display_with = 30;       //超电条宽度
     State_Data.cap_display_length = 250;    //超电条长度
     State_Data.cap_text_size = 30;          //字体大小
