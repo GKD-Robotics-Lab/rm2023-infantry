@@ -383,7 +383,6 @@ Tips：：该函数只能推送1，2，5，7个图形，其他数目协议未涉
 int String_ReFresh(String_Data string_Data)
 {
     int i;
-    int cnt = 1;
     String_Data imageData;
     unsigned char *framepoint;                      //读写指针
     u16 frametail=0xFFFF;                        //CRC16校验值
