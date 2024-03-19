@@ -26,11 +26,11 @@ void state_str(char *to_str, int cap_percent, int spin_state, int fric_state);
 void UI_init_draw();
 
 
-volatile String_Data state_text_data;
-volatile Graph_Data shoot_distance_bar, cap_percentage;
-volatile Graph_Data still_cross_line[7];
-volatile cap_text[30];
-volatile int count = 0;     //计数器
+String_Data state_text_data;
+Graph_Data shoot_distance_bar, cap_percentage;
+Graph_Data still_cross_line[7];
+char cap_text[30];
+int count = 0;     //计数器
 
 
 void custom_ui_task(void const * argument)
@@ -152,12 +152,12 @@ void UI_init_draw()
                 State_Data.cap_text_pos[1] - State_Data.cap_text_size*4.8);
     UI_ReFresh(2, shoot_distance_bar, cap_percentage);
     osDelay(100);
-    state_str(&cap_text, State_Data.cap_percent, State_Data.spin_state, State_Data.fric_state);
+    state_str(cap_text, State_Data.cap_percent, State_Data.spin_state, State_Data.fric_state);
     
     String_Draw(&state_text_data, "sta", UI_Graph_ADD, 1, State_Data.cap_text_color,
                 State_Data.cap_text_size, 21, 2, 
                 State_Data.cap_text_pos[0],
-                State_Data.cap_text_pos[1], &cap_text);
+                State_Data.cap_text_pos[1], cap_text);
     String_ReFresh(state_text_data);
     osDelay(100);
 }
@@ -181,11 +181,11 @@ void update_dynamic_paramater()
                 State_Data.cap_text_pos[0] + ((State_Data.cap_display_length*State_Data.cap_percent)/100),
                 State_Data.cap_text_pos[1] - State_Data.cap_text_size*4.8);
     //状态的刷新
-    state_str(&cap_text, State_Data.cap_percent, State_Data.spin_state, State_Data.fric_state);
+    state_str(cap_text, State_Data.cap_percent, State_Data.spin_state, State_Data.fric_state);
     String_Draw(&state_text_data, "sta", UI_Graph_Change, 1, State_Data.cap_text_color,
                 State_Data.cap_text_size, 21, 2, 
                 State_Data.cap_text_pos[0],
-                State_Data.cap_text_pos[1], &cap_text);
+                State_Data.cap_text_pos[1], cap_text);
 
     //应用刷新(英雄显示测距和准星，步兵无准星)
     if(UI_MODE == UI_HERO)  UI_ReFresh(2, shoot_distance_bar, cap_percentage);
@@ -265,7 +265,7 @@ void spin_state_str(char *to_str, int spin_state)
     to_str[1] = 'P';
     to_str[2] = 'I';
     to_str[3] = 'N';
-    to_str[4] = '   ';
+    to_str[4] = ' ';
     if(spin_state == 0)
     {
         to_str[5] = 'O';
@@ -311,11 +311,10 @@ void state_str(char *to_str, int cap_percent, int spin_state, int fric_state)
     char cap_str[10];
     char spin_str[10];
     char fric_str[10];
-    int index = 0;
     
-    cap_text_format(&cap_str, cap_percent);
-    spin_state_str(&spin_str, spin_state);
-    fric_state_str(&fric_str, fric_state);
+    cap_text_format(cap_str, cap_percent);
+    spin_state_str(spin_str, spin_state);
+    fric_state_str(fric_str, fric_state);
     for(int i=0; i<8; i++)  to_str[i] = fric_str[i];
     to_str[8] = '\n';
     for(int i=9; i<17; i++) to_str[i] = spin_str[i-9];
