@@ -15,13 +15,13 @@
 #define CROSS_5M 500
 
 /*机器人角色*/
-#define Robot_ID UI_Data_RobotID_RHero
-#define Cilent_ID UI_Data_CilentID_RHero
+#define Robot_ID UI_Data_RobotID_BStandard3
+#define Cilent_ID UI_Data_CilentID_BStandard3
 
 /*UI模式*/
 #define UI_INFANTRY 1
 #define UI_HERO 2
-#define UI_MODE UI_HERO
+#define UI_MODE UI_INFANTRY
 
 #define RE_INIT_CYCLE 30
 

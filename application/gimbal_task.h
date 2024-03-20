@@ -118,13 +118,13 @@
 
 //* limit
 // 云台中值与云台控制值限幅
-#define YAW_OFFSET_ECD           0
+#define YAW_OFFSET_ECD           3200
 #define YAW_MAX_RELATIVE_ANGLE   0.1f
 #define YAW_MIN_RELATIVE_ANGLE   -0.1f
 
 #define PITCH_OFFSET_ECD         8000
-#define PITCH_MAX_RELATIVE_ANGLE 0.25f
-#define PITCH_MIN_RELATIVE_ANGLE -0.45f
+#define PITCH_MAX_RELATIVE_ANGLE 0.20f
+#define PITCH_MIN_RELATIVE_ANGLE -0.25f
 
 //* yaw compensate 
 #define YAW_FRIC_COMPENSATION_DEADBAND 0.01f
