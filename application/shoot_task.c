@@ -23,6 +23,8 @@
 #include "detect_task.h"
 #include "pid.h"
 
+#include "custom_ui_task.h"
+
 // 为精简代码将遥控器相关按键使用宏替代
 #define RC_shoot_switch (shoot_control.shoot_rc->rc.s[SHOOT_RC_MODE_CHANNEL]) // 遥控器射击控制拨杆
 #define RC_mouse_l      (shoot_control.shoot_rc->mouse.press_l)               // 鼠标左键
@@ -38,6 +40,7 @@ static shoot_control_t shoot_control; // 射击控制结构体
 
 #if INCLUDE_uxTaskGetStackHighWaterMark
 uint32_t shoot_high_water;
+shoot_keyboard_state_t shoot_key_state;
 #endif
 
 void shoot_task(void const *pvParameters)
@@ -127,6 +130,10 @@ static void shoot_init(void)
     shoot_control.trigger.block_time   = 0;
     shoot_control.trigger.reverse_time = 0;
 
+    //* 初始键盘状态
+    shoot_key_state.fric_state = FRIC_KEY_OFF;
+    shoot_key_state.last_fric_state = FRIC_KEY_OFF;
+
     //* 更新一次反馈数据
     shoot_feedback_update();
 }
@@ -143,15 +150,36 @@ static void shoot_set_mode(void)
     static uint32_t sw_down_time = 0;
     static uint32_t press_l_time = 0;
 
+    // 刷新UI状态
+    if(shoot_control.shoot_mode == SHOOT_READY){
+        UI_Data.fric_state = FRIC_ON;
+    }else if(shoot_control.shoot_mode == SHOOT_START){
+        UI_Data.fric_state = FRIC_ACC;
+    }else{
+        UI_Data.fric_state = FRIC_OFF;
+    }
+
+    //*根据键位开关摩擦轮
+    if(shoot_control.shoot_rc->key.v & SHOOT_TOGGLE_KEYBOARD){
+        if(shoot_key_state.fric_state == FRIC_KEY_OFF){
+            shoot_key_state.fric_state = FRIC_KEY_ON;
+        }else if(shoot_key_state.fric_state == FRIC_KEY_ON){
+            shoot_key_state.fric_state = FRIC_KEY_OFF;
+        }
+    }
+
     //! 摩擦轮开关控制
     //* 上拨判断，一次开启，再次关闭
-    if ((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw) && (shoot_control.shoot_mode == SHOOT_STOP || shoot_control.shoot_mode == SHOOT_DISABLE))) {
+    //* 键盘G键开关摩擦轮
+    if (((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw)) || (shoot_key_state.fric_state == FRIC_KEY_ON && shoot_key_state.last_fric_state == FRIC_KEY_OFF) 
+            && (shoot_control.shoot_mode == SHOOT_STOP || shoot_control.shoot_mode == SHOOT_DISABLE))) {
         // 重设 last_angle
         shoot_control.trigger.last_angle = shoot_control.trigger.angle;
         shoot_control.shoot_mode         = SHOOT_START;
         // 设置斜坡函数为加速
         shoot_control.fric_ramp.input = FRIC_RAMP_ADD;
-    } else if ((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw) && shoot_control.shoot_mode != SHOOT_STOP && shoot_control.shoot_mode != SHOOT_DISABLE)) {
+    } else if ((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw) || (shoot_key_state.fric_state == FRIC_KEY_OFF && shoot_key_state.last_fric_state == FRIC_KEY_ON)
+            && shoot_control.shoot_mode != SHOOT_STOP && shoot_control.shoot_mode != SHOOT_DISABLE)) {
         shoot_control.shoot_mode = SHOOT_STOP;
         // 设置斜坡函数为减速
         shoot_control.fric_ramp.input = FRIC_RAMP_SUB;
@@ -163,36 +191,38 @@ static void shoot_set_mode(void)
         shoot_control.fric_ramp.input = FRIC_RAMP_SUB;
     }
 
-    //* 处于中档，可以使用键盘开启和关闭摩擦轮
-    if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_ON_KEYBOARD) && shoot_control.shoot_mode == SHOOT_STOP) {
-        shoot_control.shoot_mode = SHOOT_START;
-    } else if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_OFF_KEYBOARD) && shoot_control.shoot_mode != SHOOT_STOP) {
-        shoot_control.shoot_mode = SHOOT_STOP;
-    }
+    // //* 处于中档，可以使用键盘开启和关闭摩擦轮
+    // if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_TOGGLE_KEYBOARD) && shoot_control.shoot_mode == SHOOT_STOP) {
+    //     shoot_control.shoot_mode = SHOOT_START;
+    // } else if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_TOGGLE_KEYBOARD) && shoot_control.shoot_mode != SHOOT_STOP) {
+    //     shoot_control.shoot_mode = SHOOT_STOP;
+    // }
 
     //! 射击控制
-    //* 下拨一次或者鼠标按下一次，进入射击状态
+    //* 下拨一次或者鼠标左键按下一次，进入射击状态
     if (shoot_control.shoot_mode == SHOOT_READY) {
-        if ((switch_is_down(RC_shoot_switch) && !switch_is_down(last_sw)) || (RC_mouse_l && last_ml == 0) || (RC_mouse_r && last_mr == 0)) {
+        if ((switch_is_down(RC_shoot_switch) && !switch_is_down(last_sw)) || ((RC_mouse_l && last_ml) == 0)) {
             shoot_control.shoot_mode = SHOOT_FIRE;
         }
     }
 
-    //* 鼠标左键长按进入射击连发状态，松开后退出连发
-    if (shoot_control.shoot_mode == SHOOT_READY || shoot_control.shoot_mode == SHOOT_FIRE || shoot_control.shoot_mode == SHOOT_CONTINUE_FIRE || shoot_control.shoot_mode == SHOOT_DONE) {
-        if ((press_l_time == PRESS_LONG_TIME) || (sw_down_time == RC_SW_LONG_TIME)) {
-            shoot_control.shoot_mode = SHOOT_CONTINUE_FIRE;
-        } else if (shoot_control.shoot_mode == SHOOT_CONTINUE_FIRE) {
-            shoot_control.shoot_mode = SHOOT_DONE;
-        }
-    }
+    //英雄无需连发控制，暂时屏蔽
+    // //* 鼠标左键长按进入射击连发状态，松开后退出连发
+    // if (shoot_control.shoot_mode == SHOOT_READY || shoot_control.shoot_mode == SHOOT_FIRE || shoot_control.shoot_mode == SHOOT_CONTINUE_FIRE || shoot_control.shoot_mode == SHOOT_DONE) {
+    //     if ((press_l_time == PRESS_LONG_TIME) || (sw_down_time == RC_SW_LONG_TIME)) {
+    //         shoot_control.shoot_mode = SHOOT_CONTINUE_FIRE;
+    //     } else if (shoot_control.shoot_mode == SHOOT_CONTINUE_FIRE) {
+    //         shoot_control.shoot_mode = SHOOT_DONE;
+    //     }
+    // }
 
-    //* 鼠标右键按下加速摩擦轮
-    // TODO 是不是应该加速拨弹轮
-    if (RC_mouse_r)
-        shoot_control.fric_ramp.max_value = FRIC_SPEED_TURBO;
-    else
-        shoot_control.fric_ramp.max_value = FRIC_SPEED_FULL;
+    //! 右键改为自瞄
+    // //* 鼠标右键按下加速摩擦轮
+    // // TODO 是不是应该加速拨弹轮
+    // if (RC_mouse_r)
+    //     shoot_control.fric_ramp.max_value = FRIC_SPEED_TURBO;
+    // else
+    //     shoot_control.fric_ramp.max_value = FRIC_SPEED_FULL;
 
     //! 考虑枪口热量限制及云台未启动
     //* 枪口热量控制
@@ -225,6 +255,7 @@ static void shoot_set_mode(void)
     last_sw = RC_shoot_switch;
     last_ml = RC_mouse_l;
     last_mr = RC_mouse_r;
+    shoot_key_state.last_fric_state = shoot_key_state.fric_state;
 }
 
 /**

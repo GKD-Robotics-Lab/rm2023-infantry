@@ -25,6 +25,11 @@
 
 #define RE_INIT_CYCLE 30
 
+/*摩擦轮状态*/
+#define FRIC_OFF 0
+#define FRIC_ON  1
+#define FRIC_ACC 2
+
 /*UI显示参数的结构体*/
 typedef struct
 {

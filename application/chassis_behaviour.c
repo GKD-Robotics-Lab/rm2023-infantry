@@ -41,6 +41,8 @@
 #include "gimbal_behaviour.h"
 #include "detect_task.h"
 
+#include "custom_ui_task.h"
+
 #define RC_chassis_switch (behaviour_set->chassis_RC->rc.s[CHASSIS_MODE_CHANNEL]) // 遥控器底盘控制拨杆
 
 static void chassis_behaviour_set(chassis_move_t *behaviour_set);
@@ -63,6 +65,7 @@ static void (*chassis_behaviour_control_func[CHASSIS_BEHAVIOUR_LEN])(fp32 *, fp3
 // 底盘行为模式
 chassis_behaviour_e chassis_behaviour_mode             = CHASSIS_ZERO_FORCE;
 static chassis_behaviour_e chassis_behaviour_mode_last = CHASSIS_ZERO_FORCE;
+chassis_keystate_t chassis_key_state;
 
 /**
  * @brief          通过遥控器获取底盘行为模式，通过逻辑判断选择底盘控制模式 chassis_behaviour_mode
@@ -76,6 +79,13 @@ void chassis_behaviour_mode_set(chassis_move_t *chassis_move_mode)
     }
 
     chassis_behaviour_set(chassis_move_mode);
+
+    //* 更新UI状态
+    if (chassis_behaviour_mode == CHASSIS_SPIN){
+        UI_Data.spin_state = 1;
+    }else{
+        UI_Data.spin_state = 0;
+    }
 
     //* 根据行为模式选择底盘移动策略
     if (chassis_behaviour_mode == CHASSIS_ZERO_FORCE) {
@@ -103,14 +113,31 @@ void chassis_behaviour_mode_set(chassis_move_t *chassis_move_mode)
     //! STEP 3 添加新的行为模式对应的控制模式 END
 }
 
+
 static void chassis_behaviour_set(chassis_move_t *behaviour_set)
 {
+    //*根据键位开关模式
+    if((behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_TOGGLE_KEYBOARD && !(chassis_key_state.last_RC_key & CHASSIS_SPIN_TOGGLE_KEYBOARD))){
+        if(chassis_key_state.spin_state == KEY_IN_SPIN){
+            chassis_key_state.spin_state = KEY_OFF_SPIN;
+        }else if(chassis_key_state.spin_state == KEY_OFF_SPIN){
+            chassis_key_state.spin_state = KEY_IN_SPIN;
+        }
+    }
+    chassis_key_state.last_RC_key = behaviour_set->chassis_RC->key.v;
+
     //* 遥控器设置底盘行为模式
     if (switch_is_down(RC_chassis_switch)) {
         chassis_behaviour_mode = CHASSIS_NO_MOVE;
-    } else if (switch_is_mid(RC_chassis_switch) || (behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_TEMP_STOP_KEYBOARD)) {
-        chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;
-    } else if (switch_is_up(RC_chassis_switch) || (behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_KEYBOARD)) {
+    }else if(behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_TEMP_STOP_KEYBOARD){
+        chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;                //暂停小陀螺
+    }else if(chassis_key_state.spin_state == KEY_OFF_SPIN){
+        chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;                //键盘控制陀螺（高优先级
+    }else if(chassis_key_state.spin_state == KEY_IN_SPIN){
+        chassis_behaviour_mode = CHASSIS_SPIN;                                      
+    }else if (switch_is_mid(RC_chassis_switch)) {
+        chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;                //遥控器控制陀螺（低优先级
+    } else if (switch_is_up(RC_chassis_switch)) {
         chassis_behaviour_mode = CHASSIS_SPIN;
     }
 

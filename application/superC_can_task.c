@@ -3,6 +3,7 @@
 #include "referee.h"
 #include "cmsis_os.h"
 #include "bsp_usart.h"
+#include "custom_ui_task.h"
 
 uint8_t superC_power_remaining;
 uint8_t superC_bat_remaining;
@@ -15,6 +16,8 @@ void superC_can_task(void const * argument)
     {
         get_chassis_power_limit(&chassis_power_limit);
         CAN_cmd_superC(chassis_power_limit);
+
+        UI_Data.Super_cap_percent = superC_power_remaining;
 
         osDelay(100);
     }
