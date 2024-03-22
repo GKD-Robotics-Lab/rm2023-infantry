@@ -173,6 +173,14 @@ typedef struct
     uint16_t heat;
 } shoot_control_t;
 
+typedef struct
+{
+    int fric_state;
+    int last_fric_state;
+    int last_key_state;
+} shoot_keyboard_state_t;
+
+
 void shoot_task(void const *pvParameters);
 
 #endif

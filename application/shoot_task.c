@@ -25,6 +25,8 @@
 #include "detect_task.h"
 #include "pid.h"
 
+#include "custom_ui_task.h"
+
 // 为精简代码将遥控器相关按键使用宏替代
 #define RC_shoot_switch (shoot_control.shoot_rc->rc.s[SHOOT_RC_MODE_CHANNEL]) // 遥控器射击控制拨杆
 #define RC_mouse_l      (shoot_control.shoot_rc->mouse.press_l)               // 鼠标左键
@@ -37,6 +39,7 @@ static void shoot_switch_mode(void);
 static void shoot_control_loop(void);
 
 static shoot_control_t shoot_control; // 射击控制结构体
+shoot_keyboard_state_t key_state;     //键位状态
 
 #if INCLUDE_uxTaskGetStackHighWaterMark
 uint32_t shoot_high_water;
@@ -145,15 +148,31 @@ static void shoot_set_mode(void)
     static uint32_t sw_down_time = 0;
     static uint32_t press_l_time = 0;
 
+    //刷新UI
+    if(shoot_control.shoot_mode == SHOOT_START){
+        UI_Data.fric_state = FRIC_ACC;
+    }else if(shoot_control.shoot_mode == SHOOT_DISABLE || shoot_control.shoot_mode == SHOOT_STOP){
+        UI_Data.fric_state = FRIC_OFF;
+    }else{
+        UI_Data.fric_state = FRIC_ON;
+    }
+
+    //按下切换键时切换目标状态
+    if((shoot_control.shoot_rc->key.v & SHOOT_TOGGLE_KEYBOARD) && !(key_state.last_key_state & SHOOT_TOGGLE_KEYBOARD)){
+        if(key_state.fric_state == FRIC_KEY_OFF) key_state.fric_state = FRIC_KEY_ON;
+        else if(key_state.fric_state == FRIC_KEY_ON) key_state.fric_state = FRIC_KEY_OFF;
+    }
+    key_state.last_key_state = shoot_control.shoot_rc->key.v;
+
     //! 摩擦轮开关控制
     //* 上拨判断，一次开启，再次关闭
-    if ((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw) && (shoot_control.shoot_mode == SHOOT_STOP || shoot_control.shoot_mode == SHOOT_DISABLE))) {
+    if (((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw)) || shoot_control.shoot_rc->key.v & KEY_PRESSED_OFFSET_G) && (shoot_control.shoot_mode == SHOOT_STOP || shoot_control.shoot_mode == SHOOT_DISABLE)) {
         // 重设 last_angle
         shoot_control.trigger.last_angle = shoot_control.trigger.angle;
         shoot_control.shoot_mode         = SHOOT_START;
         // 设置斜坡函数为加速
         shoot_control.fric_ramp.input = FRIC_RAMP_ADD;
-    } else if ((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw) && shoot_control.shoot_mode != SHOOT_STOP && shoot_control.shoot_mode != SHOOT_DISABLE)) {
+    } else if (((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw)) || shoot_control.shoot_rc->key.v & KEY_PRESSED_OFFSET_F) && (shoot_control.shoot_mode != SHOOT_STOP && shoot_control.shoot_mode != SHOOT_DISABLE)) {
         shoot_control.shoot_mode = SHOOT_STOP;
         // 设置斜坡函数为减速
         shoot_control.fric_ramp.input = FRIC_RAMP_SUB;

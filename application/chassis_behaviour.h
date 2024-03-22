@@ -60,9 +60,21 @@ typedef enum {
     CHASSIS_BEHAVIOUR_LEN,               // 表示行为模式的总个数
 } chassis_behaviour_e;
 
+//键位状态的结构体
+typedef struct
+{
+    int spin_state;     //陀螺状态
+    int last_RC_key;
+    /* data */
+} chassis_keystate_t;
+
+#define KEY_IN_SPIN 1
+#define KEY_OFF_SPIN 0
+
 #define CHASSIS_OPEN_RC_SCALE 10 // in CHASSIS_OPEN mode, multiply the value. 在chassis_open 模型下，遥控器乘以该比例发送到can上
 
 extern void chassis_behaviour_mode_set(chassis_move_t *chassis_move_mode);
 extern void chassis_behaviour_control_set(fp32 *vx_set, fp32 *vy_set, fp32 *angle_set, chassis_move_t *chassis_move_rc_to_vector);
+extern chassis_keystate_t chassis_key_state;
 
 #endif
