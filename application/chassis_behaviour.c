@@ -131,10 +131,8 @@ static void chassis_behaviour_set(chassis_move_t *behaviour_set)
         chassis_behaviour_mode = CHASSIS_NO_MOVE;
     }else if(behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_TEMP_STOP_KEYBOARD){
         chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;                //暂停小陀螺
-    }else if(chassis_key_state.spin_state == KEY_OFF_SPIN){
-        chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;                //键盘控制陀螺（高优先级
     }else if(chassis_key_state.spin_state == KEY_IN_SPIN){
-        chassis_behaviour_mode = CHASSIS_SPIN;                                      
+        chassis_behaviour_mode = CHASSIS_SPIN;           
     }else if (switch_is_mid(RC_chassis_switch)) {
         chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;                //遥控器控制陀螺（低优先级
     } else if (switch_is_up(RC_chassis_switch)) {

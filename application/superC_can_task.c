@@ -17,7 +17,7 @@ void superC_can_task(void const * argument)
         get_chassis_power_limit(&chassis_power_limit);
         CAN_cmd_superC(chassis_power_limit);
 
-        UI_Data.Super_cap_percent = superC_power_remaining;
+        UI_Data.Super_cap_percent = superC_bat_remaining;
 
         osDelay(100);
     }

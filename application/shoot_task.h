@@ -177,6 +177,7 @@ typedef struct
 {
     int fric_state;
     int last_fric_state;
+    int last_key_state;
 } shoot_keyboard_state_t;
 
 
