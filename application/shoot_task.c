@@ -15,6 +15,8 @@
 #include "cmsis_os.h"
 
 #include "arm_math.h"
+#include "stm32f4xx.h"
+#include "stm32f4xx_hal_gpio.h"
 #include "user_lib.h"
 #include "referee.h"
 
@@ -225,6 +227,16 @@ static void shoot_set_mode(void)
     last_sw = RC_shoot_switch;
     last_ml = RC_mouse_l;
     last_mr = RC_mouse_r;
+
+    // laser control according to shoot mode
+    if (shoot_control.shoot_mode == SHOOT_DISABLE || shoot_control.shoot_mode == SHOOT_STOP)
+    {
+        HAL_GPIO_WritePin(GPIO_Port_laser, GPIO_PIN_laser, GPIO_PIN_RESET);
+    }
+    else 
+    {
+        HAL_GPIO_WritePin(GPIO_Port_laser, GPIO_PIN_laser, GPIO_PIN_SET);
+    }
 }
 
 /**
@@ -298,6 +310,7 @@ static void shoot_switch_mode(void)
         default:
             break;
     }
+
 }
 
 /**

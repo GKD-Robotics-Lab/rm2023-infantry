@@ -111,16 +111,16 @@ void gimbal_task(void const *pvParameters)
     // wait for all motor online
     // 判断电机是否都上线并且 IMU 开始工作
     while (toe_is_error(YAW_GIMBAL_MOTOR_TOE) || toe_is_error(PITCH_GIMBAL_MOTOR_TOE) || toe_is_error(BOARD_ACCEL_TOE) || toe_is_error(BOARD_GYRO_TOE)) {
-				usart1_printf("go %d %d\n",toe_is_error(YAW_GIMBAL_MOTOR_TOE) , toe_is_error(PITCH_GIMBAL_MOTOR_TOE) );
+				// usart1_printf("go %d %d\n",toe_is_error(YAW_GIMBAL_MOTOR_TOE) , toe_is_error(PITCH_GIMBAL_MOTOR_TOE) );
         vTaskDelay(GIMBAL_CONTROL_TIME);
         gimbal_feedback_update(); // 云台数据反馈
     }
     // 延时一段时间等待 IMU 的解算值稳定下来
     vTaskDelay(GIMBAL_TASK_WAIT_IMU_TIME);
-				usart1_printf("gimbal online\n");
+				// usart1_printf("gimbal online\n");
 
     while (1) {
-				usart1_printf("yaw : %d\n",gimbal_control.yaw_motor.motor_measure->ecd);
+				// usart1_printf("yaw : %d\n",gimbal_control.yaw_motor.motor_measure->ecd);
         gimbal_set_mode();                    // 设置云台控制模式
         gimbal_mode_change_control_transit(); // 控制模式切换 控制数据过渡
         gimbal_feedback_update();             // 云台数据反馈

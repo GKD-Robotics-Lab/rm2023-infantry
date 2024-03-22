@@ -93,6 +93,10 @@
 //! 枪口热量限制
 #define SHOOT_HEAT_REMAIN_VALUE 80
 
+// shoot laser gpio port set 
+#define GPIO_Port_laser GPIOC
+#define GPIO_PIN_laser GPIO_PIN_8
+
 // 射击模式状态机
 typedef enum {
     SHOOT_DISABLE = 0,   // 未使能射击时的无力状态
