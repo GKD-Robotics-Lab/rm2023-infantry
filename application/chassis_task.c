@@ -31,6 +31,7 @@
 #include "chassis_power_control.h"
 
 #include "bsp_usart.h"
+#include "superC_can_task.h"
 
 #define rc_deadband_limit(input, output, dealine)          \
     {                                                      \
@@ -461,7 +462,10 @@ static void chassis_control_loop(chassis_move_t *chassis_move_control_loop)
     }
 
     //* 功率控制
-    chassis_power_control(chassis_move_control_loop);
+    if (superC_bat_remaining <= 10){
+        chassis_power_control(chassis_move_control_loop);
+    }
+    
 
     //* 赋值电流值输出
     for (i = 0; i < 4; i++) {

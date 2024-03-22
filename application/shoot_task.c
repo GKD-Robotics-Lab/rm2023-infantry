@@ -159,20 +159,20 @@ static void shoot_set_mode(void)
 
     //! 摩擦轮开关控制
     //* 上拨判断，一次开启，再次关闭
-    if (((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw)) || shoot_control.shoot_rc->key.v & KEY_PRESSED_OFFSET_G) && (shoot_control.shoot_mode == SHOOT_STOP || shoot_control.shoot_mode == SHOOT_DISABLE)) {
+    if ((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw)) && (shoot_control.shoot_mode == SHOOT_STOP || shoot_control.shoot_mode == SHOOT_DISABLE)) {
         // 重设 last_angle
         shoot_control.trigger.last_angle = shoot_control.trigger.angle;
         shoot_control.shoot_mode         = SHOOT_START;
         // 设置斜坡函数为加速
         shoot_control.fric_ramp.input = FRIC_RAMP_ADD;
-    } else if (((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw)) || shoot_control.shoot_rc->key.v & KEY_PRESSED_OFFSET_F) && (shoot_control.shoot_mode != SHOOT_STOP && shoot_control.shoot_mode != SHOOT_DISABLE)) {
+    } else if ((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw)) && (shoot_control.shoot_mode != SHOOT_STOP && shoot_control.shoot_mode != SHOOT_DISABLE)) {
         shoot_control.shoot_mode = SHOOT_STOP;
         // 设置斜坡函数为减速
         shoot_control.fric_ramp.input = FRIC_RAMP_SUB;
     }
 
     //* 如果云台状态是 无力状态，就关闭射击
-    if(gimbal_cmd_to_shoot_stop()) {
+    if(gimbal_cmd_to_shoot_stop() && shoot_control.shoot_mode != SHOOT_DISABLE) {
         shoot_control.shoot_mode = SHOOT_STOP;
         shoot_control.fric_ramp.input = FRIC_RAMP_SUB;
     }
@@ -184,7 +184,7 @@ static void shoot_set_mode(void)
         shoot_control.shoot_mode = SHOOT_START;
         // 设置斜坡函数为加速
         shoot_control.fric_ramp.input = FRIC_RAMP_ADD;
-    } else if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_OFF_KEYBOARD) && shoot_control.shoot_mode != SHOOT_DISABLE) {
+    } else if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_OFF_KEYBOARD) && shoot_control.shoot_mode != SHOOT_DISABLE && shoot_control.shoot_mode != SHOOT_START) {
         shoot_control.shoot_mode = SHOOT_STOP;
         // 设置斜坡函数为减速
         shoot_control.fric_ramp.input = FRIC_RAMP_SUB;
