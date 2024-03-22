@@ -189,6 +189,6 @@ void get_shoot_heat0_limit_and_heat0(uint16_t *heat0_limit, uint16_t *heat0)
 
 void get_chassis_power_limit(uint16_t* power_limit)
 {
-    *power_limit = robot_state.chassis_power_limit;
+    *power_limit = robot_state.chassis_power_limit == 0 ? 55 : robot_state.chassis_power_limit;
 }
 

@@ -9,7 +9,7 @@ uint8_t superC_bat_remaining;
 
 void superC_can_task(void const * argument)
 {
-    uint16_t chassis_power_limit;
+    uint16_t chassis_power_limit = 55;
 
     for (;;)
     {

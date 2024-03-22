@@ -26,6 +26,7 @@
 #define CHASSIS_CAN hcan1
 #define GIMBAL_CAN  hcan2
 #define SHOOT_CAN   hcan2
+#define SUPERC_CAN  hcan1
 
 /*
   > 当前 CAN 总线分配：

@@ -203,10 +203,10 @@ void CAN_cmd_superC(uint16_t power_limit)
     superC_tx_message.IDE   = CAN_ID_STD;
     superC_tx_message.RTR   = CAN_RTR_DATA;
     superC_tx_message.DLC   = 0x02;
-    superC_can_send_data[0] = 66;
-    superC_can_send_data[1] = 8;
+    superC_can_send_data[0] = power_limit >> 8;
+    superC_can_send_data[1] = power_limit;
 
-    HAL_CAN_AddTxMessage(&CHASSIS_CAN, &superC_tx_message, superC_can_send_data, &send_mail_box);
+    HAL_CAN_AddTxMessage(&SUPERC_CAN, &superC_tx_message, superC_can_send_data, &send_mail_box);
 }
 
 
