@@ -166,10 +166,16 @@ static void shoot_set_mode(void)
     }
 
     //* 处于中档，可以使用键盘开启和关闭摩擦轮
-    if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_ON_KEYBOARD) && shoot_control.shoot_mode == SHOOT_STOP) {
+    if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_ON_KEYBOARD) && shoot_control.shoot_mode == SHOOT_DISABLE) {
+        // 重设 last_angle
+        shoot_control.trigger.last_angle = shoot_control.trigger.angle;
         shoot_control.shoot_mode = SHOOT_START;
-    } else if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_OFF_KEYBOARD) && shoot_control.shoot_mode != SHOOT_STOP) {
+        // 设置斜坡函数为加速
+        shoot_control.fric_ramp.input = FRIC_RAMP_ADD;
+    } else if (switch_is_mid(RC_shoot_switch) && (shoot_control.shoot_rc->key.v & SHOOT_OFF_KEYBOARD) && shoot_control.shoot_mode != SHOOT_DISABLE) {
         shoot_control.shoot_mode = SHOOT_STOP;
+        // 设置斜坡函数为减速
+        shoot_control.fric_ramp.input = FRIC_RAMP_SUB;
     }
 
     //! 射击控制
@@ -180,14 +186,15 @@ static void shoot_set_mode(void)
         }
     }
 
-    //* 鼠标左键长按进入射击连发状态，松开后退出连发
-    if (shoot_control.shoot_mode == SHOOT_READY || shoot_control.shoot_mode == SHOOT_FIRE || shoot_control.shoot_mode == SHOOT_CONTINUE_FIRE || shoot_control.shoot_mode == SHOOT_DONE) {
-        if ((press_l_time == PRESS_LONG_TIME) || (sw_down_time == RC_SW_LONG_TIME)) {
-            shoot_control.shoot_mode = SHOOT_CONTINUE_FIRE;
-        } else if (shoot_control.shoot_mode == SHOOT_CONTINUE_FIRE) {
-            shoot_control.shoot_mode = SHOOT_DONE;
-        }
-    }
+    // disable continue fire
+    // //* 鼠标左键长按进入射击连发状态，松开后退出连发
+    // if (shoot_control.shoot_mode == SHOOT_READY || shoot_control.shoot_mode == SHOOT_FIRE || shoot_control.shoot_mode == SHOOT_CONTINUE_FIRE || shoot_control.shoot_mode == SHOOT_DONE) {
+    //     if ((press_l_time == PRESS_LONG_TIME) || (sw_down_time == RC_SW_LONG_TIME)) {
+    //         shoot_control.shoot_mode = SHOOT_CONTINUE_FIRE;
+    //     } else if (shoot_control.shoot_mode == SHOOT_CONTINUE_FIRE) {
+    //         shoot_control.shoot_mode = SHOOT_DONE;
+    //     }
+    // }
 
     //* 鼠标右键按下加速摩擦轮
     // TODO 是不是应该加速拨弹轮
@@ -229,7 +236,7 @@ static void shoot_set_mode(void)
     last_mr = RC_mouse_r;
 
     // laser control according to shoot mode
-    if (shoot_control.shoot_mode == SHOOT_DISABLE || shoot_control.shoot_mode == SHOOT_STOP)
+    if (shoot_control.shoot_mode == SHOOT_DISABLE)
     {
         HAL_GPIO_WritePin(GPIO_Port_laser, GPIO_PIN_laser, GPIO_PIN_RESET);
     }

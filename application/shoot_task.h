@@ -83,7 +83,7 @@
 //! 遥控器键盘射击状态控制相关参数
 #define SHOOT_RC_MODE_CHANNEL   1 // 射击发射开关通道数据
 #define SHOOT_ON_KEYBOARD       KEY_PRESSED_OFFSET_G
-#define SHOOT_OFF_KEYBOARD      KEY_PRESSED_OFFSET_F
+#define SHOOT_OFF_KEYBOARD      KEY_PRESSED_OFFSET_G
 
 #define PRESS_LONG_TIME         400  // 鼠标长按判断
 #define RC_SW_LONG_TIME         1000 // 遥控器射击开关打下档一段时间后，连续发射子弹
