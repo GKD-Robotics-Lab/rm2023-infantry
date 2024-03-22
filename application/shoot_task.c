@@ -157,13 +157,6 @@ static void shoot_set_mode(void)
         UI_Data.fric_state = FRIC_ON;
     }
 
-    //按下切换键时切换目标状态
-    if((shoot_control.shoot_rc->key.v & SHOOT_TOGGLE_KEYBOARD) && !(key_state.last_key_state & SHOOT_TOGGLE_KEYBOARD)){
-        if(key_state.fric_state == FRIC_KEY_OFF) key_state.fric_state = FRIC_KEY_ON;
-        else if(key_state.fric_state == FRIC_KEY_ON) key_state.fric_state = FRIC_KEY_OFF;
-    }
-    key_state.last_key_state = shoot_control.shoot_rc->key.v;
-
     //! 摩擦轮开关控制
     //* 上拨判断，一次开启，再次关闭
     if (((switch_is_up(RC_shoot_switch) && !switch_is_up(last_sw)) || shoot_control.shoot_rc->key.v & KEY_PRESSED_OFFSET_G) && (shoot_control.shoot_mode == SHOOT_STOP || shoot_control.shoot_mode == SHOOT_DISABLE)) {
