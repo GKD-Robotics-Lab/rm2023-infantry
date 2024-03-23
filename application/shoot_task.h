@@ -45,10 +45,8 @@
 // 拨弹轮电机相关参数
 #define PIT_NUM                       8  // 拨弹结构一圈坑位数
 #define TRIGGER_MOTOR_REDUCTION_RATIO 36 // 拨弹轮电机减速比
-#define FULL_ECD_COUNT                (TRIGGER_MOTOR_REDUCTION_RATIO / 2)
-
-#define HALF_ECD_RANGE                4096 // 电机反馈码盘值范围
-#define ECD_RANGE                     8191 // TODO 8192? 重复定义？
+#define ECD_RANGE_PER_CIRCLE_RAW 8192
+#define ECD_COUNT_PER_CIRCLE (ECD_RANGE_PER_CIRCLE_RAW * TRIGGER_MOTOR_REDUCTION_RATIO)
 
 #define M2006_MOTOR_RPM_TO_VECTOR     (2 * 3.1415926f / (ECD_RANGE * TRIGGER_MOTOR_REDUCTION_RATIO))
 #define TRIGGER_MOTOR_ECD_TO_ANGLE    M2006_MOTOR_RPM_TO_VECTOR // 电机编码器反馈值转化为角度 (rad) 的比例
@@ -62,11 +60,11 @@
 #define TRIGGER_REVERSE_TIME        500   // 一次反转的时长
 
 // 拨弹轮电机 PID
-#define TRIGGER_ANGLE_PID_KP        5.0f
-#define TRIGGER_ANGLE_PID_KI        0.3f
+#define TRIGGER_ANGLE_PID_KP        1.6f
+#define TRIGGER_ANGLE_PID_KI        0.02f
 #define TRIGGER_ANGLE_PID_KD        0.0f
 #define TRIGGER_ANGLE_PID_MAX_OUT   10.0f
-#define TRIGGER_ANGLE_PID_MAX_IOUT  0.5f
+#define TRIGGER_ANGLE_PID_MAX_IOUT  0.1f
 #define TRIGGER_ANGLE_PID_DEAD_BAND 0.0f
 
 #define TRIGGER_SPEED_PID_KP        666.0f
@@ -135,7 +133,8 @@ typedef struct
     fp32 last_angle;
 
     //* 电机反馈值
-    int8_t ecd_count; // 记录电机的电机轴转的圈数，用于将角度归化到输出轴上
+    uint16_t last_ecd;
+    fp32 ecd_count; // 记录电机的电机轴转的圈数，用于将角度归化到输出轴上
     fp32 angle;
     fp32 speed;
 

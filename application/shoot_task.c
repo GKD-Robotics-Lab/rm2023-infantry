@@ -204,6 +204,7 @@ static void shoot_set_mode(void)
             shoot_control.shoot_mode = SHOOT_CONTINUE_FIRE;
         } else if (shoot_control.shoot_mode == SHOOT_CONTINUE_FIRE) {
             shoot_control.shoot_mode = SHOOT_DONE;
+            shoot_control.trigger.last_angle = shoot_control.trigger.angle;
         }
     }
 
@@ -276,18 +277,20 @@ static void shoot_feedback_update(void)
 
     //* 拨弹轮角度获取
     // 电机圈数重置，因为输出轴旋转一圈，电机轴旋转 36 圈，将电机轴数据处理成输出轴数据，用于控制输出轴角度
-    if (shoot_control.trigger.motor_measure->ecd - shoot_control.trigger.motor_measure->last_ecd > HALF_ECD_RANGE) {
-        shoot_control.trigger.ecd_count--;
-    } else if (shoot_control.trigger.motor_measure->ecd - shoot_control.trigger.motor_measure->last_ecd < -HALF_ECD_RANGE) {
-        shoot_control.trigger.ecd_count++;
-    }
-    if (shoot_control.trigger.ecd_count == FULL_ECD_COUNT) {
-        shoot_control.trigger.ecd_count = -(FULL_ECD_COUNT - 1);
-    } else if (shoot_control.trigger.ecd_count == -FULL_ECD_COUNT) {
-        shoot_control.trigger.ecd_count = FULL_ECD_COUNT - 1;
-    }
+    int16_t ecd_delta = shoot_control.trigger.motor_measure->ecd - shoot_control.trigger.last_ecd;
+    shoot_control.trigger.last_ecd = shoot_control.trigger.motor_measure->ecd;
+    if (ecd_delta < -ECD_RANGE_PER_CIRCLE_RAW / 2)
+        ecd_delta += ECD_RANGE_PER_CIRCLE_RAW;
+    else if (ecd_delta > ECD_RANGE_PER_CIRCLE_RAW / 2)
+        ecd_delta -= ECD_RANGE_PER_CIRCLE_RAW;
+    shoot_control.trigger.ecd_count += ecd_delta;
+    if (shoot_control.trigger.ecd_count >= ECD_COUNT_PER_CIRCLE)
+        shoot_control.trigger.ecd_count -= ECD_COUNT_PER_CIRCLE;
+    else if (shoot_control.trigger.ecd_count < 0)
+        shoot_control.trigger.ecd_count += ECD_COUNT_PER_CIRCLE;
+
     // 计算输出轴角度
-    shoot_control.trigger.angle = (shoot_control.trigger.ecd_count * ECD_RANGE + shoot_control.trigger.motor_measure->ecd) * TRIGGER_MOTOR_ECD_TO_ANGLE;
+    shoot_control.trigger.angle = shoot_control.trigger.ecd_count / ECD_COUNT_PER_CIRCLE * 2 * PI - PI;
 
     //* 摩擦轮速度获取
     shoot_control.fric1.speed = rpm_to_radps(shoot_control.fric1.motor_measure->speed_rpm);
@@ -312,7 +315,7 @@ static void shoot_switch_mode(void)
                 shoot_control.shoot_mode = SHOOT_DONE;
                 // record trigger angle when exiting fire
                 // 退出 DONE 时记录角度
-                shoot_control.trigger.last_angle += 2 * PI / PIT_NUM;
+                shoot_control.trigger.last_angle = shoot_control.trigger.angle;
             }
             break;
         case SHOOT_DONE:
