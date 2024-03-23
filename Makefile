@@ -28,7 +28,7 @@ STM32F407xx \
 ARM_MATH_CM4
 
 # link script
-LDSCRIPT := STM32F407IGHX_FLASH.ld
+LDSCRIPT := STM32F407IGHx_FLASH.ld
 LIBS := -lahrs
 # figure out compiler settings
 CC := $(GCC_PREFIX)gcc
