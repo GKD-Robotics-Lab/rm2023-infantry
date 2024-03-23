@@ -118,6 +118,9 @@ static void chassis_behaviour_set(chassis_move_t *behaviour_set)
     }
     chassis_key_state.last_RC_key = behaviour_set->chassis_RC->key.v;
 
+    if(chassis_behaviour_mode == CHASSIS_SPIN) UI_Data.spin_state = 1;
+    else if(chassis_behaviour_mode == CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW) UI_Data.spin_state = 0;
+
     //* 遥控器设置底盘行为模式
     if (switch_is_down(RC_chassis_switch)) {
         chassis_behaviour_mode = CHASSIS_NO_MOVE;

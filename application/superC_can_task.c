@@ -19,6 +19,8 @@ void superC_can_task(void const * argument)
 
         UI_Data.Super_cap_percent = superC_bat_remaining;
 
+        usart1_printf("power_lim:%d\n", chassis_power_limit);
+
         osDelay(100);
     }
 }
