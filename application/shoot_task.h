@@ -41,18 +41,10 @@
 #define FRIC_SPEED_PID_MAX_IOUT  10000.0f
 #define FRIC_SPEED_PID_DEAD_BAND 0.0f
 
-//* 拨弹轮
-// 拨弹轮电机相关参数
-#define PIT_NUM                       8  // 拨弹结构一圈坑位数
-#define TRIGGER_MOTOR_REDUCTION_RATIO 36 // 拨弹轮电机减速比
-#define FULL_ECD_COUNT                (TRIGGER_MOTOR_REDUCTION_RATIO / 2)
-
 #define PIT_NUM_HERO                       6  // 拨弹结构一圈坑位数
-#define TRIGGER_MOTOR_REDUCTION_RATIO_3508 19 // 拨弹轮电机减速比
-#define FULL_ECD_COUNT_3508                (TRIGGER_MOTOR_REDUCTION_RATIO_3508 / 2)
-
-#define HALF_ECD_RANGE                4096 // 电机反馈码盘值范围
-#define ECD_RANGE                     8191 // TODO 8192? 重复定义？
+#define TRIGGER_MOTOR_REDUCTION_RATIO (3591.0f/187.0f) // 拨弹轮电机减速比
+#define ECD_RANGE_PER_CIRCLE_RAW 8192
+#define ECD_COUNT_PER_CIRCLE (ECD_RANGE_PER_CIRCLE_RAW * TRIGGER_MOTOR_REDUCTION_RATIO)
 
 #define M2006_MOTOR_RPM_TO_VECTOR     (2 * 3.1415926f / (ECD_RANGE * TRIGGER_MOTOR_REDUCTION_RATIO_3508))
 #define TRIGGER_MOTOR_ECD_TO_ANGLE    M2006_MOTOR_RPM_TO_VECTOR // 电机编码器反馈值转化为角度 (rad) 的比例
@@ -139,7 +131,8 @@ typedef struct
     fp32 last_angle;
 
     //* 电机反馈值
-    int8_t ecd_count; // 记录电机的电机轴转的圈数，用于将角度归化到输出轴上
+    uint16_t last_ecd;
+    fp32 ecd_count; // 记录电机的电机轴转的圈数，用于将角度归化到输出轴上
     fp32 angle;
     fp32 speed;
 
