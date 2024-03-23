@@ -29,34 +29,34 @@
 /****************************红方机器人ID********************/
 #define UI_Data_RobotID_RHero 1
 #define UI_Data_RobotID_REngineer 2
-#define UI_Data_RobotID_RStandard1 3
-#define UI_Data_RobotID_RStandard2 4
-#define UI_Data_RobotID_RStandard3 5
+#define UI_Data_RobotID_RStandard3 3
+#define UI_Data_RobotID_RStandard4 4
+#define UI_Data_RobotID_RStandard5 5
 #define UI_Data_RobotID_RAerial 6
 #define UI_Data_RobotID_RSentry 7
 #define UI_Data_RobotID_RRadar 9
 /****************************蓝方机器人ID********************/
 #define UI_Data_RobotID_BHero 101
 #define UI_Data_RobotID_BEngineer 102
-#define UI_Data_RobotID_BStandard1 103
-#define UI_Data_RobotID_BStandard2 104
-#define UI_Data_RobotID_BStandard3 105
+#define UI_Data_RobotID_BStandard3 103
+#define UI_Data_RobotID_BStandard4 104
+#define UI_Data_RobotID_BStandard5 105
 #define UI_Data_RobotID_BAerial 106
 #define UI_Data_RobotID_BSentry 107
 #define UI_Data_RobotID_BRadar 109
 /**************************红方操作手ID************************/
 #define UI_Data_CilentID_RHero 0x0101
 #define UI_Data_CilentID_REngineer 0x0102
-#define UI_Data_CilentID_RStandard1 0x0103
-#define UI_Data_CilentID_RStandard2 0x0104
-#define UI_Data_CilentID_RStandard3 0x0105
+#define UI_Data_CilentID_RStandard3 0x0103
+#define UI_Data_CilentID_RStandard4 0x0104
+#define UI_Data_CilentID_RStandard5 0x0105
 #define UI_Data_CilentID_RAerial 0x0106
 /***************************蓝方操作手ID***********************/
 #define UI_Data_CilentID_BHero 0x0165
 #define UI_Data_CilentID_BEngineer 0x0166
-#define UI_Data_CilentID_BStandard1 0x0167
-#define UI_Data_CilentID_BStandard2 0x0168
-#define UI_Data_CilentID_BStandard3 0x0169
+#define UI_Data_CilentID_BStandard3 0x0167
+#define UI_Data_CilentID_BStandard4 0x0168
+#define UI_Data_CilentID_BStandard5 0x0169
 #define UI_Data_CilentID_BAerial 0x016A
 /***************************删除操作***************************/
 #define UI_Data_Del_NoOperate 0
