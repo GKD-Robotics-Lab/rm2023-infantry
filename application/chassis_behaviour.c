@@ -41,6 +41,8 @@
 #include "gimbal_behaviour.h"
 #include "detect_task.h"
 
+#include "custom_ui_task.h"
+
 #define RC_chassis_switch (behaviour_set->chassis_RC->rc.s[CHASSIS_MODE_CHANNEL]) // 遥控器底盘控制拨杆
 
 static void chassis_behaviour_set(chassis_move_t *behaviour_set);
@@ -63,6 +65,7 @@ static void (*chassis_behaviour_control_func[CHASSIS_BEHAVIOUR_LEN])(fp32 *, fp3
 // 底盘行为模式
 chassis_behaviour_e chassis_behaviour_mode             = CHASSIS_ZERO_FORCE;
 static chassis_behaviour_e chassis_behaviour_mode_last = CHASSIS_ZERO_FORCE;
+chassis_keystate_t chassis_key_state;
 
 /**
  * @brief          通过遥控器获取底盘行为模式，通过逻辑判断选择底盘控制模式 chassis_behaviour_mode
@@ -105,12 +108,26 @@ void chassis_behaviour_mode_set(chassis_move_t *chassis_move_mode)
 
 static void chassis_behaviour_set(chassis_move_t *behaviour_set)
 {
+    //*根据键位开关模式
+    if((behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_TOGGLE_KEYBOARD && !(chassis_key_state.last_RC_key & CHASSIS_SPIN_TOGGLE_KEYBOARD))){
+        if(chassis_key_state.spin_state == KEY_IN_SPIN){
+            chassis_key_state.spin_state = KEY_OFF_SPIN;
+        }else if(chassis_key_state.spin_state == KEY_OFF_SPIN){
+            chassis_key_state.spin_state = KEY_IN_SPIN;
+        }
+    }
+    chassis_key_state.last_RC_key = behaviour_set->chassis_RC->key.v;
+
     //* 遥控器设置底盘行为模式
     if (switch_is_down(RC_chassis_switch)) {
-        chassis_behaviour_mode = CHASSIS_NO_FOLLOW_YAW;
-    } else if (switch_is_mid(RC_chassis_switch) || (behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_TEMP_STOP_KEYBOARD)) {
-        chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;
-    } else if (switch_is_up(RC_chassis_switch) || (behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_KEYBOARD)) {
+        chassis_behaviour_mode = CHASSIS_NO_MOVE;
+    }else if(behaviour_set->chassis_RC->key.v & CHASSIS_SPIN_TEMP_STOP_KEYBOARD){
+        chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;                //暂停小陀螺
+    }else if(chassis_key_state.spin_state == KEY_IN_SPIN){
+        chassis_behaviour_mode = CHASSIS_SPIN;           
+    }else if (switch_is_mid(RC_chassis_switch)) {
+        chassis_behaviour_mode = CHASSIS_INFANTRY_FOLLOW_GIMBAL_YAW;                //遥控器控制陀螺（低优先级
+    } else if (switch_is_up(RC_chassis_switch)) {
         chassis_behaviour_mode = CHASSIS_SPIN;
     }
 

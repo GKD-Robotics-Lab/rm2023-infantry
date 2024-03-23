@@ -62,6 +62,13 @@
 #define TRIGGER_REVERSE_TIME        500   // 一次反转的时长
 
 // 拨弹轮电机 PID
+#define TRIGGER_ANGLE_PID_KP        5.0f
+#define TRIGGER_ANGLE_PID_KI        0.3f
+#define TRIGGER_ANGLE_PID_KD        0.0f
+#define TRIGGER_ANGLE_PID_MAX_OUT   10.0f
+#define TRIGGER_ANGLE_PID_MAX_IOUT  0.5f
+#define TRIGGER_ANGLE_PID_DEAD_BAND 0.0f
+
 #define TRIGGER_SPEED_PID_KP        666.0f
 #define TRIGGER_SPEED_PID_KI        0.8f
 #define TRIGGER_SPEED_PID_KD        0.0f
@@ -71,8 +78,8 @@
 
 //! 遥控器键盘射击状态控制相关参数
 #define SHOOT_RC_MODE_CHANNEL   1 // 射击发射开关通道数据
-#define SHOOT_ON_KEYBOARD       KEY_PRESSED_OFFSET_Q
-#define SHOOT_OFF_KEYBOARD      KEY_PRESSED_OFFSET_E
+#define SHOOT_ON_KEYBOARD       KEY_PRESSED_OFFSET_G
+#define SHOOT_OFF_KEYBOARD      KEY_PRESSED_OFFSET_G
 
 #define PRESS_LONG_TIME         400  // 鼠标长按判断
 #define RC_SW_LONG_TIME         1000 // 遥控器射击开关打下档一段时间后，连续发射子弹
@@ -81,6 +88,10 @@
 
 //! 枪口热量限制
 #define SHOOT_HEAT_REMAIN_VALUE 80
+
+// shoot laser gpio port set 
+#define GPIO_Port_laser GPIOC
+#define GPIO_PIN_laser GPIO_PIN_8
 
 // 射击模式状态机
 typedef enum {
@@ -118,6 +129,7 @@ typedef struct
 
     //* 电机 PID 结构体
     pid_typedef speed_pid;
+    pid_typedef angle_pid;
 
     //* 电机上一次角度记录
     fp32 last_angle;
@@ -156,6 +168,14 @@ typedef struct
     uint16_t heat_limit;
     uint16_t heat;
 } shoot_control_t;
+
+typedef struct
+{
+    int fric_state;
+    int last_fric_state;
+    int last_key_state;
+} shoot_keyboard_state_t;
+
 
 void shoot_task(void const *pvParameters);
 

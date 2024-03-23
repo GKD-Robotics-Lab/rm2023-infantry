@@ -56,13 +56,13 @@ void custom_ui_task(void const * argument)
         } 
         count ++;
 
-        //测试刷新用
-        UI_Data.Super_cap_percent+=2;
-        if(UI_Data.Super_cap_percent>=100) UI_Data.Super_cap_percent=0;
-        if(UI_Data.Super_cap_percent>=50) UI_Data.spin_state = 1;
-        else UI_Data.spin_state = 0;
-        if(UI_Data.Super_cap_percent>=70) UI_Data.fric_state = 1;
-        else UI_Data.fric_state = 0;
+        // //测试刷新用
+        // UI_Data.Super_cap_percent+=2;
+        // if(UI_Data.Super_cap_percent>=100) UI_Data.Super_cap_percent=0;
+        // if(UI_Data.Super_cap_percent>=50) UI_Data.spin_state = 1;
+        // else UI_Data.spin_state = 0;
+        // if(UI_Data.Super_cap_percent>=70) UI_Data.fric_state = 1;
+        // else UI_Data.fric_state = 0;
 
         osDelay(100); //刷新率=10Hz
     }
@@ -290,19 +290,26 @@ void fric_state_str(char *to_str, int fric_state)
     to_str[2] = 'I';
     to_str[3] = 'C';
     to_str[4] = ' ';
-    if(fric_state == 0)
+    if(fric_state == FRIC_OFF)
     {
         to_str[5] = 'O';
         to_str[6] = 'F';
         to_str[7] = 'F';
         to_str[8] = '\0';
     }
-    else if(fric_state == 1)
+    else if(fric_state == FRIC_ON)
     {
         to_str[5] = 'O';
         to_str[6] = 'N';
         to_str[7] = ' ';
         to_str[8] = '\0';
+    }
+    else if(fric_state == FRIC_ACC)
+    {
+        to_str[5] = 'A';
+        to_str[6] = 'C';
+        to_str[7] = 'C';
+        to_str[8] = '\0';  
     }
 }
 

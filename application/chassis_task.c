@@ -31,6 +31,7 @@
 #include "chassis_power_control.h"
 
 #include "bsp_usart.h"
+#include "superC_can_task.h"
 
 #define rc_deadband_limit(input, output, dealine)          \
     {                                                      \
@@ -197,7 +198,8 @@ static void chassis_init(chassis_move_t *chassis_move_init)
     // 键盘控制斜波函数初始化
     ramp_init(&chassis_move_init->key_vx_ramp, CHASSIS_CONTROL_TIME, NORMAL_MAX_CHASSIS_SPEED_X, -NORMAL_MAX_CHASSIS_SPEED_X);
     ramp_init(&chassis_move_init->key_vy_ramp, CHASSIS_CONTROL_TIME, NORMAL_MAX_CHASSIS_SPEED_Y, -NORMAL_MAX_CHASSIS_SPEED_Y);
-
+    // 初始化键位状态
+    chassis_key_state.spin_state = KEY_OFF_SPIN;
     //* update data
     // 其他参数会在这里初始化
     chassis_feedback_update(chassis_move_init);
@@ -460,7 +462,10 @@ static void chassis_control_loop(chassis_move_t *chassis_move_control_loop)
     }
 
     //* 功率控制
-    chassis_power_control(chassis_move_control_loop);
+    if (superC_bat_remaining <= 10){
+        chassis_power_control(chassis_move_control_loop);
+    }
+    
 
     //* 赋值电流值输出
     for (i = 0; i < 4; i++) {
