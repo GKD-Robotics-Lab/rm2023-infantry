@@ -13,6 +13,15 @@
 # eide template
 *.ept
 *.eide-template
-/.cache
+.cache/
 debug-*
-gdb-*
+gdb*
+.eide/
+.pack
+.vscode/
+vscode*
+.cproject*
+.DS_store/
+.mxproject
+.project*
+*.code-workspace
