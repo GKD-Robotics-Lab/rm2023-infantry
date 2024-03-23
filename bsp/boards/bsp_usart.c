@@ -48,8 +48,7 @@ void usart6_printf(const char *fmt, ...)
     // 返回字符串长度
     len = vsnprintf(ptx_buf, USART1_TX_BUF_LEN, fmt, args);
     va_end(args);
-    HAL_UART_Transmit_DMA(&huart6, (uint8_t *)tx_buf, len);
-    __HAL_DMA_DISABLE_IT(huart6.hdmatx, DMA_IT_HT);
+    HAL_UART_Transmit(&huart6, (uint8_t *)tx_buf, len, 0xff);
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
