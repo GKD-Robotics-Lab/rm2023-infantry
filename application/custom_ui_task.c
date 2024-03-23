@@ -55,7 +55,6 @@ void custom_ui_task(void const * argument)
             count = 0;
         } 
         count ++;
-
         // //测试刷新用
         // UI_Data.Super_cap_percent+=2;
         // if(UI_Data.Super_cap_percent>=100) UI_Data.Super_cap_percent=0;
