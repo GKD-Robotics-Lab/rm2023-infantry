@@ -45,6 +45,8 @@
 #include "config.h"
 #include "user_lib.h"
 
+#include "auto_aim_task.h"
+
 // 为精简代码将遥控器相关按键使用宏替代
 #define RC_gimbal_switch (gimbal_mode_set->rc_ctrl->rc.s[GIMBAL_MODE_CHANNEL])
 
@@ -71,12 +73,14 @@ static void gimbal_absolute_angle_control(fp32 *yaw, fp32 *pitch, gimbal_control
 static void gimbal_relative_angle_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gimbal_control_set);
 static void gimbal_motionless_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gimbal_control_set);
 static void gimbal_open_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gimbal_control_set);
+static void gimbal_auto_aim_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gimbal_control_set);
 static void (*gimbal_control_func[GIMBAL_BEHAVIOUR_LEN])(fp32 *, fp32 *, gimbal_control_t *) = {gimbal_zero_force_control,
                                                                                                 gimbal_init_control,
                                                                                                 gimbal_absolute_angle_control,
                                                                                                 gimbal_relative_angle_control,
                                                                                                 gimbal_motionless_control,
-                                                                                                gimbal_open_control};
+                                                                                                gimbal_open_control,
+                                                                                                gimbal_auto_aim_control};
 
 // 云台行为状态机
 static gimbal_behaviour_e gimbal_behaviour = GIMBAL_ZERO_FORCE;
@@ -117,6 +121,10 @@ void gimbal_behaviour_mode_set(gimbal_control_t *gimbal_mode_set)
         case GIMBAL_MOTIONLESS:
             gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_ENCONDE_LIMIT;
             gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_ENCONDE_LIMIT;
+            break;
+        case GIMBAL_AUTO_AIM:
+            gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_GYRO;
+            gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_GYRO_LIMIT;
             break;
         //! STEP 3 为云台行为模式选择对应的电机控制模式 BEGIN !//
         /*
@@ -216,6 +224,12 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
 
     //* 记录上次的模式
     last_gimbal_behaviour = gimbal_behaviour;
+
+    //- 先强制设置为自瞄模式
+    if(AutoAimData.auto_aim_status == AUTOAIM_LOCKED){
+        gimbal_behaviour = GIMBAL_AUTO_AIM;
+    }
+
 }
 
 /**
@@ -397,6 +411,19 @@ static void gimbal_open_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gimbal
 
     *yaw   = yaw_channel * 20;
     *pitch = pitch_channel * 20;
+}
+
+/*自瞄模式 -Fish*/
+static void gimbal_auto_aim_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gimbal_control_set)
+{
+    if (yaw == NULL || pitch == NULL || gimbal_control_set == NULL) {
+        return;
+    }else if(AutoAimData.auto_aim_status == AUTOAIM_LOST){
+        return;
+    }
+
+    *yaw = AutoAimData.yaw;
+    *pitch = AutoAimData.pitch;
 }
 
 //! STEP 2 实现新的行为控制函数 END !//
