@@ -311,15 +311,21 @@ static void shoot_switch_mode(void)
             break;
         case SHOOT_FIRE:
             if (rad_format(shoot_control.trigger.angle - shoot_control.trigger.last_angle) > 2 * PI / PIT_NUM_HERO)
+            if (rad_format(shoot_control.trigger.angle - shoot_control.trigger.last_angle) > 2 * PI / PIT_NUM)
+            {
                 shoot_control.shoot_mode = SHOOT_DONE;
+                // record trigger angle when exiting fire
+                // 退出 DONE 时记录角度
+                shoot_control.trigger.last_angle += 2 * PI / PIT_NUM_HERO;
+            }
             break;
         case SHOOT_DONE:
             done_time++;
             if (done_time > SHOOT_DONE_KEY_OFF_TIME) {
                 done_time                = 0;
                 shoot_control.shoot_mode = SHOOT_READY;
-                // 退出 DONE 时记录角度
-                shoot_control.trigger.last_angle = shoot_control.trigger.angle;
+                // move up to get a more accurate angle
+                // shoot_control.trigger.last_angle = shoot_control.trigger.angle;
             }
             break;
         case SHOOT_STOP:
@@ -329,7 +335,6 @@ static void shoot_switch_mode(void)
         default:
             break;
     }
-
 }
 
 /**
@@ -365,7 +370,7 @@ static void shoot_control_loop(void)
         case SHOOT_READY:
         case SHOOT_STOP:
             // 拨弹轮不动
-            shoot_control.trigger.speed_set   = PID_calc(&shoot_control.trigger.angle_pid, (shoot_control.trigger.angle - shoot_control.trigger.last_angle), 0);
+            shoot_control.trigger.speed_set   = PID_calc(&shoot_control.trigger.angle_pid, rad_format(shoot_control.trigger.angle - shoot_control.trigger.last_angle), 0);
             shoot_control.trigger.current_set = PID_calc(&shoot_control.trigger.speed_pid, shoot_control.trigger.speed, shoot_control.trigger.speed_set);
             break;
         case SHOOT_DONE:
