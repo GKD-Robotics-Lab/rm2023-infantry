@@ -27,7 +27,7 @@ void UI_init_draw();
 
 
 String_Data state_text_data;
-Graph_Data shoot_distance_bar, cap_percentage;
+Graph_Data shoot_distance_bar, cap_percentage, auto_aim_range;
 Graph_Data still_cross_line[7];
 char cap_text[30];
 int count = 0;     //计数器
@@ -158,6 +158,12 @@ void UI_init_draw()
                 State_Data.cap_text_pos[0],
                 State_Data.cap_text_pos[1], cap_text);
     String_ReFresh(state_text_data);
+    osDelay(150);
+
+    //瞄准框
+    Rectangle_Draw(&auto_aim_range, "aui", UI_Graph_ADD, 0, UI_Color_Cyan, 3,
+            600, 200, 1300, 800);
+    UI_ReFresh(1, auto_aim_range);
     osDelay(100);
 }
 

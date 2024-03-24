@@ -49,6 +49,7 @@
 #include "bsp_usart.h"
 
 #include "INS_task.h"
+#include "custom_ui_task.h"
 
 // 为精简代码将遥控器相关按键使用宏替代
 #define RC_gimbal_switch (gimbal_mode_set->rc_ctrl->rc.s[GIMBAL_MODE_CHANNEL])
@@ -205,13 +206,8 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
     } else if (switch_is_up(RC_gimbal_switch)) {
         gimbal_behaviour = GIMBAL_ABSOLUTE_ANGLE;
     }
-    //根据拨杆设置自瞄
-    if(gimbal_mode_set->rc_ctrl->rc.ch[4] > 600 && AutoAimData.auto_aim_status == AUTOAIM_LOCKED)
-    {
-        gimbal_behaviour = GIMBAL_AUTO_AIM;
-    }
-    //鼠标右键自瞄
-    if(RC_mouse_r)
+    //根据拨杆&鼠标右键设置自瞄
+    if(((gimbal_mode_set->rc_ctrl->rc.ch[4] > 600) || RC_mouse_r) && AutoAimData.auto_aim_status == AUTOAIM_LOCKED)
     {
         gimbal_behaviour = GIMBAL_AUTO_AIM;
     }
