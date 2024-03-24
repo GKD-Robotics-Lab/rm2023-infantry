@@ -49,6 +49,8 @@
 
 // 为精简代码将遥控器相关按键使用宏替代
 #define RC_gimbal_switch (gimbal_mode_set->rc_ctrl->rc.s[GIMBAL_MODE_CHANNEL])
+#define RC_mouse_l      (gimbal_mode_set->rc_ctrl->mouse.press_l)               // 鼠标左键
+#define RC_mouse_r      (gimbal_mode_set->rc_ctrl->mouse.press_r)               // 鼠标右键
 
 /**
  * @brief          遥控器的死区判断，因为遥控器的拨杆在中位的时候，不一定为0，
@@ -201,6 +203,11 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
     } else if (switch_is_up(RC_gimbal_switch)) {
         gimbal_behaviour = GIMBAL_ABSOLUTE_ANGLE;
     }
+    //根据拨杆&鼠标右键设置自瞄
+    if(((gimbal_mode_set->rc_ctrl->rc.ch[4] > 600) || RC_mouse_r) && AutoAimData.auto_aim_status == AUTOAIM_LOCKED)
+    {
+        gimbal_behaviour = GIMBAL_AUTO_AIM;
+    }
 
     //* 在某些模式切换的情况下先进入 init 模式
     // enter init mode
@@ -224,11 +231,6 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
 
     //* 记录上次的模式
     last_gimbal_behaviour = gimbal_behaviour;
-
-    //- 先强制设置为自瞄模式
-    if(AutoAimData.auto_aim_status == AUTOAIM_LOCKED){
-        gimbal_behaviour = GIMBAL_AUTO_AIM;
-    }
 
 }
 
@@ -421,9 +423,14 @@ static void gimbal_auto_aim_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gi
     }else if(AutoAimData.auto_aim_status == AUTOAIM_LOST){
         return;
     }
+    //*pitch += (-gimbal_control_set->pitch_motor.absolute_angle - AutoAimData.pitch)*0.0007; //正：下
+    *pitch = 0;
+    *yaw -= (gimbal_control_set->yaw_motor.absolute_angle - AutoAimData.yaw)*0.007; //正：左
+    // usart6_printf("yaw:%f, INS:%f, div:%f\n", AutoAimData.yaw, gimbal_control_set->yaw_motor.absolute_angle,
+    //                 AutoAimData.yaw - gimbal_control_set->yaw_motor.absolute_angle);
+    // usart6_printf("pitch:%f, INS:%f, div:%f\n", AutoAimData.pitch, gimbal_control_set->pitch_motor.absolute_angle,
+    //                 -(gimbal_control_set->pitch_motor.absolute_angle - AutoAimData.pitch));
 
-    *yaw = AutoAimData.yaw;
-    *pitch = AutoAimData.pitch;
 }
 
 //! STEP 2 实现新的行为控制函数 END !//

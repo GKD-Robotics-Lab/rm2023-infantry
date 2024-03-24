@@ -38,6 +38,7 @@
 #include "shoot_task.h"
 #include "superC_can_task.h"
 #include "custom_ui_task.h"
+#include "auto_aim_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,6 +72,7 @@ osThreadId servo_task_handle;
 osThreadId shootTaskHandle;
 osThreadId superC_can_task_handle;
 osThreadId custom_ui_task_hanele;
+osThreadId auto_aim_task_handle;
 /* USER CODE END Variables */
 osThreadId testHandle;
 
@@ -195,10 +197,16 @@ void MX_FREERTOS_Init(void)
     if (superC_can_task_handle == NULL)
         Error_Handler();
 
-    //自定义UI线程
+    //鑷畾涔塙I
     osThreadDef(UI, custom_ui_task, osPriorityNormal, 0, 128);
     custom_ui_task_hanele = osThreadCreate(osThread(UI), NULL);
     if (custom_ui_task_hanele == NULL)
+        Error_Handler();
+
+    //鑷瀯绾跨▼
+    osThreadDef(AUTOAIM, auto_aim_task, osPriorityNormal, 0, 128);
+    auto_aim_task_handle = osThreadCreate(osThread(AUTOAIM), NULL);
+    if (auto_aim_task_handle == NULL)
         Error_Handler();
 
     // osThreadDef(USBTask, usb_task, osPriorityNormal, 0, 128);

@@ -4,6 +4,8 @@
 #include "usart.h"
 #include "INS_task.h"
 #include "string.h"
+#include "math.h"
+
 
 SentPacketTpye SentPacket;
 RecevPackeType auto_aim_Packet;
@@ -17,26 +19,38 @@ void updata_imu_angle();
 void auto_aim_task(void const * argument)
 {
     auto_aim_init();
+    HAL_UART_Receive_IT(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet));
 
     while(1)
     {
         updata_imu_angle();
         HAL_UART_Transmit_DMA(&huart1, (uint8_t *)&SentPacket, sizeof(SentPacket));
 
-        HAL_UART_Receive_DMA(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet));
+        //HAL_UART_Receive(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet), 0x02);
+        //usart6_printf("head:%x, yaw:%f, pitch:%f\n", auto_aim_Packet.header, auto_aim_Packet.yaw, auto_aim_Packet.pitch);
+        //usart6_printf("yaw:%f, pitch:%f, LOCK:%d\n", AutoAimData.yaw, AutoAimData.pitch, AutoAimData.auto_aim_status);
+        //memset(&AutoAimData, 0, sizeof(AutoAimData));   //清空结构体
+        osDelay(20); //刷新率=50Hz
+        HAL_UART_Receive_IT(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet));
+    }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if(huart == &huart1)
+    {
         //更新自瞄状态机&传递参数
-        if(auto_aim_Packet.header == 0xA5){
+        if(auto_aim_Packet.header == 0xA5 && !isnan(auto_aim_Packet.yaw) && !isnan(auto_aim_Packet.pitch)){
             AutoAimData.auto_aim_status = AUTOAIM_LOCKED;
             AutoAimData.yaw = auto_aim_Packet.yaw;
             AutoAimData.pitch = auto_aim_Packet.pitch;
         }else{
             AutoAimData.auto_aim_status = AUTOAIM_LOST;
         }
-        memset(&AutoAimData, 0, sizeof(AutoAimData));   //清空结构体
+        //memset(&auto_aim_Packet, 0, sizeof(auto_aim_Packet));   //清空结构体
+        //usart6_printf("yaw:%f, pitch:%f, LOCK:%d\n", AutoAimData.yaw, AutoAimData.pitch, AutoAimData.auto_aim_status);
 
-        //usart6_printf("TEST\n");
-
-        osDelay(2); //刷新率=500Hz
+        HAL_UART_Receive_IT(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet));
     }
 }
 
