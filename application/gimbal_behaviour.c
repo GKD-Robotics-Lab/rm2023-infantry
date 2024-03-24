@@ -204,6 +204,11 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
     } else if (switch_is_up(RC_gimbal_switch)) {
         gimbal_behaviour = GIMBAL_ABSOLUTE_ANGLE;
     }
+    //根据拨杆设置自瞄
+    if(gimbal_mode_set->rc_ctrl->rc.ch[4] > 600 && AutoAimData.auto_aim_status == AUTOAIM_LOCKED)
+    {
+        gimbal_behaviour = GIMBAL_AUTO_AIM;
+    }
 
     //* 在某些模式切换的情况下先进入 init 模式
     // enter init mode
@@ -228,10 +233,10 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
     //* 记录上次的模式
     last_gimbal_behaviour = gimbal_behaviour;
 
-    //- 先强制设置为自瞄模式
-    if(AutoAimData.auto_aim_status == AUTOAIM_LOCKED){
-        gimbal_behaviour = GIMBAL_AUTO_AIM;
-    }
+    // //- 先强制设置为自瞄模式
+    // if(AutoAimData.auto_aim_status == AUTOAIM_LOCKED){
+    //     gimbal_behaviour = GIMBAL_AUTO_AIM;
+    // }
 
 }
 
