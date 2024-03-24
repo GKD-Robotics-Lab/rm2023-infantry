@@ -52,6 +52,7 @@ typedef enum {
     GIMBAL_MOTIONLESS, // 不动模式，相对底盘电机各轴增量为 0
     //! STEP 1 添加新的行为模式名称 BEGIN !//
     GIMBAL_OPEN, // 开环模式，用于调试
+    GIMBAL_AUTO_AIM, //自瞄模式
 
     //! STEP 1 添加新的行为模式名称 END !//
     GIMBAL_BEHAVIOUR_LEN,
