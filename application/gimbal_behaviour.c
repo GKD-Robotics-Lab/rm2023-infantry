@@ -52,7 +52,8 @@
 
 // 为精简代码将遥控器相关按键使用宏替代
 #define RC_gimbal_switch (gimbal_mode_set->rc_ctrl->rc.s[GIMBAL_MODE_CHANNEL])
-
+#define RC_mouse_l      (gimbal_mode_set->rc_ctrl->mouse.press_l)               // 鼠标左键
+#define RC_mouse_r      (gimbal_mode_set->rc_ctrl->mouse.press_r)               // 鼠标右键
 /**
  * @brief          遥控器的死区判断，因为遥控器的拨杆在中位的时候，不一定为0，
  * @param          输入的遥控器值
@@ -206,6 +207,11 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
     }
     //根据拨杆设置自瞄
     if(gimbal_mode_set->rc_ctrl->rc.ch[4] > 600 && AutoAimData.auto_aim_status == AUTOAIM_LOCKED)
+    {
+        gimbal_behaviour = GIMBAL_AUTO_AIM;
+    }
+    //鼠标右键自瞄
+    if(RC_mouse_r)
     {
         gimbal_behaviour = GIMBAL_AUTO_AIM;
     }

@@ -87,6 +87,8 @@ void chassis_behaviour_mode_set(chassis_move_t *chassis_move_mode)
         UI_Data.spin_state = 0;
     }
 
+    //chassis_behaviour_mode = CHASSIS_ZERO_FORCE;
+
     //* 根据行为模式选择底盘移动策略
     if (chassis_behaviour_mode == CHASSIS_ZERO_FORCE) {
         chassis_move_mode->chassis_translation_strategy = TRANSLATION_RAW;
