@@ -28,9 +28,9 @@ void auto_aim_task(void const * argument)
 
         //HAL_UART_Receive(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet), 0x02);
         //usart6_printf("head:%x, yaw:%f, pitch:%f\n", auto_aim_Packet.header, auto_aim_Packet.yaw, auto_aim_Packet.pitch);
-        usart6_printf("yaw:%f, pitch:%f\n", AutoAimData.yaw, AutoAimData.pitch);
+        //usart6_printf("yaw:%f, pitch:%f, LOCK:%d\n", AutoAimData.yaw, AutoAimData.pitch, AutoAimData.auto_aim_status);
         //memset(&AutoAimData, 0, sizeof(AutoAimData));   //清空结构体
-        osDelay(2); //刷新率=50Hz
+        osDelay(20); //刷新率=50Hz
         HAL_UART_Receive_IT(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet));
     }
 }

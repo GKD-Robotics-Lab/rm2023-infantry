@@ -46,6 +46,9 @@
 #include "user_lib.h"
 
 #include "auto_aim_task.h"
+#include "bsp_usart.h"
+
+#include "INS_task.h"
 
 // 为精简代码将遥控器相关按键使用宏替代
 #define RC_gimbal_switch (gimbal_mode_set->rc_ctrl->rc.s[GIMBAL_MODE_CHANNEL])
@@ -421,9 +424,13 @@ static void gimbal_auto_aim_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gi
     }else if(AutoAimData.auto_aim_status == AUTOAIM_LOST){
         return;
     }
+    *pitch += (-gimbal_control_set->pitch_motor.absolute_angle - AutoAimData.pitch)*0.007; //正：下
+    *yaw -= (gimbal_control_set->yaw_motor.absolute_angle - AutoAimData.yaw)*0.012; //正：左
+    // usart6_printf("yaw:%f, INS:%f, div:%f\n", AutoAimData.yaw, gimbal_control_set->yaw_motor.absolute_angle,
+    //                 AutoAimData.yaw - gimbal_control_set->yaw_motor.absolute_angle);
+    // usart6_printf("pitch:%f, INS:%f, div:%f\n", AutoAimData.pitch, gimbal_control_set->pitch_motor.absolute_angle,
+    //                 -(gimbal_control_set->pitch_motor.absolute_angle - AutoAimData.pitch));
 
-    *yaw = AutoAimData.yaw;
-    *pitch = AutoAimData.pitch;
 }
 
 //! STEP 2 实现新的行为控制函数 END !//
