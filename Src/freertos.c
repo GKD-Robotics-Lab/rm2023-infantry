@@ -188,10 +188,10 @@ void MX_FREERTOS_Init(void)
     if (led_RGB_flow_handle == NULL)
         Error_Handler();
 
-    // osThreadDef(REFEREE, referee_usart_task, osPriorityNormal, 0, 128);
-    // referee_usart_task_handle = osThreadCreate(osThread(REFEREE), NULL);
-    // if (referee_usart_task_handle == NULL)
-    //     Error_Handler();
+    osThreadDef(REFEREE, referee_usart_task, osPriorityNormal, 0, 128);
+    referee_usart_task_handle = osThreadCreate(osThread(REFEREE), NULL);
+    if (referee_usart_task_handle == NULL)
+        Error_Handler();
 
     osThreadDef(SUPERC, superC_can_task, osPriorityNormal, 0, 128);
     superC_can_task_handle = osThreadCreate(osThread(SUPERC), NULL);
@@ -199,10 +199,10 @@ void MX_FREERTOS_Init(void)
         Error_Handler();
 
     //自定义UI线程
-    // osThreadDef(UI, custom_ui_task, osPriorityNormal, 0, 128);
-    // custom_ui_task_hanele = osThreadCreate(osThread(UI), NULL);
-    // if (custom_ui_task_hanele == NULL)
-    //     Error_Handler();
+    osThreadDef(UI, custom_ui_task, osPriorityNormal, 0, 128);
+    custom_ui_task_hanele = osThreadCreate(osThread(UI), NULL);
+    if (custom_ui_task_hanele == NULL)
+        Error_Handler();
 
     //自瞄线程
     osThreadDef(AUTOAIM, auto_aim_task, osPriorityNormal, 0, 128);
