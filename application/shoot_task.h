@@ -76,8 +76,8 @@
 
 //! 遥控器键盘射击状态控制相关参数
 #define SHOOT_RC_MODE_CHANNEL   1 // 射击发射开关通道数据
-#define SHOOT_ON_KEYBOARD       KEY_PRESSED_OFFSET_G
-#define SHOOT_OFF_KEYBOARD      KEY_PRESSED_OFFSET_G
+#define SHOOT_ON_KEYBOARD       KEY_PRESSED_OFFSET_F
+#define SHOOT_OFF_KEYBOARD      KEY_PRESSED_OFFSET_F
 
 #define PRESS_LONG_TIME         400  // 鼠标长按判断
 #define RC_SW_LONG_TIME         1000 // 遥控器射击开关打下档一段时间后，连续发射子弹
@@ -90,10 +90,6 @@
 // shoot laser gpio port set 
 #define GPIO_Port_laser GPIOC
 #define GPIO_PIN_laser GPIO_PIN_8
-
-// 连发模式
-#define SHOOT_BRUST_MODE 1
-#define SHOOT_SINGLE_MODE 2
 
 // 射击模式状态机
 typedef enum {
@@ -170,8 +166,6 @@ typedef struct
     //* 枪口热量获取
     uint16_t heat_limit;
     uint16_t heat;
-
-    uint16_t brust_mode;
 } shoot_control_t;
 
 typedef struct

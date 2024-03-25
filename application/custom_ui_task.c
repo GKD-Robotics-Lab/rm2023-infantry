@@ -206,7 +206,7 @@ void update_dynamic_paramater()
     String_ReFresh(state_text_data);
     osDelay(100);
         /*连发模式和单舱开关*/
-    cover_brust_text(cover_brust_text_str, UI_Data.cover_state, UI_Data.cover_state);
+    cover_brust_text(cover_brust_text_str, UI_Data.cover_state, UI_Data.brust_state);
     String_Draw(&state_text_data, "blw", UI_Graph_Change, 1, State_Data.cap_text_color,
                 State_Data.cap_text_size, 19, 2, 
                 State_Data.cap_text_pos[0],
