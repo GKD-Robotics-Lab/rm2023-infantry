@@ -15,11 +15,16 @@ void superC_can_task(void const * argument)
     for (;;)
     {
         get_chassis_power_limit(&chassis_power_limit);
-        CAN_cmd_superC(chassis_power_limit);
+
+        if (chassis_power_limit >= 40)
+            CAN_cmd_superC(chassis_power_limit);
+        else 
+            CAN_cmd_superC(45);
+            
 
         UI_Data.Super_cap_percent = superC_bat_remaining;
 
-        usart1_printf("power_lim:%d\n", chassis_power_limit);
+        // usart1_printf("power_lim:%d\n", chassis_power_limit);
 
         osDelay(100);
     }
