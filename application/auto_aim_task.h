@@ -6,8 +6,7 @@
 #define AUTOAIM_LOST 0
 #define AUTOAIM_LOCKED 1
 
-#define AUTOAIM_TIMEOUT 100     
-
+#define AUTOAIM_TIMEOUT 4     
 typedef struct
 {
   uint8_t header;
