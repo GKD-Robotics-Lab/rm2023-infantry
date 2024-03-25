@@ -5,6 +5,7 @@
 #include "INS_task.h"
 #include "string.h"
 #include "math.h"
+#include "user_lib.h"
 
 
 SentPacketTpye SentPacket;
@@ -40,7 +41,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     if(huart == &huart1)
     {
         //更新自瞄状态机&传递参数
-        if(auto_aim_Packet.header == 0xA5 && !isnan(auto_aim_Packet.yaw) && !isnan(auto_aim_Packet.pitch)){
+        if(auto_aim_Packet.header == 0xA5 && !isnan(auto_aim_Packet.yaw) && !isnan(auto_aim_Packet.pitch) && auto_aim_Packet.yaw > -PI && auto_aim_Packet.yaw < PI && auto_aim_Packet.pitch > -PI && auto_aim_Packet.pitch < PI){
             AutoAimData.auto_aim_status = AUTOAIM_LOCKED;
             AutoAimData.yaw = auto_aim_Packet.yaw;
             AutoAimData.pitch = auto_aim_Packet.pitch;

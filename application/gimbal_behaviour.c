@@ -436,6 +436,7 @@ static void gimbal_auto_aim_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gi
 
     //!先直接去设陀螺仪目标角度
     gimbal_control_set->yaw_motor.absolute_angle_set = AutoAimData.yaw;
+    gimbal_control_set->pitch_motor.absolute_angle_set = -AutoAimData.pitch;
 
     // usart6_printf("yaw:%f, INS:%f, div:%f\n", AutoAimData.yaw, gimbal_control_set->yaw_motor.absolute_angle,
     //                 AutoAimData.yaw - gimbal_control_set->yaw_motor.absolute_angle);
