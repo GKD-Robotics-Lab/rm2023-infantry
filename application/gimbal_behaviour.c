@@ -430,7 +430,7 @@ static void gimbal_auto_aim_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gi
         return;
     }
     //*pitch += (-gimbal_control_set->pitch_motor.absolute_angle - AutoAimData.pitch)*0.0007; //正：下
-    *pitch = 0;
+    *pitch = AutoAimData.pitch; //!会卡死
     *yaw = AutoAimData.yaw;
     //*yaw -= (gimbal_control_set->yaw_motor.absolute_angle - AutoAimData.yaw)*0.009; //正：左
 
