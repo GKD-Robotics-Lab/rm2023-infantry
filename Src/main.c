@@ -144,6 +144,7 @@ int main(void)
     delay_init();
     cali_param_init();
     remote_control_init();
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

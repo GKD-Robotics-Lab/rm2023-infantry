@@ -203,11 +203,11 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
     } else if (switch_is_up(RC_gimbal_switch)) {
         gimbal_behaviour = GIMBAL_ABSOLUTE_ANGLE;
     }
-    //根据拨杆&鼠标右键设置自瞄
-    if(((gimbal_mode_set->rc_ctrl->rc.ch[4] > 600) || RC_mouse_r) && AutoAimData.auto_aim_status == AUTOAIM_LOCKED)
-    {
-        gimbal_behaviour = GIMBAL_AUTO_AIM;
-    }
+    // //根据拨杆&鼠标右键设置自瞄
+    // if(((gimbal_mode_set->rc_ctrl->rc.ch[4] > 600) || RC_mouse_r) && AutoAimData.auto_aim_status == AUTOAIM_LOCKED)
+    // {
+    //     gimbal_behaviour = GIMBAL_AUTO_AIM;
+    // }
 
     // //根据拨杆&鼠标右键设置自瞄
     // if((gimbal_mode_set->rc_ctrl->rc.ch[4] > 600) || RC_mouse_r)

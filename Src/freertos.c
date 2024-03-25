@@ -219,10 +219,10 @@ void MX_FREERTOS_Init(void)
     // if (battery_voltage_handle == NULL)
     //     Error_Handler();
 
-    // osThreadDef(SERVO, servo_task, osPriorityNormal, 0, 128);
-    // servo_task_handle = osThreadCreate(osThread(SERVO), NULL);
-    // if (servo_task_handle == NULL)
-    //     Error_Handler();
+    osThreadDef(SERVO, servo_task, osPriorityNormal, 0, 128);
+    servo_task_handle = osThreadCreate(osThread(SERVO), NULL);
+    if (servo_task_handle == NULL)
+        Error_Handler();
 
     /* USER CODE END RTOS_THREADS */
 }

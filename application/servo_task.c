@@ -22,9 +22,15 @@
 #include "remote_control.h"
 //#include "UI.h"
 #include "string.h"
+#include "tim.h"
+#include "remote_control.h"
+
 
 #define SERVO_MIN_PWM   500
 #define SERVO_MAX_PWM   2500
+
+#define SERVO_OFF_POS   500
+#define SERVO_ON_POS    1100
 
 #define PWM_DETAL_VALUE 10
 
@@ -40,6 +46,9 @@
 #define SERVO_MINUS_PWM_KEY KEY_PRESSED_OFFSET_SHIFT
 
 const RC_ctrl_t *servo_rc;
+
+int servo_state = 0; //0-off, 1-on
+
 // const static uint16_t servo_key[4] = {SERVO1_ADD_PWM_KEY, SERVO2_ADD_PWM_KEY, SERVO3_ADD_PWM_KEY, SERVO4_ADD_PWM_KEY};
 uint16_t servo_pwm[4] = {SERVO_MIN_PWM, SERVO_MIN_PWM, SERVO_MIN_PWM, SERVO_MIN_PWM};
 
@@ -55,90 +64,36 @@ uint16_t servo_pwm[4] = {SERVO_MIN_PWM, SERVO_MIN_PWM, SERVO_MIN_PWM, SERVO_MIN_
   * @retval         none
   */
 
+void set_servo_on();
+void set_servo_off();
+
 void servo_task(void const * argument)
 {
     servo_rc = get_remote_control_point();
-    //static String_Data change_white, change_black;
-    //Char_Draw(&change_white, "001", UI_Graph_ADD, 9, UI_Color_White, 2, 8, 5, 200, 200, "cover");
-    //Char_Draw(&change_white, "002", UI_Graph_ADD, 9, UI_Color_Black, 2, 8, 5, 200, 200, "cover");
-
-//    Graph_Data change_white, change_black;;
-//    Line_Draw(&change_white, "001", UI_Graph_Change, 9, UI_Color_White, 3, 200, 200, 250, 200);
-//    Line_Draw(&change_black, "001", UI_Graph_Change, 9, UI_Color_Black, 3, 200, 200, 250, 200);
-//    memset(&change_white, 0, sizeof(change_white));
-//    memset(&change_black, 0, sizeof(change_black));
-
+//gimbal_mode_set->rc_ctrl->rc.ch[4] > 600
     while(1)
     {
-
-        static int16_t last_key_mode = 0;
-        static int8_t cover_mode = 0, this_mode = 0;;
-        static uint32_t last_offtick = 0;
-        if(servo_rc->key.v & SERVO1_ADD_PWM_KEY){
-            if(xTaskGetTickCount() - last_offtick >= 1000){
-                cover_mode = 1;
-                this_mode = 1;
-            }
-            else{
-                this_mode = 0;
-            }
-        }
-        else{
-            if(last_key_mode && !this_mode){
-                cover_mode = 0;
-            }
-            last_offtick = xTaskGetTickCount();
-        }
-        last_key_mode = (servo_rc->key.v & SERVO1_ADD_PWM_KEY);
-        if(servo_rc->rc.ch[COVER_PLATE_CHANNEL] > COVER_RC_DEADBAND)
+        if((servo_rc->key.v & KEY_PRESSED_OFFSET_R) || (servo_rc->rc.ch[4] >600))
         {
-            cover_mode = 1;
+            if(servo_state == 0) servo_state = 1;
+            else if(servo_state == 1) servo_state = 0;
         }
 
-        else if(servo_rc->rc.ch[COVER_PLATE_CHANNEL] < -COVER_RC_DEADBAND)
-        {
-            cover_mode = 0;
-        }
-
-        servo_pwm[COVER_PLATE_PORT] = cover_mode ? SERVO_MAX_PWM : SERVO_MIN_PWM;
-
-        if(servo_pwm[COVER_PLATE_PORT] < SERVO_MIN_PWM)
-        {
-            servo_pwm[COVER_PLATE_PORT] = SERVO_MIN_PWM;
-        }
-        else if(servo_pwm[COVER_PLATE_PORT] > SERVO_MAX_PWM)
-        {
-            servo_pwm[COVER_PLATE_PORT] = SERVO_MAX_PWM;
-        }
-        servo_pwm_set(servo_pwm[COVER_PLATE_PORT], COVER_PLATE_PORT);
-        /*
-    for(uint8_t i = 0; i < 4; i++)
-    {
-
-        if( (servo_rc->key.v & SERVO_MINUS_PWM_KEY) && (servo_rc->key.v & servo_key[i]))
-        {
-            servo_pwm[i] -= PWM_DETAL_VALUE;
-        }
-        else if(servo_rc->key.v & servo_key[i])
-        {
-            servo_pwm[i] += PWM_DETAL_VALUE;
-        }
-
-        //limit the pwm
-       //限制pwm
-        if(servo_pwm[i] < SERVO_MIN_PWM)
-        {
-            servo_pwm[i] = SERVO_MIN_PWM;
-        }
-        else if(servo_pwm[i] > SERVO_MAX_PWM)
-        {
-            servo_pwm[i] = SERVO_MAX_PWM;
-        }
-
-        servo_pwm_set(servo_pwm[i], i);
-    }
-        */
+        if(servo_state == 1) set_servo_on();
+        else if(servo_state == 0) set_servo_off();
+        
         osDelay(10);
     }
 }
 
+void set_servo_on()
+{
+        __HAL_TIM_SetCompare(&htim8, TIM_CHANNEL_2, SERVO_ON_POS);
+        HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
+}
+
+void set_servo_off()
+{
+        __HAL_TIM_SetCompare(&htim8, TIM_CHANNEL_2, SERVO_OFF_POS);
+        HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
+}
