@@ -91,6 +91,10 @@
 #define GPIO_Port_laser GPIOC
 #define GPIO_PIN_laser GPIO_PIN_8
 
+// 连发模式
+#define SHOOT_BRUST_MODE 1
+#define SHOOT_SINGLE_MODE 2
+
 // 射击模式状态机
 typedef enum {
     SHOOT_DISABLE = 0,   // 未使能射击时的无力状态
@@ -166,6 +170,8 @@ typedef struct
     //* 枪口热量获取
     uint16_t heat_limit;
     uint16_t heat;
+
+    uint16_t brust_mode;
 } shoot_control_t;
 
 typedef struct

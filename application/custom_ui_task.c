@@ -5,6 +5,7 @@
 #include "custom_ui_task.h"
 #include "stdio.h"
 #include "string.h"
+#include "printf.h"
 
 Crosshair_Data_Type Crosshair_Data;
 UI_DisplayData_Type UI_Data;
@@ -24,12 +25,13 @@ void cap_text_format(char *to_str, int cap_percent);
 void sync_parameter();
 void state_str(char *to_str, int cap_percent, int spin_state, int fric_state);
 void UI_init_draw();
+void cover_brust_text(char *to_str, int cover_state, int brust_state);
 
 
 String_Data state_text_data;
 Graph_Data shoot_distance_bar, cap_percentage;
 Graph_Data still_cross_line[7];
-char cap_text[30];
+char cap_text[30], cover_brust_text_str[30];
 int count = 0;     //计数器
 
 
@@ -117,16 +119,16 @@ void draw_crosshair_infantry()
         Crosshair_Data.cross_colar,
         Crosshair_Data.line_width,
         Crosshair_Data.center[0]-(Crosshair_Data.cross_width/2),
-        Crosshair_Data.center[1],
+        Crosshair_Data.center[1]-80,
         Crosshair_Data.center[0]+(Crosshair_Data.cross_width/2),
-        Crosshair_Data.center[1]);
+        Crosshair_Data.center[1]-80);
     //竖着的主准星
     Line_Draw(&still_cross_line[1], "L2", UI_Graph_ADD, 0, 
         Crosshair_Data.cross_colar,
         Crosshair_Data.line_width,
-        Crosshair_Data.center[0],
+        Crosshair_Data.center[0]-15,
         Crosshair_Data.center[1]+(Crosshair_Data.cross_high/2)+Crosshair_Data.cross_high_offset,
-        Crosshair_Data.center[0],
+        Crosshair_Data.center[0]-15,
         Crosshair_Data.center[1]-(Crosshair_Data.cross_high/2)+Crosshair_Data.cross_high_offset);
     UI_ReFresh(2, still_cross_line[0], still_cross_line[1]);
     
@@ -160,6 +162,16 @@ void UI_init_draw()
                 State_Data.cap_text_pos[1], cap_text);
     String_ReFresh(state_text_data);
     osDelay(100);
+
+    /*连发模式和单舱开关*/
+    cover_brust_text(cover_brust_text_str, UI_Data.cover_state, UI_Data.brust_state);
+    String_Draw(&state_text_data, "blw", UI_Graph_ADD, 1, State_Data.cap_text_color,
+                State_Data.cap_text_size, 19, 2, 
+                State_Data.cap_text_pos[0],
+                State_Data.cap_text_pos[1]-180, cover_brust_text_str);
+    String_ReFresh(state_text_data);
+    osDelay(100);
+    
 }
 
 /*刷新动态参数*/
@@ -192,6 +204,15 @@ void update_dynamic_paramater()
     else if(UI_MODE == UI_INFANTRY) UI_ReFresh(1, cap_percentage);
     osDelay(100);
     String_ReFresh(state_text_data);
+    osDelay(100);
+        /*连发模式和单舱开关*/
+    cover_brust_text(cover_brust_text_str, UI_Data.cover_state, UI_Data.cover_state);
+    String_Draw(&state_text_data, "blw", UI_Graph_Change, 1, State_Data.cap_text_color,
+                State_Data.cap_text_size, 19, 2, 
+                State_Data.cap_text_pos[0],
+                State_Data.cap_text_pos[1]-180, cover_brust_text_str);
+    String_ReFresh(state_text_data);
+    osDelay(100);
  }
 
 /*刷新动态参数*/
@@ -241,6 +262,47 @@ void int_to_str(char *to_str, int number)
     to_str[1] = ((number/10) % 10) + 48;
     to_str[2] = (number % 10) + 48;
     to_str[3] = '\0';
+}
+
+void cover_brust_text(char *to_str, int cover_state, int brust_state)
+{
+    to_str[0] = 'C';
+    to_str[1] = 'O';
+    to_str[2] = 'V';
+    to_str[3] = 'E';
+    to_str[4] = 'R';
+    to_str[5] = ' ';
+    if(cover_state == 1)
+    {
+        to_str[6] = 'O';
+        to_str[7] = 'N';
+        to_str[8] = ' ';
+    }
+    else if(cover_state == 0)
+    {
+        to_str[6] = 'O';
+        to_str[7] = 'F';
+        to_str[8] = 'F';
+    }
+    to_str[9] = '\n';
+    to_str[10] = 'B';
+    to_str[11] = 'R';
+    to_str[12] = 'U';
+    to_str[13] = 'S';
+    to_str[14] = 'T';
+    to_str[15] = ' ';
+    if(brust_state == 1)
+    {
+        to_str[16] = 'O';
+        to_str[17] = 'N';
+        to_str[18] = ' ';
+    }
+    else if(brust_state == 0)
+    {
+        to_str[16] = 'O';
+        to_str[17] = 'F';
+        to_str[18] = 'F'; 
+    }
 }
 
 //生成超电百分比文字

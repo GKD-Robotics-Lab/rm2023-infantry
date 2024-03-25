@@ -132,6 +132,8 @@ static void shoot_init(void)
     shoot_control.trigger.block_time   = 0;
     shoot_control.trigger.reverse_time = 0;
 
+    shoot_control.brust_mode = SHOOT_SINGLE_MODE;
+
     //* 更新一次反馈数据
     shoot_feedback_update();
 }

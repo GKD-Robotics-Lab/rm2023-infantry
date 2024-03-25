@@ -24,6 +24,7 @@
 #include "string.h"
 #include "tim.h"
 #include "remote_control.h"
+#include "custom_ui_task.h"
 
 
 #define SERVO_MIN_PWM   500
@@ -66,21 +67,32 @@ uint16_t servo_pwm[4] = {SERVO_MIN_PWM, SERVO_MIN_PWM, SERVO_MIN_PWM, SERVO_MIN_
 
 void set_servo_on();
 void set_servo_off();
+uint16_t last_key_state, last_rc_state;
 
 void servo_task(void const * argument)
 {
     servo_rc = get_remote_control_point();
-//gimbal_mode_set->rc_ctrl->rc.ch[4] > 600
     while(1)
     {
-        if((servo_rc->key.v & KEY_PRESSED_OFFSET_R) || (servo_rc->rc.ch[4] >600))
+        if(((servo_rc->key.v & KEY_PRESSED_OFFSET_R) && !(last_key_state & KEY_PRESSED_OFFSET_R))
+                || ((servo_rc->rc.ch[4] >600) && !(last_rc_state >600)))
         {
             if(servo_state == 0) servo_state = 1;
             else if(servo_state == 1) servo_state = 0;
         }
+        last_key_state = servo_rc->key.v;
+        last_rc_state = servo_rc->rc.ch[4];
 
-        if(servo_state == 1) set_servo_on();
-        else if(servo_state == 0) set_servo_off();
+        if(servo_state == 1) 
+        {
+            set_servo_on();
+            UI_Data.cover_state = 1;
+        }
+        else if(servo_state == 0) 
+        {
+            set_servo_off();
+            UI_Data.cover_state = 0;
+        }
         
         osDelay(10);
     }

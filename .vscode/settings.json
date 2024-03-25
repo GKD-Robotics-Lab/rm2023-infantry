@@ -12,6 +12,16 @@
         "stm32f4xx_hal_rcc.h": "c",
         "detect_task.h": "c",
         "custom_ui_task.h": "c",
-        "bsp_usart.h": "c"
+        "bsp_usart.h": "c",
+        "gimbal_behaviour.h": "c",
+        "pid.h": "c",
+        "can_receive.h": "c",
+        "user_lib.h": "c",
+        "stm32f4xx_hal_gpio.h": "c",
+        "stm32f4xx.h": "c",
+        "arm_math.h": "c",
+        "shoot_task.h": "c",
+        "string.h": "c",
+        "printf.h": "c"
     }
 }

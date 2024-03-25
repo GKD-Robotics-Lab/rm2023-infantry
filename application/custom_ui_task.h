@@ -15,8 +15,8 @@
 #define CROSS_5M 500
 
 /*机器人角色*/
-#define Robot_ID UI_Data_RobotID_BStandard3
-#define Cilent_ID UI_Data_CilentID_BStandard3
+#define Robot_ID UI_Data_RobotID_RStandard3
+#define Cilent_ID UI_Data_CilentID_RStandard3
 
 /*UI模式*/
 #define UI_INFANTRY 1
@@ -38,6 +38,8 @@ typedef struct
     float Super_cap_percent;    //超电百分比
     int spin_state;     //小陀螺状态
     int fric_state;     //摩擦轮状态
+    int brust_state;
+    int cover_state;
 } UI_DisplayData_Type;
 
 /*描述准星的结构体*/
