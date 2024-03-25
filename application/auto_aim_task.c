@@ -70,7 +70,7 @@ void auto_aim_init()
     SentPacket.aim_x = 0.0;
     SentPacket.aim_y = 0.0;
     SentPacket.aim_z = 0.0;
-    SentPacket.detect_color = 1;
+    SentPacket.detect_color = 0;
     SentPacket.reserved = 0;
     SentPacket.reset_tracker =0;
     /*INS指针初始化*/
