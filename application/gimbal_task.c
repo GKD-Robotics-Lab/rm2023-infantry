@@ -72,10 +72,12 @@ static void gimbal_motor_raw_set_control(gimbal_motor_t *gimbal_motor, fp32 add)
 static void gimbal_motor_gyro_set_control(gimbal_motor_t *gimbal_motor, fp32 add);
 static void gimbal_motor_gyro_limit_set_control(gimbal_motor_t *gimbal_motor, fp32 add);
 static void gimbal_motor_encoder_limit_set_control(gimbal_motor_t *gimbal_motor, fp32 add);
+static void gimbal_motor_gyro_set_control_direct(gimbal_motor_t *gimbal_motor, fp32 angle);
 static void (*gimbal_motor_set_control_func[GIMBAL_MOTOR_MODE_LEN])(gimbal_motor_t *, fp32) = {gimbal_motor_raw_set_control,
                                                                                                gimbal_motor_gyro_set_control,
                                                                                                gimbal_motor_gyro_limit_set_control,
-                                                                                               gimbal_motor_encoder_limit_set_control};
+                                                                                               gimbal_motor_encoder_limit_set_control,
+                                                                                               gimbal_motor_gyro_set_control_direct};
 
 static void gimbal_motor_absolute_angle_control(gimbal_motor_t *gimbal_motor);
 static void gimbal_motor_relative_angle_control(gimbal_motor_t *gimbal_motor);
@@ -83,7 +85,8 @@ static void gimbal_motor_raw_angle_control(gimbal_motor_t *gimbal_motor);
 static void (*gimbal_motor_control_func[GIMBAL_MOTOR_MODE_LEN])(gimbal_motor_t *) = {gimbal_motor_raw_angle_control,
                                                                                      gimbal_motor_absolute_angle_control,
                                                                                      gimbal_motor_absolute_angle_control,
-                                                                                     gimbal_motor_relative_angle_control};
+                                                                                     gimbal_motor_relative_angle_control,
+                                                                                     gimbal_motor_absolute_angle_control};
 
 static fp32 gimbal_motor_yaw_speed_compensate(pid_typedef *pid);
 
@@ -364,6 +367,15 @@ static void gimbal_motor_gyro_set_control(gimbal_motor_t *gimbal_motor, fp32 add
     }
 
     gimbal_motor->absolute_angle_set = rad_format(gimbal_motor->absolute_angle_set + add);
+}
+
+static void gimbal_motor_gyro_set_control_direct(gimbal_motor_t *gimbal_motor, fp32 add)
+{
+    if (gimbal_motor == NULL) {
+        return;
+    }
+
+    gimbal_motor->absolute_angle_set = add;
 }
 
 static void gimbal_motor_gyro_limit_set_control(gimbal_motor_t *gimbal_motor, fp32 add)

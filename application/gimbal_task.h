@@ -55,7 +55,7 @@
 
 #define PITCH_ENCODE_RELATIVE_PID_KP        15.0f
 #define PITCH_ENCODE_RELATIVE_PID_KI        0.00f
-#define PITCH_ENCODE_RELATIVE_PID_KD        0.0f
+#define PITCH_ENCODE_RELATIVE_PID_KD        0.9f
 #define PITCH_ENCODE_RELATIVE_PID_MAX_OUT   10.0f
 #define PITCH_ENCODE_RELATIVE_PID_MAX_IOUT  0.0f
 #define PITCH_ENCODE_RELATIVE_PID_DEAD_BAND 0.0f
@@ -157,6 +157,7 @@ typedef enum {
     GIMBAL_MOTOR_GYRO,          // 电机陀螺仪角度控制
     GIMBAL_MOTOR_GYRO_LIMIT,    // 带限位的电机陀螺仪角度控制
     GIMBAL_MOTOR_ENCONDE_LIMIT, // 带限位的电机编码值角度控制
+    GIMBAL_MOTOR_GYRO_DIRECT,   // 直接指定角度值输入
 
     GIMBAL_MOTOR_MODE_LEN,
 } gimbal_motor_mode_e;

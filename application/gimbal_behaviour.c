@@ -125,7 +125,7 @@ void gimbal_behaviour_mode_set(gimbal_control_t *gimbal_mode_set)
             gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_ENCONDE_LIMIT;
             break;
         case GIMBAL_AUTO_AIM:
-            gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_GYRO;
+            gimbal_mode_set->yaw_motor.motor_mode   = GIMBAL_MOTOR_GYRO_DIRECT;
             gimbal_mode_set->pitch_motor.motor_mode = GIMBAL_MOTOR_GYRO_LIMIT;
             break;
         //! STEP 3 为云台行为模式选择对应的电机控制模式 BEGIN !//
@@ -208,6 +208,12 @@ static void gimbal_behaviour_set(gimbal_control_t *gimbal_mode_set)
     {
         gimbal_behaviour = GIMBAL_AUTO_AIM;
     }
+
+    // //根据拨杆&鼠标右键设置自瞄
+    // if((gimbal_mode_set->rc_ctrl->rc.ch[4] > 600) || RC_mouse_r)
+    // {
+    //     gimbal_behaviour = GIMBAL_AUTO_AIM;
+    // }
 
     //* 在某些模式切换的情况下先进入 init 模式
     // enter init mode
@@ -425,7 +431,12 @@ static void gimbal_auto_aim_control(fp32 *yaw, fp32 *pitch, gimbal_control_t *gi
     }
     //*pitch += (-gimbal_control_set->pitch_motor.absolute_angle - AutoAimData.pitch)*0.0007; //正：下
     *pitch = 0;
-    *yaw -= (gimbal_control_set->yaw_motor.absolute_angle - AutoAimData.yaw)*0.007; //正：左
+    *yaw = AutoAimData.yaw;
+    //*yaw -= (gimbal_control_set->yaw_motor.absolute_angle - AutoAimData.yaw)*0.009; //正：左
+
+    //!先直接去设陀螺仪目标角度
+    gimbal_control_set->yaw_motor.absolute_angle_set = AutoAimData.yaw;
+
     // usart6_printf("yaw:%f, INS:%f, div:%f\n", AutoAimData.yaw, gimbal_control_set->yaw_motor.absolute_angle,
     //                 AutoAimData.yaw - gimbal_control_set->yaw_motor.absolute_angle);
     // usart6_printf("pitch:%f, INS:%f, div:%f\n", AutoAimData.pitch, gimbal_control_set->pitch_motor.absolute_angle,
