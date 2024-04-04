@@ -20,7 +20,6 @@ void superC_can_task(void const * argument)
         else 
             CAN_cmd_superC(45);
             
-
         UI_Data.Super_cap_percent = superC_bat_remaining;
 
         osDelay(100);

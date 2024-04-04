@@ -5,6 +5,8 @@
 #include "INS_task.h"
 #include "string.h"
 #include "math.h"
+#include "UI.h"
+#include "referee.h"
 
 
 SentPacketTpye SentPacket;
@@ -14,27 +16,41 @@ const fp32 *INS_angle_point;
 
 void auto_aim_init();
 void updata_imu_angle();
+void Read_robot_color();
 float math_pi = 3.1415926;
 
 
 void auto_aim_task(void const * argument)
 {
+    Read_robot_color();
     auto_aim_init();
     HAL_UART_Receive_IT(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet));
 
     while(1)
     {
+        Read_robot_color();
         updata_imu_angle();
         HAL_UART_Transmit_DMA(&huart1, (uint8_t *)&SentPacket, sizeof(SentPacket));
 
-        //HAL_UART_Receive(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet), 0x02);
-        //usart6_printf("head:%x, yaw:%f, pitch:%f\n", auto_aim_Packet.header, auto_aim_Packet.yaw, auto_aim_Packet.pitch);
-        //usart6_printf("yaw:%f, pitch:%f, LOCK:%d\n", AutoAimData.yaw, AutoAimData.pitch, AutoAimData.auto_aim_status);
-        //memset(&AutoAimData, 0, sizeof(AutoAimData));   //清空结构体
         osDelay(20); //刷新率=50Hz
         HAL_UART_Receive_IT(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet));
-        AutoAimData.timeout_count ++;
-        // if(AutoAimData.timeout_count >= AUTOAIM_TIMEOUT) AutoAimData.auto_aim_status = AUTOAIM_LOST;
+        //超时处理，一定时间没触发接收中断判定NUC离线
+        AutoAimData.timeout_count++;
+        if(AutoAimData.timeout_count >= AUTOAIM_TIMEOUT_COUNT){
+            AutoAimData.auto_aim_status = AUTOAIM_OFFLINE;
+            AutoAimData.timeout_count = AUTOAIM_TIMEOUT_COUNT + 100; //防止计数器溢出
+        }
+    }
+}
+
+// 从裁判系统读取己方机器人颜色
+void Read_robot_color()
+{
+    AutoAimData.self_robot_id = get_robot_id();
+    if(AutoAimData.self_robot_id == UI_Data_RobotID_BHero){
+        SentPacket.detect_color = 0; //red
+    }else if(AutoAimData.self_robot_id == UI_Data_RobotID_RHero){
+        SentPacket.detect_color = 1; //blue
     }
 }
 
@@ -49,13 +65,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             AutoAimData.auto_aim_status = AUTOAIM_LOCKED;
             AutoAimData.yaw = auto_aim_Packet.yaw;
             AutoAimData.pitch = auto_aim_Packet.pitch;
-            AutoAimData.timeout_count = 0;      //超时清零
         }else{
             AutoAimData.auto_aim_status = AUTOAIM_LOST;
-        }        
-        //memset(&auto_aim_Packet, 0, sizeof(auto_aim_Packet));   //清空结构体
-        //usart6_printf("yaw:%f, pitch:%f, LOCK:%d\n", AutoAimData.yaw, AutoAimData.pitch, AutoAimData.auto_aim_status);
+        }
 
+        //清空超时计数
+        AutoAimData.timeout_count = 0;
         HAL_UART_Receive_IT(&huart1, (uint8_t *)&auto_aim_Packet, sizeof(auto_aim_Packet));
     }
    
@@ -78,7 +93,7 @@ void auto_aim_init()
     /*接收结构体初始化*/
     memset(&AutoAimData, 0, sizeof(AutoAimData));
     AutoAimData.auto_aim_status = AUTOAIM_LOST;
-    AutoAimData.timeout_count = 0;
+    AutoAimData.timeout_count = AUTOAIM_TIMEOUT_COUNT;
 }
 
 void updata_imu_angle()

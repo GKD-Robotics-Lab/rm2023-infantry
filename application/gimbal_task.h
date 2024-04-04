@@ -123,7 +123,7 @@
 #define YAW_MIN_RELATIVE_ANGLE   -0.1f
 
 #define PITCH_OFFSET_ECD         600
-#define PITCH_MAX_RELATIVE_ANGLE 0.25f
+#define PITCH_MAX_RELATIVE_ANGLE 0.32f
 #define PITCH_MIN_RELATIVE_ANGLE -0.45f
 
 //* yaw compensate 

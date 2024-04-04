@@ -128,6 +128,13 @@ static void chassis_behaviour_set(chassis_move_t *behaviour_set)
     }
     chassis_key_state.last_RC_key = behaviour_set->chassis_RC->key.v;
 
+
+    //*软件Reset
+    if(behaviour_set->chassis_RC->key.v & SOFT_RESET_KEY){
+         HAL_NVIC_SystemReset();
+    }
+
+
     //* 遥控器设置底盘行为模式
     if (switch_is_down(RC_chassis_switch)) {
         chassis_behaviour_mode = CHASSIS_NO_MOVE;

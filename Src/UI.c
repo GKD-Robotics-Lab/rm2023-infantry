@@ -17,6 +17,8 @@ static unsigned char UI_com[512];
 static int UI_tot = 0;
 
 UI_control_t UI_control;
+uint16_t Robot_ID_Read = Robot_ID;
+uint16_t Cilent_ID_Read = Cilent_ID;
 
 
 unsigned char UI_Seq;                      //包序号
@@ -57,8 +59,8 @@ void UI_Delete(u8 Del_Operate,u8 Del_Layer)
     framehead.CMD_ID=UI_CMD_Robo_Exchange;                   //填充包头数据
 
     datahead.Data_ID=UI_Data_ID_Del;
-    datahead.Sender_ID=Robot_ID;
-    datahead.Receiver_ID=Cilent_ID;                          //填充操作数据
+    datahead.Sender_ID=Robot_ID_Read;
+    datahead.Receiver_ID=Cilent_ID_Read;                          //填充操作数据
 
     del.Delete_Operate=Del_Operate;
     del.Layer=Del_Layer;                                     //控制信息
@@ -323,8 +325,8 @@ int UI_ReFresh(int cnt,...)
         default:
             return (-1);
     }
-    datahead.Sender_ID=Robot_ID;
-    datahead.Receiver_ID=Cilent_ID;                          //填充操作数据
+    datahead.Sender_ID=Robot_ID_Read;
+    datahead.Receiver_ID=Cilent_ID_Read;                          //填充操作数据
 
     framepoint=(unsigned char *)&framehead;
     frametail=Get_CRC16_Check_Sum_UI(framepoint,sizeof(framehead),frametail);
@@ -401,8 +403,8 @@ int String_ReFresh(String_Data string_Data)
 
     datahead.Data_ID=UI_Data_ID_DrawString;
 
-    datahead.Sender_ID=Robot_ID;
-    datahead.Receiver_ID=Cilent_ID;                          //填充操作数据
+    datahead.Sender_ID=Robot_ID_Read;
+    datahead.Receiver_ID=Cilent_ID_Read;                          //填充操作数据
 
     framepoint=(unsigned char *)&framehead;
     frametail=Get_CRC16_Check_Sum_UI(framepoint,sizeof(framehead),frametail);

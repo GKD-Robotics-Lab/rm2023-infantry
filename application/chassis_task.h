@@ -139,6 +139,8 @@
 // 小陀螺模式控制按键
 #define CHASSIS_SPIN_TOGGLE_KEYBOARD            KEY_PRESSED_OFFSET_Q
 #define CHASSIS_SPIN_TEMP_STOP_KEYBOARD         KEY_PRESSED_OFFSET_SHIFT
+// 软件Reset
+#define SOFT_RESET_KEY KEY_PRESSED_OFFSET_B     //软件Reset
 
 //* 遥控器数字转化比例设置
 // rocker value (max 660) change to vertial speed (m/s)

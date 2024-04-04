@@ -203,4 +203,7 @@ void Char_Draw(String_Data *image,char imagename[3],u32 Graph_Operate,u32 Graph_
 int Char_ReFresh(String_Data string_Data);
 void Arc_Draw(Graph_Data *image,char imagename[3],u32 Graph_Operate,u32 Graph_Layer,u32 Graph_Color,u32 Graph_StartAngle,u32 Graph_EndAngle,u32 Graph_Width,u32 Start_x,u32 Start_y,u32 x_Length,u32 y_Length);
 
+extern uint16_t Robot_ID_Read;
+extern uint16_t Cilent_ID_Read;
+
 #endif

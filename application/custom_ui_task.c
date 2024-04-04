@@ -5,6 +5,7 @@
 #include "custom_ui_task.h"
 #include "stdio.h"
 #include "string.h"
+#include "auto_aim_task.h"
 
 Crosshair_Data_Type Crosshair_Data;
 UI_DisplayData_Type UI_Data;
@@ -24,12 +25,13 @@ void cap_text_format(char *to_str, int cap_percent);
 void sync_parameter();
 void state_str(char *to_str, int cap_percent, int spin_state, int fric_state);
 void UI_init_draw();
+void Read_Robot_ID();
 
 
 String_Data state_text_data;
 Graph_Data shoot_distance_bar, cap_percentage, auto_aim_range;
 Graph_Data still_cross_line[7];
-char cap_text[30];
+char cap_text[30], auto_aim_text[10];
 int count = 0;     //计数器
 
 
@@ -41,12 +43,14 @@ void custom_ui_task(void const * argument)
 
     while(1)
     {
+        Read_Robot_ID();
         sync_parameter();
         update_dynamic_paramater();
 
         //间隔一定时间重新初始化ui
         if(count >= RE_INIT_CYCLE)
         {
+            Read_Robot_ID();
             osDelay(100);
             if(UI_MODE == UI_HERO) draw_crosshair_hero();
             else if(UI_MODE == UI_INFANTRY) draw_crosshair_infantry();
@@ -159,12 +163,13 @@ void UI_init_draw()
                 State_Data.cap_text_pos[1], cap_text);
     String_ReFresh(state_text_data);
     osDelay(150);
-
+    
     //瞄准框
     Rectangle_Draw(&auto_aim_range, "aui", UI_Graph_ADD, 0, UI_Color_Cyan, 3,
-            600, 200, 1300, 800);
+            700, 300, 1300, 800);
     UI_ReFresh(1, auto_aim_range);
     osDelay(100);
+
 }
 
 /*刷新动态参数*/
@@ -192,11 +197,25 @@ void update_dynamic_paramater()
                 State_Data.cap_text_pos[0],
                 State_Data.cap_text_pos[1], cap_text);
 
+    //自瞄框的刷新
+    if(UI_Data.auto_aim_state == AUTOAIM_LOST){
+        Rectangle_Draw(&auto_aim_range, "aui", UI_Graph_Change, 0, UI_Color_Green, 3,
+            700, 300, 1300, 800);
+    }else if(UI_Data.auto_aim_state == AUTOAIM_LOCKED){
+        Rectangle_Draw(&auto_aim_range, "aui", UI_Graph_Change, 0, UI_Color_Purplish_red, 3,
+            700, 300, 1300, 800);
+    }else if(UI_Data.auto_aim_state == AUTOAIM_OFFLINE){
+        Rectangle_Draw(&auto_aim_range, "aui", UI_Graph_Change, 0, UI_Color_Black, 3,
+            700, 300, 1300, 800);
+    }
+
     //应用刷新(英雄显示测距和准星，步兵无准星)
     if(UI_MODE == UI_HERO)  UI_ReFresh(2, shoot_distance_bar, cap_percentage);
     else if(UI_MODE == UI_INFANTRY) UI_ReFresh(1, cap_percentage);
     osDelay(100);
     String_ReFresh(state_text_data);
+    osDelay(100);
+    UI_ReFresh(1, auto_aim_range);
  }
 
 /*刷新动态参数*/
@@ -345,6 +364,25 @@ void sync_parameter()
     State_Data.cap_percent = (u32)(UI_Data.Super_cap_percent);
     State_Data.fric_state = UI_Data.fric_state;
     State_Data.spin_state = UI_Data.spin_state;
+    UI_Data.auto_aim_state = AutoAimData.auto_aim_status;
+}
+
+// 从裁判系统读取机器人ID
+void Read_Robot_ID()
+{
+    Robot_ID_Read = get_robot_id();
+    switch (Robot_ID_Read)
+    {
+    case UI_Data_RobotID_BHero:
+        Cilent_ID_Read = UI_Data_CilentID_BHero;
+        break;
+
+    case UI_Data_RobotID_RHero:
+        Cilent_ID_Read = UI_Data_CilentID_RHero;
+        break;
+    
+    }
+    //usart1_printf("robotid:%x, cilentid:%x\n", Robot_ID_Read, Cilent_ID_Read);
 }
 
 void ui_parameter_init()

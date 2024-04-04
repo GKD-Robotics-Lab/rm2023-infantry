@@ -5,8 +5,11 @@
 
 #define AUTOAIM_LOST 0
 #define AUTOAIM_LOCKED 1
+#define AUTOAIM_OFFLINE 2
 
-#define AUTOAIM_TIMEOUT 4     
+
+#define AUTOAIM_TIMEOUT_COUNT 80
+
 typedef struct
 {
   uint8_t header;
@@ -35,7 +38,9 @@ typedef struct
   int auto_aim_status;  //自瞄状态（是否可用）
   float yaw;
   float pitch;
+  int self_robot_id; //己方ID
 }AutoAimType;
 
 extern void auto_aim_task(void const * argument);
 extern AutoAimType AutoAimData;
+extern SentPacketTpye SentPacket;

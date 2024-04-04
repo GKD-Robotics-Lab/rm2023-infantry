@@ -38,6 +38,7 @@ typedef struct
     float Super_cap_percent;    //超电百分比
     int spin_state;     //小陀螺状态
     int fric_state;     //摩擦轮状态
+    int auto_aim_state; //自瞄状态
 } UI_DisplayData_Type;
 
 /*描述准星的结构体*/
