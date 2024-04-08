@@ -186,6 +186,9 @@ typedef struct{
     Graph_Data fric_graph, spin_graph, accuracy_graph;
 } UI_control_t;
 
+extern int Robot_ID_Read;
+extern int Cilent_ID_Read;
+
 extern void UI_task(void const *pvParameters);
 extern void UI_set_fric(uint8_t mode);
 extern void UI_set_spin(uint8_t mode);

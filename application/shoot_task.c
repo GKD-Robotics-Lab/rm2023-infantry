@@ -193,7 +193,7 @@ static void shoot_set_mode(void)
     //! 射击控制
     //* 下拨一次或者鼠标按下一次，进入射击状态
     if (shoot_control.shoot_mode == SHOOT_READY) {
-        if ((switch_is_down(RC_shoot_switch) && !switch_is_down(last_sw)) || (RC_mouse_l && last_ml == 0) || (RC_mouse_r && last_mr == 0)) {
+        if ((switch_is_down(RC_shoot_switch) && !switch_is_down(last_sw)) || (RC_mouse_l && !last_ml)) {
             shoot_control.shoot_mode = SHOOT_FIRE;
         }
     }
@@ -210,10 +210,10 @@ static void shoot_set_mode(void)
 
     //* 鼠标右键按下加速摩擦轮
     // TODO 是不是应该加速拨弹轮
-    if (RC_mouse_r)
-        shoot_control.fric_ramp.max_value = FRIC_SPEED_TURBO;
-    else
-        shoot_control.fric_ramp.max_value = FRIC_SPEED_FULL;
+    // if (RC_mouse_r)
+    //     shoot_control.fric_ramp.max_value = FRIC_SPEED_TURBO;
+    // else
+    //     shoot_control.fric_ramp.max_value = FRIC_SPEED_FULL;
 
     //! 考虑枪口热量限制及云台未启动
     //* 枪口热量控制

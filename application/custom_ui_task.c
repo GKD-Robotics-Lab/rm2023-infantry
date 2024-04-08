@@ -26,7 +26,7 @@ void sync_parameter();
 void state_str(char *to_str, int cap_percent, int spin_state, int fric_state);
 void UI_init_draw();
 void cover_brust_text(char *to_str, int cover_state, int brust_state);
-
+void Read_RobotID();
 
 String_Data state_text_data;
 Graph_Data shoot_distance_bar, cap_percentage;
@@ -37,12 +37,14 @@ int count = 0;     //计数器
 
 void custom_ui_task(void const * argument)
 {
+    Read_RobotID();
     custom_UI_init();
     sync_parameter();
     UI_init_draw();
 
     while(1)
     {
+        Read_RobotID();
         sync_parameter();
         update_dynamic_paramater();
 
@@ -402,6 +404,33 @@ void sync_parameter()
     State_Data.cap_percent = (u32)(UI_Data.Super_cap_percent);
     State_Data.fric_state = UI_Data.fric_state;
     State_Data.spin_state = UI_Data.spin_state;
+}
+
+void Read_RobotID()
+{
+    Robot_ID_Read = get_robot_id();
+    switch (Robot_ID_Read)
+    {
+    case UI_Data_RobotID_BStandard3:
+        Cilent_ID_Read = UI_Data_CilentID_BStandard3;
+        break;
+    case UI_Data_RobotID_BStandard4:
+        Cilent_ID_Read = UI_Data_CilentID_BStandard4;
+        break; 
+    case UI_Data_RobotID_BStandard5:
+        Cilent_ID_Read = UI_Data_CilentID_BStandard5;
+        break;
+
+    case UI_Data_RobotID_RStandard3:
+        Cilent_ID_Read = UI_Data_CilentID_RStandard3;
+        break;
+    case UI_Data_RobotID_RStandard4:
+        Cilent_ID_Read = UI_Data_CilentID_RStandard4;
+        break; 
+    case UI_Data_RobotID_RStandard5:
+        Cilent_ID_Read = UI_Data_CilentID_RStandard5;
+        break;
+    }
 }
 
 void ui_parameter_init()
