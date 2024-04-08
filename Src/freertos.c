@@ -204,10 +204,10 @@ void MX_FREERTOS_Init(void)
         Error_Handler();
 
     //自瞄线程
-    osThreadDef(AUTOAIM, auto_aim_task, osPriorityNormal, 0, 128);
-    auto_aim_task_handle = osThreadCreate(osThread(AUTOAIM), NULL);
-    if (auto_aim_task_handle == NULL)
-        Error_Handler();
+    // osThreadDef(AUTOAIM, auto_aim_task, osPriorityNormal, 0, 128);
+    // auto_aim_task_handle = osThreadCreate(osThread(AUTOAIM), NULL);
+    // if (auto_aim_task_handle == NULL)
+    //     Error_Handler();
 
     // osThreadDef(USBTask, usb_task, osPriorityNormal, 0, 128);
     // usb_task_handle = osThreadCreate(osThread(USBTask), NULL);
