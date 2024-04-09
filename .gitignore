@@ -13,7 +13,10 @@
 # eide template
 *.ept
 *.eide-template
-compile_commands.json
 .cache/
-gdb-*
 debug-*
+gdb*
+.eide/
+.pack
+.vscode/
+v

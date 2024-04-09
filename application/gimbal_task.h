@@ -118,7 +118,7 @@
 
 //* limit
 // 云台中值与云台控制值限幅
-#define YAW_OFFSET_ECD           3800
+#define YAW_OFFSET_ECD           2600
 #define YAW_MAX_RELATIVE_ANGLE   0.1f
 #define YAW_MIN_RELATIVE_ANGLE   -0.1f
 
