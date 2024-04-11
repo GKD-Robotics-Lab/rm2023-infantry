@@ -31,7 +31,7 @@
 #define SERVO_MAX_PWM   2500
 
 #define SERVO_OFF_POS   1670
-#define SERVO_ON_POS    2400
+#define SERVO_ON_POS    0620
 
 #define PWM_DETAL_VALUE 10
 

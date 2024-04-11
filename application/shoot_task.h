@@ -28,7 +28,7 @@
 
 // 摩擦轮斜坡函数设置
 #define FRIC_SPEED_STOP  0.0f
-#define FRIC_SPEED_FULL  780.0f // 5000.0f
+#define FRIC_SPEED_FULL  700.0f // 5000.0f
 #define FRIC_SPEED_TURBO 600.0f // 右键加速时的最大速度
 #define FRIC_RAMP_ADD    300.0f // 摩擦轮缓启停的加速度
 #define FRIC_RAMP_SUB    -200.0f
@@ -80,7 +80,7 @@
 #define SHOOT_OFF_KEYBOARD      KEY_PRESSED_OFFSET_F
 
 #define PRESS_LONG_TIME         400  // 鼠标长按判断
-#define RC_SW_LONG_TIME         1000 // 遥控器射击开关打下档一段时间后，连续发射子弹
+#define RC_SW_LONG_TIME         300 // 遥控器射击开关打下档一段时间后，连续发射子弹
 
 #define SHOOT_DONE_KEY_OFF_TIME 15 // 射击完成后 子弹弹出去后，判断时间，以防误触发
 
